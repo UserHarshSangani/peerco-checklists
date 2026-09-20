@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { ChecklistTemplate, Outlet } from "@/lib/types";
 import { ChecklistView } from "./checklist-view";
-import { LogoutButton } from "./logout-button";
+import { LogoutButton } from "@/components/logout-button";
 
 export function TabletApp({ outlets }: { outlets: Outlet[] }) {
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(

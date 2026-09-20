@@ -1,0 +1,23 @@
+"use client";
+
+import { OutletProvider, type ManagedOutlet } from "./outlet-context";
+import { Nav } from "./nav";
+import { OutletPicker } from "./outlet-picker";
+
+export function ManagementShell({
+  outlets,
+  children,
+}: {
+  outlets: ManagedOutlet[];
+  children: React.ReactNode;
+}) {
+  return (
+    <OutletProvider outlets={outlets}>
+      <div className="flex min-h-dvh flex-col bg-zinc-50 dark:bg-zinc-950">
+        <Nav />
+        <OutletPicker />
+        <div className="flex flex-1 flex-col">{children}</div>
+      </div>
+    </OutletProvider>
+  );
+}

@@ -20,7 +20,7 @@ export async function updateSession(request: NextRequest) {
   // Skip the session refresh until real Supabase credentials are set in
   // .env.local — the placeholder values are not a valid URL.
   if (!isValidSupabaseUrl(supabaseUrl) || !supabaseAnonKey) {
-    return { response: supabaseResponse, user: null };
+    return { response: supabaseResponse, user: null, supabase: null };
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -46,5 +46,5 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { response: supabaseResponse, user };
+  return { response: supabaseResponse, user, supabase };
 }

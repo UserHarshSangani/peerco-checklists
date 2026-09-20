@@ -2,17 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { homeForRole } from "@/lib/roles";
 
 export type LoginState = { error: string | null };
-
-// All roles land on /tablet for now; kept as a map so redirects can diverge
-// by role later without touching the call site.
-const ROLE_REDIRECTS: Record<string, string> = {
-  device: "/tablet",
-  peerco_admin: "/tablet",
-  manager: "/tablet",
-  owner: "/tablet",
-};
 
 export async function login(
   _prevState: LoginState,
@@ -46,5 +38,5 @@ export async function login(
     return { error: "No profile is set up for this account." };
   }
 
-  redirect(ROLE_REDIRECTS[profile.role] ?? "/tablet");
+  redirect(homeForRole(profile.role));
 }
