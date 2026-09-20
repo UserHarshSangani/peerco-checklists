@@ -2,16 +2,21 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
+const DEFAULT_PANEL_CLASSNAME =
+  "max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-surface p-6 shadow-xl outline-none";
+
 export function Modal({
   title,
   onClose,
   children,
   closeOnOverlayClick = true,
+  panelClassName = DEFAULT_PANEL_CLASSNAME,
 }: {
   title?: string;
   onClose: () => void;
   children: ReactNode;
   closeOnOverlayClick?: boolean;
+  panelClassName?: string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -58,7 +63,7 @@ export function Modal({
         aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-surface p-6 shadow-xl outline-none"
+        className={panelClassName}
       >
         {title && (
           <h3

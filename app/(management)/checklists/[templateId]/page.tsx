@@ -45,7 +45,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   async function fetchItems() {
     return supabase
       .from("checklist_items")
-      .select("id, label, required, position")
+      .select("id, label, required, position, requires_photo")
       .eq("template_id", templateId)
       .order("position");
   }
@@ -138,6 +138,20 @@ function TemplateEditor({ templateId }: { templateId: string }) {
     const { error } = await supabase
       .from("checklist_items")
       .update({ required: !item.required })
+      .eq("id", item.id);
+    setSavingId(null);
+    if (error) {
+      showError(error.message);
+      return;
+    }
+    await refreshItems();
+  }
+
+  async function toggleRequiresPhoto(item: ChecklistItemRow) {
+    setSavingId(item.id);
+    const { error } = await supabase
+      .from("checklist_items")
+      .update({ requires_photo: !item.requires_photo })
       .eq("id", item.id);
     setSavingId(null);
     if (error) {
@@ -285,6 +299,11 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                       <span className="text-base font-medium text-text">
                         {item.label}
                       </span>
+                      {item.requires_photo && (
+                        <span aria-hidden="true" title={t("manager.photoRequiredToggle")}>
+                          📷
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -311,6 +330,18 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                     }`}
                   >
                     {item.required ? t("manager.required") : t("manager.optional")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={savingId === item.id}
+                    onClick={() => toggleRequiresPhoto(item)}
+                    className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+                      item.requires_photo
+                        ? "bg-accent/15 text-accent"
+                        : "bg-border/50 text-muted"
+                    }`}
+                  >
+                    📷 {t("manager.photoRequiredToggle")}
                   </button>
                   <button
                     type="button"
