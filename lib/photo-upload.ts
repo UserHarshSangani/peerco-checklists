@@ -73,24 +73,3 @@ export async function uploadChecklistPhoto(
   });
   return { error: error?.message ?? null };
 }
-
-export type CameraAvailability = "ok" | "denied" | "unavailable";
-
-// Best-effort check via the Permissions API (Chrome/Android support
-// querying "camera"; Safari doesn't, and just returns "ok" — the OS camera
-// sheet triggered by the file input's `capture` attribute handles its own
-// permission prompt in that case, outside our control either way).
-export async function checkCameraAvailability(): Promise<CameraAvailability> {
-  if (typeof navigator === "undefined" || !navigator.mediaDevices) {
-    return "unavailable";
-  }
-  try {
-    if (!navigator.permissions?.query) return "ok";
-    const status = await navigator.permissions.query({
-      name: "camera" as PermissionName,
-    });
-    return status.state === "denied" ? "denied" : "ok";
-  } catch {
-    return "ok";
-  }
-}

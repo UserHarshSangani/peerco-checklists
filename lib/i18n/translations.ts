@@ -210,10 +210,10 @@ const dictionary = {
     hi: "अपलोड नहीं हो सका",
     mr: "अपलोड झाले नाही",
   },
-  "tablet.cameraBlocked": {
-    en: "Camera access is blocked. Allow camera access for this site in your browser settings, then try again.",
-    hi: "कैमरा एक्सेस ब्लॉक है। अपनी ब्राउज़र सेटिंग्स में इस साइट के लिए कैमरा एक्सेस की अनुमति दें, फिर फिर से कोशिश करें।",
-    mr: "कॅमेरा अ‍ॅक्सेस ब्लॉक आहे. तुमच्या ब्राउझर सेटिंग्जमध्ये या साइटसाठी कॅमेरा अ‍ॅक्सेसला परवानगी द्या, नंतर पुन्हा प्रयत्न करा.",
+  "tablet.nonTouchHint": {
+    en: "On a tablet or phone this opens the camera",
+    hi: "टैबलेट या फ़ोन पर यह कैमरा खोलता है",
+    mr: "टॅबलेट किंवा फोनवर यामुळे कॅमेरा उघडतो",
   },
   "tablet.photoNeeded": {
     en: "Photo needed: {labels}",
