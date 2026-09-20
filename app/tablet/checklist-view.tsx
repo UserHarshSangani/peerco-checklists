@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { todayInKolkata } from "@/lib/date";
 import { useLanguage } from "@/lib/i18n/language-context";
 import type { ChecklistItemRow, ChecklistTemplate, Outlet } from "@/lib/types";
 import { SubmitModal } from "./submit-modal";
+import { PhotoCapture, isPhotoUploaded, type ItemPhotoState } from "./photo-capture";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 
@@ -23,12 +25,17 @@ export function ChecklistView({
 }) {
   const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
+  const businessDate = useMemo(() => todayInKolkata(), []);
   const [items, setItems] = useState<ChecklistItemRow[]>([]);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const [photos, setPhotos] = useState<Record<string, ItemPhotoState>>({});
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [missingItemIds, setMissingItemIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [missingPhotoItemIds, setMissingPhotoItemIds] = useState<Set<string>>(
     new Set(),
   );
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -37,7 +44,7 @@ export function ChecklistView({
     let cancelled = false;
     supabase
       .from("checklist_items")
-      .select("id, label, required, position")
+      .select("id, label, required, position, requires_photo")
       .eq("template_id", template.id)
       .order("position")
       .then(({ data, error }) => {
@@ -71,6 +78,12 @@ export function ChecklistView({
       next.delete(itemId);
       return next;
     });
+    setMissingPhotoItemIds((prev) => {
+      if (!prev.has(itemId)) return prev;
+      const next = new Set(prev);
+      next.delete(itemId);
+      return next;
+    });
   }
 
   function setNote(itemId: string, note: string) {
@@ -88,16 +101,48 @@ export function ChecklistView({
     }
   }
 
-  const doneCount = items.filter((item) => answers[item.id]?.done).length;
+  function setPhotoState(itemId: string, state: ItemPhotoState | undefined) {
+    setPhotos((prev) => {
+      const next = { ...prev };
+      if (state) {
+        next[itemId] = state;
+      } else {
+        delete next[itemId];
+      }
+      return next;
+    });
+    if (isPhotoUploaded(state)) {
+      setMissingPhotoItemIds((prev) => {
+        if (!prev.has(itemId)) return prev;
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
+    }
+  }
+
+  function isItemComplete(item: ChecklistItemRow): boolean {
+    const answer = answers[item.id];
+    if (!answer?.done) return false;
+    if (item.requires_photo) return isPhotoUploaded(photos[item.id]);
+    return true;
+  }
+
+  const doneCount = items.filter(isItemComplete).length;
   const missingRequiredItems = items.filter((item) => {
     if (!item.required) return false;
     const answer = answers[item.id];
     return !answer?.done && !answer?.note.trim();
   });
+  const missingPhotoItems = items.filter((item) => {
+    if (!item.requires_photo) return false;
+    return answers[item.id]?.done && !isPhotoUploaded(photos[item.id]);
+  });
 
   function handleSubmitTap() {
-    if (missingRequiredItems.length > 0) {
+    if (missingRequiredItems.length > 0 || missingPhotoItems.length > 0) {
       setMissingItemIds(new Set(missingRequiredItems.map((item) => item.id)));
+      setMissingPhotoItemIds(new Set(missingPhotoItems.map((item) => item.id)));
       return;
     }
     setShowSubmitModal(true);
@@ -162,12 +207,13 @@ export function ChecklistView({
         <ul className="flex flex-col gap-3">
           {items.map((item) => {
             const answer = answers[item.id] ?? { done: false, note: "" };
-            const hasError = missingItemIds.has(item.id);
+            const hasNoteError = missingItemIds.has(item.id);
+            const hasPhotoError = missingPhotoItemIds.has(item.id);
             return (
               <li
                 key={item.id}
                 className={`rounded-2xl bg-surface p-4 shadow-sm ring-1 ${
-                  hasError ? "ring-danger" : "ring-border"
+                  hasNoteError || hasPhotoError ? "ring-danger" : "ring-border"
                 }`}
               >
                 <button
@@ -204,12 +250,26 @@ export function ChecklistView({
                       placeholder={t("tablet.notDonePlaceholder")}
                       className="w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none"
                     />
-                    {hasError && (
+                    {hasNoteError && (
                       <p className="mt-1 text-sm text-danger">
                         {t("tablet.noteValidation")}
                       </p>
                     )}
                   </div>
+                )}
+
+                {item.requires_photo && (
+                  <PhotoCapture
+                    outletId={outlet.id}
+                    businessDate={businessDate}
+                    state={photos[item.id]}
+                    onChange={(state) => setPhotoState(item.id, state)}
+                  />
+                )}
+                {hasPhotoError && (
+                  <p className="mt-1 text-sm text-danger">
+                    {t("tablet.photoNeededInline")}
+                  </p>
                 )}
               </li>
             );
@@ -236,8 +296,15 @@ export function ChecklistView({
 
       <div className="safe-bottom fixed inset-x-0 bottom-0 border-t border-border bg-surface/95 p-4 backdrop-blur">
         {missingRequiredItems.length > 0 && (
-          <p className="mb-2 text-center text-sm font-medium text-warning">
+          <p className="mb-1 text-center text-sm font-medium text-warning">
             {t("tablet.missingItems", { count: missingRequiredItems.length })}
+          </p>
+        )}
+        {missingPhotoItems.length > 0 && (
+          <p className="mb-2 text-center text-sm font-medium text-warning">
+            {t("tablet.photoNeeded", {
+              labels: missingPhotoItems.map((item) => item.label).join(", "),
+            })}
           </p>
         )}
         <Button
@@ -255,6 +322,7 @@ export function ChecklistView({
           template={template}
           items={items}
           answers={answers}
+          photos={photos}
           notes={notes}
           onClose={() => setShowSubmitModal(false)}
           onSuccess={onSubmitted}

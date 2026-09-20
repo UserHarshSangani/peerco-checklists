@@ -7,6 +7,7 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import type { ChecklistItemRow, ChecklistTemplate, Outlet, StaffMember } from "@/lib/types";
 import type { Answer } from "./checklist-view";
+import { isPhotoUploaded, type ItemPhotoState } from "./photo-capture";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
@@ -18,6 +19,8 @@ const REASON_KEYS: Record<string, TranslationKey> = {
   invalid_staff: "tablet.reason.invalid_staff",
   not_allowed: "tablet.reason.not_allowed",
   bad_request: "tablet.reason.bad_request",
+  missing_photo: "tablet.reason.missing_photo",
+  invalid_photo: "tablet.reason.invalid_photo",
 };
 
 type SubmitResult =
@@ -46,6 +49,7 @@ export function SubmitModal({
   template,
   items,
   answers,
+  photos,
   notes,
   onClose,
   onSuccess,
@@ -54,6 +58,7 @@ export function SubmitModal({
   template: ChecklistTemplate;
   items: ChecklistItemRow[];
   answers: Record<string, Answer>;
+  photos: Record<string, ItemPhotoState>;
   notes: string;
   onClose: () => void;
   onSuccess: () => void;
@@ -149,11 +154,15 @@ export function SubmitModal({
       p_staff_id: selectedStaff.id,
       p_pin: pin,
       p_business_date: todayInKolkata(),
-      p_answers: items.map((item) => ({
-        item_id: item.id,
-        done: answers[item.id]?.done ?? false,
-        note: answers[item.id]?.note.trim() || null,
-      })),
+      p_answers: items.map((item) => {
+        const photo = photos[item.id];
+        return {
+          item_id: item.id,
+          done: answers[item.id]?.done ?? false,
+          note: answers[item.id]?.note.trim() || null,
+          photo_path: isPhotoUploaded(photo) ? photo.path : null,
+        };
+      }),
       p_notes: notes.trim() || null,
     });
 

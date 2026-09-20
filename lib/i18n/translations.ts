@@ -189,6 +189,47 @@ const dictionary = {
     mr: "सबमिट करण्यापूर्वी {count} आयटमला नोंद हवी",
   },
   "tablet.submit": { en: "Submit", hi: "सबमिट करें", mr: "सबमिट करा" },
+  "tablet.takePhoto": { en: "Take photo", hi: "फोटो लें", mr: "फोटो घ्या" },
+  "tablet.retakePhoto": {
+    en: "Retake photo",
+    hi: "फिर से फोटो लें",
+    mr: "पुन्हा फोटो घ्या",
+  },
+  "tablet.uploadingPhoto": {
+    en: "Uploading…",
+    hi: "अपलोड हो रहा है…",
+    mr: "अपलोड होत आहे…",
+  },
+  "tablet.photoUploaded": {
+    en: "Uploaded",
+    hi: "अपलोड हो गया",
+    mr: "अपलोड झाले",
+  },
+  "tablet.photoUploadFailed": {
+    en: "Upload failed",
+    hi: "अपलोड नहीं हो सका",
+    mr: "अपलोड झाले नाही",
+  },
+  "tablet.cameraBlocked": {
+    en: "Camera access is blocked. Allow camera access for this site in your browser settings, then try again.",
+    hi: "कैमरा एक्सेस ब्लॉक है। अपनी ब्राउज़र सेटिंग्स में इस साइट के लिए कैमरा एक्सेस की अनुमति दें, फिर फिर से कोशिश करें।",
+    mr: "कॅमेरा अ‍ॅक्सेस ब्लॉक आहे. तुमच्या ब्राउझर सेटिंग्जमध्ये या साइटसाठी कॅमेरा अ‍ॅक्सेसला परवानगी द्या, नंतर पुन्हा प्रयत्न करा.",
+  },
+  "tablet.photoNeeded": {
+    en: "Photo needed: {labels}",
+    hi: "फोटो चाहिए: {labels}",
+    mr: "फोटो हवा: {labels}",
+  },
+  "tablet.photoNeededInline": {
+    en: "A photo is needed for this item.",
+    hi: "इस आइटम के लिए फोटो चाहिए।",
+    mr: "या आयटमसाठी फोटो हवा आहे.",
+  },
+  "tablet.photoPreviewAlt": {
+    en: "Photo preview",
+    hi: "फोटो प्रीव्यू",
+    mr: "फोटो प्रीव्ह्यू",
+  },
 
   // /tablet — submit flow (staff picker, PIN pad, success)
   "tablet.whosSubmitting": {
@@ -263,6 +304,16 @@ const dictionary = {
     hi: "{name} कुछ मिनटों के लिए लॉक है। थोड़ी देर बाद फिर कोशिश करें।",
     mr: "{name} काही मिनिटांसाठी लॉक आहे. थोड्या वेळाने पुन्हा प्रयत्न करा.",
   },
+  "tablet.reason.missing_photo": {
+    en: "Please retake the photo and try again.",
+    hi: "कृपया फिर से फोटो लें और कोशिश करें।",
+    mr: "कृपया पुन्हा फोटो घ्या आणि प्रयत्न करा.",
+  },
+  "tablet.reason.invalid_photo": {
+    en: "Please retake the photo and try again.",
+    hi: "कृपया फिर से फोटो लें और कोशिश करें।",
+    mr: "कृपया पुन्हा फोटो घ्या आणि प्रयत्न करा.",
+  },
 
   // Manager screens — shared outlet picker
   "manager.outlet": { en: "Outlet", hi: "आउटलेट", mr: "आउटलेट" },
@@ -331,6 +382,12 @@ const dictionary = {
     en: "Overall notes",
     hi: "कुल नोट्स",
     mr: "एकूण नोंदी",
+  },
+  "manager.viewPhoto": { en: "View photo", hi: "फोटो देखें", mr: "फोटो पहा" },
+  "manager.photoUnavailable": {
+    en: "Photo unavailable",
+    hi: "फोटो उपलब्ध नहीं है",
+    mr: "फोटो उपलब्ध नाही",
   },
 
   // /staff
@@ -442,6 +499,11 @@ const dictionary = {
   },
   "manager.moveUp": { en: "Move up", hi: "ऊपर ले जाएं", mr: "वर न्या" },
   "manager.moveDown": { en: "Move down", hi: "नीचे ले जाएं", mr: "खाली न्या" },
+  "manager.photoRequiredToggle": {
+    en: "Photo required",
+    hi: "फोटो आवश्यक",
+    mr: "फोटो आवश्यक",
+  },
 } satisfies Record<string, Entry>;
 
 export type TranslationKey = keyof typeof dictionary;

@@ -13,6 +13,7 @@ export type ChecklistItemRow = {
   label: string;
   required: boolean;
   position: number;
+  requires_photo: boolean;
 };
 
 export type StaffMember = {
