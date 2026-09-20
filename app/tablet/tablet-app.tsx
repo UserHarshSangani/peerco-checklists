@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSwitcher } from "@/components/language/language-switcher";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InstallHint } from "@/components/pwa/install-hint";
 
 export function TabletApp({ outlets }: { outlets: Outlet[] }) {
   const { t, locale } = useLanguage();
@@ -66,6 +67,7 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
         <main className="flex flex-1 items-center justify-center p-6">
           <EmptyState title={t("common.noOutlets")} />
         </main>
+        <InstallHint />
       </div>
     );
   }
@@ -91,6 +93,7 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
             ))}
           </div>
         </main>
+        <InstallHint />
       </div>
     );
   }
@@ -115,6 +118,7 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
         outlet={selectedOutlet}
         onSelect={setActiveTemplate}
       />
+      <InstallHint />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { ToastProvider } from "@/components/ui/toast";
 import { LanguageProvider } from "@/lib/i18n/language-context";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PeerCo Checklists",
   description: "Outlet checklists for PeerCo staff.",
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Checklists",
+  },
 };
 
 export const viewport: Viewport = {
@@ -50,6 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ToastProvider>{children}</ToastProvider>
           </LanguageProvider>
         </ThemeProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
