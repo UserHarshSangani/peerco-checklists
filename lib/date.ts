@@ -1,3 +1,5 @@
+import type { Locale } from "./i18n/translations";
+
 export function todayInKolkata(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(
     new Date(),
@@ -32,4 +34,18 @@ export function formatDateLabel(dateStr: string): string {
     day: "numeric",
     month: "short",
   });
+}
+
+const INTL_LOCALE: Record<Locale, string> = {
+  en: "en-IN",
+  hi: "hi-IN",
+  mr: "mr-IN",
+};
+
+export function formatDateLabelForLocale(dateStr: string, locale: Locale): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString(
+    INTL_LOCALE[locale],
+    { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" },
+  );
 }
