@@ -10,6 +10,7 @@ import { NewChecklistModal, type ChecklistKind } from "./new-checklist-modal";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
 
 type TemplateRow = {
   id: string;
@@ -37,12 +38,12 @@ export default function ChecklistsPage() {
 
 function ChecklistsForOutlet({ outletId }: { outletId: string }) {
   const { t } = useLanguage();
+  const { showError } = useToast();
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [templates, setTemplates] = useState<TemplateRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
 
@@ -78,19 +79,18 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
 
   async function toggleActive(row: TemplateRow) {
     setSavingId(row.id);
-    setActionError(null);
     const { error } = await supabase
       .from("checklist_templates")
       .update({ active: !row.active })
       .eq("id", row.id);
     setSavingId(null);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     const { data, error: refreshError } = await fetchTemplates();
     if (refreshError) {
-      setActionError(refreshError.message);
+      showError(refreshError.message);
       return;
     }
     setTemplates(data ?? []);
@@ -131,9 +131,6 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
         <p className="text-danger">
           {t("common.loadChecklistsError", { error: loadError })}
         </p>
-      )}
-      {actionError && (
-        <p className="mb-4 text-sm font-medium text-danger">{actionError}</p>
       )}
       {!loading && !loadError && templates.length === 0 && (
         <EmptyState title={t("manager.noChecklistsYet")} />

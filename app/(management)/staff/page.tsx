@@ -9,6 +9,7 @@ import { StaffPinModal } from "./staff-pin-modal";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
 
 type StaffRow = {
   id: string;
@@ -38,11 +39,11 @@ function isLocked(lockedUntil: string | null): boolean {
 
 function StaffForOutlet({ outletId }: { outletId: string }) {
   const { t } = useLanguage();
+  const { showError } = useToast();
   const supabase = useMemo(() => createClient(), []);
   const [staff, setStaff] = useState<StaffRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -61,10 +62,9 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
   async function refresh() {
     const { data, error } = await fetchStaff();
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
-    setActionError(null);
     setStaff(data ?? []);
   }
 
@@ -117,14 +117,13 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
 
   async function toggleActive(row: StaffRow) {
     setSavingId(row.id);
-    setActionError(null);
     const { error } = await supabase
       .from("staff")
       .update({ name: row.name, active: !row.active })
       .eq("id", row.id);
     setSavingId(null);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     await refresh();
@@ -133,18 +132,17 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
   async function saveName(row: StaffRow) {
     const trimmed = editingName.trim();
     if (!trimmed) {
-      setActionError(t("common.nameEmpty"));
+      showError(t("common.nameEmpty"));
       return;
     }
     setSavingId(row.id);
-    setActionError(null);
     const { error } = await supabase
       .from("staff")
       .update({ name: trimmed, active: row.active })
       .eq("id", row.id);
     setSavingId(null);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     setEditingId(null);
@@ -167,9 +165,6 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
         <p className="text-danger">
           {t("common.loadStaffError", { error: loadError })}
         </p>
-      )}
-      {actionError && (
-        <p className="mb-4 text-sm font-medium text-danger">{actionError}</p>
       )}
       {!loading && !loadError && staff.length === 0 && (
         <EmptyState title={t("manager.noStaffYet")} />

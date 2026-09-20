@@ -8,6 +8,7 @@ import type { ChecklistItemRow } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
 
 type TemplateInfo = {
   id: string;
@@ -25,12 +26,12 @@ export default function TemplateDetailPage({
 
 function TemplateEditor({ templateId }: { templateId: string }) {
   const { t } = useLanguage();
+  const { showError } = useToast();
   const supabase = useMemo(() => createClient(), []);
   const [template, setTemplate] = useState<TemplateInfo | null>(null);
   const [items, setItems] = useState<ChecklistItemRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -88,10 +89,9 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   async function refreshItems() {
     const { data, error } = await fetchItems();
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
-    setActionError(null);
     setItems(data ?? []);
   }
 
@@ -99,7 +99,6 @@ function TemplateEditor({ templateId }: { templateId: string }) {
     const nextPosition =
       items.length > 0 ? Math.max(...items.map((item) => item.position)) + 1 : 1;
     setAdding(true);
-    setActionError(null);
     const { error } = await supabase.from("checklist_items").insert({
       template_id: templateId,
       label: "New item",
@@ -108,7 +107,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
     });
     setAdding(false);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     await refreshItems();
@@ -117,18 +116,17 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   async function saveLabel(item: ChecklistItemRow) {
     const trimmed = editingLabel.trim();
     if (!trimmed) {
-      setActionError(t("manager.labelEmpty"));
+      showError(t("manager.labelEmpty"));
       return;
     }
     setSavingId(item.id);
-    setActionError(null);
     const { error } = await supabase
       .from("checklist_items")
       .update({ label: trimmed })
       .eq("id", item.id);
     setSavingId(null);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     setEditingId(null);
@@ -137,14 +135,13 @@ function TemplateEditor({ templateId }: { templateId: string }) {
 
   async function toggleRequired(item: ChecklistItemRow) {
     setSavingId(item.id);
-    setActionError(null);
     const { error } = await supabase
       .from("checklist_items")
       .update({ required: !item.required })
       .eq("id", item.id);
     setSavingId(null);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     await refreshItems();
@@ -157,7 +154,6 @@ function TemplateEditor({ templateId }: { templateId: string }) {
     const other = items[swapIndex];
 
     setSavingId(item.id);
-    setActionError(null);
     const [res1, res2] = await Promise.all([
       supabase
         .from("checklist_items")
@@ -171,7 +167,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
     setSavingId(null);
     const firstError = res1.error ?? res2.error;
     if (firstError) {
-      setActionError(firstError.message);
+      showError(firstError.message);
       return;
     }
     await refreshItems();
@@ -182,14 +178,13 @@ function TemplateEditor({ templateId }: { templateId: string }) {
       return;
     }
     setSavingId(item.id);
-    setActionError(null);
     const { error } = await supabase
       .from("checklist_items")
       .delete()
       .eq("id", item.id);
     setSavingId(null);
     if (error) {
-      setActionError(error.message);
+      showError(error.message);
       return;
     }
     await refreshItems();
@@ -227,12 +222,6 @@ function TemplateEditor({ templateId }: { templateId: string }) {
               {adding ? t("manager.adding") : t("manager.addItem")}
             </Button>
           </div>
-
-          {actionError && (
-            <p className="mb-4 text-sm font-medium text-danger">
-              {actionError}
-            </p>
-          )}
 
           {items.length === 0 && (
             <EmptyState title={t("manager.noItemsYet")} />
