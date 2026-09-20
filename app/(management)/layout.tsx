@@ -35,8 +35,8 @@ export default async function ManagementLayout({
 
   if (error) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-zinc-50 p-6 text-center dark:bg-zinc-950">
-        <p className="text-red-600 dark:text-red-400">
+      <div className="flex min-h-dvh items-center justify-center bg-bg p-6 text-center">
+        <p className="text-danger">
           Couldn&apos;t load outlets: {error.message}
         </p>
       </div>

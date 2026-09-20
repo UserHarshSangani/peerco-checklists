@@ -13,7 +13,7 @@ export function ManagementShell({
 }) {
   return (
     <OutletProvider outlets={outlets}>
-      <div className="flex min-h-dvh flex-col bg-zinc-50 dark:bg-zinc-950">
+      <div className="flex min-h-dvh flex-col bg-bg">
         <Nav />
         <OutletPicker />
         <div className="flex flex-1 flex-col">{children}</div>

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useLanguage } from "@/lib/i18n/language-context";
+import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 export type ChecklistKind = "opening" | "closing";
 
@@ -14,6 +17,7 @@ export function NewChecklistModal({
   }) => Promise<{ error: string | null }>;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [kind, setKind] = useState<ChecklistKind>("opening");
   const [submitting, setSubmitting] = useState(false);
@@ -22,7 +26,7 @@ export function NewChecklistModal({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (!name.trim()) {
-      setError("Enter a name.");
+      setError(t("common.enterName"));
       return;
     }
     setSubmitting(true);
@@ -37,20 +41,13 @@ export function NewChecklistModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl dark:bg-zinc-900"
-      >
-        <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          New checklist
-        </h3>
-
+    <Modal onClose={onClose} title={t("manager.newChecklist")}>
+      <form onSubmit={handleSubmit}>
         <label
           htmlFor="template-name"
-          className="mb-1 block text-sm font-medium text-zinc-600 dark:text-zinc-300"
+          className="mb-1 block text-sm font-medium text-muted"
         >
-          Name
+          {t("common.nameLabel")}
         </label>
         <input
           id="template-name"
@@ -58,48 +55,43 @@ export function NewChecklistModal({
           value={name}
           onChange={(event) => setName(event.target.value)}
           autoFocus
-          className="mb-4 w-full rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-3 text-base text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+          className="mb-4 w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
         />
 
         <label
           htmlFor="template-kind"
-          className="mb-1 block text-sm font-medium text-zinc-600 dark:text-zinc-300"
+          className="mb-1 block text-sm font-medium text-muted"
         >
-          Kind
+          {t("manager.kindLabel")}
         </label>
         <select
           id="template-kind"
           value={kind}
           onChange={(event) => setKind(event.target.value as ChecklistKind)}
-          className="mb-4 w-full rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-3 text-base text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+          className="mb-4 w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
         >
-          <option value="opening">Opening</option>
-          <option value="closing">Closing</option>
+          <option value="opening">{t("manager.kindOpening")}</option>
+          <option value="closing">{t("manager.kindClosing")}</option>
         </select>
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </p>
+          <p className="mb-4 text-sm font-medium text-danger">{error}</p>
         )}
 
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
-            className="flex-1 rounded-2xl bg-zinc-100 py-3 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+            className="flex-1"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex-1 rounded-2xl bg-zinc-900 py-3 text-base font-semibold text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-          >
-            {submitting ? "Creating…" : "Create"}
-          </button>
+            {t("common.cancel")}
+          </Button>
+          <Button type="submit" loading={submitting} className="flex-1">
+            {submitting ? t("manager.creating") : t("manager.create")}
+          </Button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 }

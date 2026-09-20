@@ -1,16 +1,16 @@
 "use client";
 
 import { useOutletContext, type ManagedOutlet } from "./outlet-context";
+import { useLanguage } from "@/lib/i18n/language-context";
 
 export function OutletPicker() {
   const { outlets, selectedOutlet, setSelectedOutletId } = useOutletContext();
+  const { t } = useLanguage();
 
   if (outlets.length === 0) {
     return (
-      <div className="border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          No outlets are assigned to your account yet.
-        </p>
+      <div className="border-b border-border bg-surface px-6 py-4">
+        <p className="text-sm text-muted">{t("common.noOutlets")}</p>
       </div>
     );
   }
@@ -25,18 +25,18 @@ export function OutletPicker() {
   const showGroups = groups.size > 1;
 
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-200 bg-white px-6 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex items-center gap-3 border-b border-border bg-surface px-6 py-3">
       <label
         htmlFor="outlet-picker"
-        className="text-sm font-medium text-zinc-600 dark:text-zinc-300"
+        className="text-sm font-medium text-muted"
       >
-        Outlet
+        {t("manager.outlet")}
       </label>
       <select
         id="outlet-picker"
         value={selectedOutlet?.id ?? ""}
         onChange={(event) => setSelectedOutletId(event.target.value)}
-        className="rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+        className="min-h-[40px] rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
       >
         {showGroups
           ? Array.from(groups.entries()).map(([groupName, groupOutlets]) => (

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useLanguage } from "@/lib/i18n/language-context";
+import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 export function StaffPinModal({
   title,
@@ -18,6 +21,7 @@ export function StaffPinModal({
   }) => Promise<{ error: string | null }>;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -26,11 +30,11 @@ export function StaffPinModal({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (showNameField && !name.trim()) {
-      setError("Enter a name.");
+      setError(t("common.enterName"));
       return;
     }
     if (!/^[0-9]{4,6}$/.test(pin)) {
-      setError("PIN must be 4 to 6 digits.");
+      setError(t("manager.pinMustBeDigits"));
       return;
     }
 
@@ -48,22 +52,15 @@ export function StaffPinModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl dark:bg-zinc-900"
-      >
-        <h3 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          {title}
-        </h3>
-
+    <Modal onClose={onClose} title={title}>
+      <form onSubmit={handleSubmit}>
         {showNameField && (
           <>
             <label
               htmlFor="staff-name"
-              className="mb-1 block text-sm font-medium text-zinc-600 dark:text-zinc-300"
+              className="mb-1 block text-sm font-medium text-muted"
             >
-              Name
+              {t("common.nameLabel")}
             </label>
             <input
               id="staff-name"
@@ -71,16 +68,16 @@ export function StaffPinModal({
               value={name}
               onChange={(event) => setName(event.target.value)}
               autoFocus
-              className="mb-4 w-full rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-3 text-base text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+              className="mb-4 w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
             />
           </>
         )}
 
         <label
           htmlFor="staff-pin"
-          className="mb-1 block text-sm font-medium text-zinc-600 dark:text-zinc-300"
+          className="mb-1 block text-sm font-medium text-muted"
         >
-          PIN (4 to 6 digits)
+          {t("manager.pinLabel")}
         </label>
         <input
           id="staff-pin"
@@ -92,32 +89,27 @@ export function StaffPinModal({
           onChange={(event) =>
             setPin(event.target.value.replace(/\D/g, "").slice(0, 6))
           }
-          className="mb-4 w-full rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-3 text-base tracking-[0.3em] text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+          className="mb-4 w-full rounded-lg border border-border bg-bg px-4 py-3 text-base tracking-[0.3em] text-text focus:border-accent focus:outline-none"
         />
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </p>
+          <p className="mb-4 text-sm font-medium text-danger">{error}</p>
         )}
 
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
-            className="flex-1 rounded-2xl bg-zinc-100 py-3 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+            className="flex-1"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex-1 rounded-2xl bg-zinc-900 py-3 text-base font-semibold text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-          >
-            {submitting ? "Saving…" : submitLabel}
-          </button>
+            {t("common.cancel")}
+          </Button>
+          <Button type="submit" loading={submitting} className="flex-1">
+            {submitting ? t("common.saving") : submitLabel}
+          </Button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 }

@@ -4,8 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { NewChecklistModal, type ChecklistKind } from "./new-checklist-modal";
+import { Button } from "@/components/ui/button";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type TemplateRow = {
   id: string;
@@ -16,13 +20,12 @@ type TemplateRow = {
 
 export default function ChecklistsPage() {
   const { selectedOutlet } = useOutletContext();
+  const { t } = useLanguage();
 
   if (!selectedOutlet) {
     return (
       <main className="flex flex-1 items-center justify-center p-6 text-center">
-        <p className="text-zinc-500 dark:text-zinc-400">
-          Choose an outlet to manage its checklists.
-        </p>
+        <p className="text-muted">{t("manager.chooseOutletChecklists")}</p>
       </main>
     );
   }
@@ -33,6 +36,7 @@ export default function ChecklistsPage() {
 }
 
 function ChecklistsForOutlet({ outletId }: { outletId: string }) {
+  const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [templates, setTemplates] = useState<TemplateRow[]>([]);
@@ -41,6 +45,11 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+
+  const kindLabels: Record<ChecklistKind, string> = {
+    opening: t("manager.kindOpening"),
+    closing: t("manager.kindClosing"),
+  };
 
   async function fetchTemplates() {
     return supabase
@@ -100,70 +109,62 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
       .select("id")
       .single();
     if (error || !data) {
-      return { error: error?.message ?? "Something went wrong. Please try again." };
+      return { error: error?.message ?? t("manager.createError") };
     }
     router.push(`/checklists/${data.id}`);
     return { error: null };
   }
 
   return (
-    <main className="flex-1 p-6">
+    <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Checklists
+        <h2 className="text-xl font-semibold text-text">
+          {t("common.checklistsHeading")}
         </h2>
-        <button
-          type="button"
-          onClick={() => setShowNewModal(true)}
-          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          New checklist
-        </button>
+        <Button type="button" onClick={() => setShowNewModal(true)}>
+          {t("manager.newChecklist")}
+        </Button>
       </div>
 
-      {loading && <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>}
+      {loading && <SkeletonList rows={3} rowClassName="h-16" />}
       {loadError && (
-        <p className="text-red-600 dark:text-red-400">
-          Couldn&apos;t load checklists: {loadError}
+        <p className="text-danger">
+          {t("common.loadChecklistsError", { error: loadError })}
         </p>
       )}
       {actionError && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400">
-          {actionError}
-        </p>
+        <p className="mb-4 text-sm font-medium text-danger">{actionError}</p>
       )}
       {!loading && !loadError && templates.length === 0 && (
-        <p className="text-zinc-500 dark:text-zinc-400">
-          No checklists yet. Create your first one.
-        </p>
+        <EmptyState title={t("manager.noChecklistsYet")} />
       )}
 
       <ul className="flex flex-col gap-3">
         {templates.map((template) => (
           <li
             key={template.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border"
           >
             <Link
               href={`/checklists/${template.id}`}
-              className="flex-1 text-base font-medium text-zinc-900 hover:underline dark:text-zinc-50"
+              className="flex-1 text-base font-medium text-text hover:underline"
             >
               {template.name}
-              <span className="ml-2 text-sm font-normal text-zinc-500 dark:text-zinc-400">
-                {template.kind}
+              <span className="ml-2 text-sm font-normal text-muted">
+                {kindLabels[template.kind]}
               </span>
             </Link>
             <button
               type="button"
               disabled={savingId === template.id}
               onClick={() => toggleActive(template)}
-              className={`rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+              className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
                 template.active
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-                  : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                  ? "bg-success/15 text-success"
+                  : "bg-border/50 text-muted"
               }`}
             >
-              {template.active ? "Active" : "Inactive"}
+              {template.active ? t("manager.active") : t("manager.inactive")}
             </button>
           </li>
         ))}

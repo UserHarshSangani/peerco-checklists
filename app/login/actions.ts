@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { homeForRole } from "@/lib/roles";
 
-export type LoginState = { error: string | null };
+export type LoginErrorCode =
+  | "missing_credentials"
+  | "invalid_credentials"
+  | "no_profile";
+
+export type LoginState = { errorCode: LoginErrorCode | null };
 
 export async function login(
   _prevState: LoginState,
@@ -14,7 +19,7 @@ export async function login(
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
-    return { error: "Enter your email and password." };
+    return { errorCode: "missing_credentials" };
   }
 
   const supabase = await createClient();
@@ -24,7 +29,7 @@ export async function login(
   });
 
   if (error || !data.user) {
-    return { error: "Incorrect email or password." };
+    return { errorCode: "invalid_credentials" };
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -35,7 +40,7 @@ export async function login(
 
   if (profileError || !profile) {
     await supabase.auth.signOut();
-    return { error: "No profile is set up for this account." };
+    return { errorCode: "no_profile" };
   }
 
   redirect(homeForRole(profile.role));

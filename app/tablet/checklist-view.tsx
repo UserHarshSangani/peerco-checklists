@@ -110,7 +110,7 @@ export function ChecklistView({
         onClick={onBack}
         className="mb-2 min-h-[40px] text-sm font-medium text-muted hover:text-text"
       >
-        ‹ {t("tablet.backToChecklists")}
+        ‹ {t("common.backToChecklists")}
       </button>
       <p className="mb-2 truncate text-lg font-semibold text-text">
         {template.name}

@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatTimeKolkata } from "@/lib/date";
+import { useLanguage } from "@/lib/i18n/language-context";
+import { Modal } from "@/components/ui/modal";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 type Answer = {
   id: string;
@@ -26,6 +29,7 @@ export function SubmissionModal({
   submission: SubmissionSummary;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,84 +56,76 @@ export function SubmissionModal({
   }, [supabase, submission.id]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-xl dark:bg-zinc-900">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              {submission.title}
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Submitted by {submission.staffName} at{" "}
-              {formatTimeKolkata(submission.submittedAt)}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-          >
-            Close
-          </button>
+    <Modal onClose={onClose}>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-text">
+            {submission.title}
+          </h3>
+          <p className="text-sm text-muted">
+            {t("manager.submittedAt", {
+              name: submission.staffName,
+              time: formatTimeKolkata(submission.submittedAt),
+            })}
+          </p>
         </div>
-
-        {loading && (
-          <p className="text-zinc-500 dark:text-zinc-400">
-            Loading answers…
-          </p>
-        )}
-        {loadError && (
-          <p className="text-red-600 dark:text-red-400">
-            Couldn&apos;t load answers: {loadError}
-          </p>
-        )}
-
-        {!loading && !loadError && (
-          <ul className="flex flex-col gap-2">
-            {answers.map((answer) => (
-              <li
-                key={answer.id}
-                className={`rounded-xl p-4 ring-1 ${
-                  answer.done
-                    ? "bg-zinc-50 ring-zinc-200 dark:bg-zinc-800/60 dark:ring-zinc-700"
-                    : "bg-red-50 ring-red-300 dark:bg-red-950/40 dark:ring-red-900"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                    {answer.item_label}
-                  </span>
-                  <span
-                    className={`shrink-0 text-xs font-semibold tracking-wide uppercase ${
-                      answer.done
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-red-600 dark:text-red-400"
-                    }`}
-                  >
-                    {answer.done ? "Done" : "Not done"}
-                  </span>
-                </div>
-                {answer.note && (
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                    Note: {answer.note}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {submission.notes && (
-          <div className="mt-4 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/60">
-            <p className="mb-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
-              Overall notes
-            </p>
-            <p className="text-sm text-zinc-700 dark:text-zinc-200">
-              {submission.notes}
-            </p>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="min-h-[40px] shrink-0 text-sm font-medium text-muted hover:text-text"
+        >
+          {t("common.close")}
+        </button>
       </div>
-    </div>
+
+      {loading && <SkeletonList rows={4} rowClassName="h-14" />}
+      {loadError && (
+        <p className="text-danger">
+          {t("manager.loadAnswersError", { error: loadError })}
+        </p>
+      )}
+
+      {!loading && !loadError && (
+        <ul className="flex flex-col gap-2">
+          {answers.map((answer) => (
+            <li
+              key={answer.id}
+              className={`rounded-xl p-4 ring-1 ${
+                answer.done
+                  ? "bg-bg ring-border"
+                  : "bg-danger/10 ring-danger/40"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium text-text">
+                  {answer.item_label}
+                </span>
+                <span
+                  className={`shrink-0 text-xs font-semibold tracking-wide uppercase ${
+                    answer.done ? "text-success" : "text-danger"
+                  }`}
+                >
+                  {answer.done ? t("manager.itemDone") : t("manager.itemNotDone")}
+                </span>
+              </div>
+              {answer.note && (
+                <p className="mt-1 text-sm text-muted">
+                  {t("manager.note", { note: answer.note })}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {submission.notes && (
+        <div className="mt-4 rounded-xl bg-bg p-4">
+          <p className="mb-1 text-xs font-semibold tracking-wide text-muted uppercase">
+            {t("manager.overallNotes")}
+          </p>
+          <p className="text-sm text-text">{submission.notes}</p>
+        </div>
+      )}
+    </Modal>
   );
 }

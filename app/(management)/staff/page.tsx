@@ -3,8 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatTimeKolkata } from "@/lib/date";
+import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { StaffPinModal } from "./staff-pin-modal";
+import { Button } from "@/components/ui/button";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type StaffRow = {
   id: string;
@@ -15,13 +19,12 @@ type StaffRow = {
 
 export default function StaffPage() {
   const { selectedOutlet } = useOutletContext();
+  const { t } = useLanguage();
 
   if (!selectedOutlet) {
     return (
       <main className="flex flex-1 items-center justify-center p-6 text-center">
-        <p className="text-zinc-500 dark:text-zinc-400">
-          Choose an outlet to manage its staff.
-        </p>
+        <p className="text-muted">{t("manager.chooseOutletStaff")}</p>
       </main>
     );
   }
@@ -34,6 +37,7 @@ function isLocked(lockedUntil: string | null): boolean {
 }
 
 function StaffForOutlet({ outletId }: { outletId: string }) {
+  const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const [staff, setStaff] = useState<StaffRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +133,7 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
   async function saveName(row: StaffRow) {
     const trimmed = editingName.trim();
     if (!trimmed) {
-      setActionError("Name can't be empty.");
+      setActionError(t("common.nameEmpty"));
       return;
     }
     setSavingId(row.id);
@@ -148,42 +152,34 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
   }
 
   return (
-    <main className="flex-1 p-6">
+    <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Staff
+        <h2 className="text-xl font-semibold text-text">
+          {t("manager.staffHeading")}
         </h2>
-        <button
-          type="button"
-          onClick={() => setShowAddModal(true)}
-          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          Add staff
-        </button>
+        <Button type="button" onClick={() => setShowAddModal(true)}>
+          {t("manager.addStaff")}
+        </Button>
       </div>
 
-      {loading && <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>}
+      {loading && <SkeletonList rows={3} rowClassName="h-16" />}
       {loadError && (
-        <p className="text-red-600 dark:text-red-400">
-          Couldn&apos;t load staff: {loadError}
+        <p className="text-danger">
+          {t("common.loadStaffError", { error: loadError })}
         </p>
       )}
       {actionError && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400">
-          {actionError}
-        </p>
+        <p className="mb-4 text-sm font-medium text-danger">{actionError}</p>
       )}
       {!loading && !loadError && staff.length === 0 && (
-        <p className="text-zinc-500 dark:text-zinc-400">
-          No staff yet. Add your first staff member.
-        </p>
+        <EmptyState title={t("manager.noStaffYet")} />
       )}
 
       <ul className="flex flex-col gap-3">
         {staff.map((row) => (
           <li
             key={row.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border"
           >
             <div className="flex flex-wrap items-center gap-3">
               {editingId === row.id ? (
@@ -193,27 +189,27 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
                     value={editingName}
                     onChange={(event) => setEditingName(event.target.value)}
                     autoFocus
-                    className="rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-base text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="min-h-[40px] rounded-lg border border-border bg-bg px-3 py-2 text-base text-text focus:border-accent focus:outline-none"
                   />
                   <button
                     type="button"
                     disabled={savingId === row.id}
                     onClick={() => saveName(row)}
-                    className="rounded-full bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+                    className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
                   >
-                    Save
+                    {t("common.save")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                    className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-base font-medium text-zinc-900 dark:text-zinc-50">
+                  <p className="text-base font-medium text-text">
                     {row.name}
                   </p>
                   <button
@@ -222,20 +218,22 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
                       setEditingId(row.id);
                       setEditingName(row.name);
                     }}
-                    className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                    className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
                   >
-                    Rename
+                    {t("manager.rename")}
                   </button>
                 </>
               )}
               {!row.active && (
-                <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                  Inactive
+                <span className="rounded-full bg-border/50 px-3 py-1 text-xs font-semibold text-muted">
+                  {t("manager.inactive")}
                 </span>
               )}
               {isLocked(row.locked_until) && (
-                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-400">
-                  Locked until {formatTimeKolkata(row.locked_until!)}
+                <span className="rounded-full bg-danger/15 px-3 py-1 text-xs font-semibold text-danger">
+                  {t("manager.lockedUntil", {
+                    time: formatTimeKolkata(row.locked_until!),
+                  })}
                 </span>
               )}
             </div>
@@ -244,21 +242,21 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
               <button
                 type="button"
                 onClick={() => setResetPinFor(row)}
-                className="rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="min-h-[40px] rounded-full px-4 py-2 text-sm font-medium text-muted hover:bg-border/40 hover:text-text"
               >
-                Reset PIN
+                {t("manager.resetPin")}
               </button>
               <button
                 type="button"
                 disabled={savingId === row.id}
                 onClick={() => toggleActive(row)}
-                className={`rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+                className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
                   row.active
-                    ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                    ? "bg-danger/15 text-danger"
+                    : "bg-success/15 text-success"
                 }`}
               >
-                {row.active ? "Deactivate" : "Activate"}
+                {row.active ? t("manager.deactivate") : t("manager.activate")}
               </button>
             </div>
           </li>
@@ -267,18 +265,18 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
 
       {showAddModal && (
         <StaffPinModal
-          title="Add staff"
+          title={t("manager.addStaff")}
           showNameField
-          submitLabel="Add"
+          submitLabel={t("manager.add")}
           onSubmit={handleAddStaff}
           onClose={() => setShowAddModal(false)}
         />
       )}
       {resetPinFor && (
         <StaffPinModal
-          title={`Reset PIN for ${resetPinFor.name}`}
+          title={t("manager.resetPinTitle", { name: resetPinFor.name })}
           showNameField={false}
-          submitLabel="Save"
+          submitLabel={t("common.save")}
           onSubmit={(values) => handleResetPin(resetPinFor.id, values)}
           onClose={() => setResetPinFor(null)}
         />

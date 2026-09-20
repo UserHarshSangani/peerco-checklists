@@ -3,7 +3,11 @@
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/lib/i18n/language-context";
 import type { ChecklistItemRow } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type TemplateInfo = {
   id: string;
@@ -20,6 +24,7 @@ export default function TemplateDetailPage({
 }
 
 function TemplateEditor({ templateId }: { templateId: string }) {
+  const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const [template, setTemplate] = useState<TemplateInfo | null>(null);
   const [items, setItems] = useState<ChecklistItemRow[]>([]);
@@ -30,6 +35,11 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
+
+  const kindLabels = {
+    opening: t("manager.kindOpening"),
+    closing: t("manager.kindClosing"),
+  };
 
   async function fetchItems() {
     return supabase
@@ -107,7 +117,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   async function saveLabel(item: ChecklistItemRow) {
     const trimmed = editingLabel.trim();
     if (!trimmed) {
-      setActionError("Label can't be empty.");
+      setActionError(t("manager.labelEmpty"));
       return;
     }
     setSavingId(item.id);
@@ -168,11 +178,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   }
 
   async function deleteItem(item: ChecklistItemRow) {
-    if (
-      !window.confirm(
-        `Delete "${item.label}"? Past submissions keep their own copy of this item.`,
-      )
-    ) {
+    if (!window.confirm(t("manager.confirmDeleteItem", { label: item.label }))) {
       return;
     }
     setSavingId(item.id);
@@ -190,18 +196,18 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   }
 
   return (
-    <main className="flex-1 p-6">
+    <main className="flex-1 p-4 sm:p-6">
       <Link
         href="/checklists"
-        className="mb-4 inline-block text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+        className="mb-4 inline-block text-sm font-medium text-muted hover:text-text"
       >
-        ‹ Back to checklists
+        ‹ {t("common.backToChecklists")}
       </Link>
 
-      {loading && <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>}
+      {loading && <SkeletonList rows={4} rowClassName="h-16" />}
       {loadError && (
-        <p className="text-red-600 dark:text-red-400">
-          Couldn&apos;t load this checklist: {loadError}
+        <p className="text-danger">
+          {t("manager.loadTemplateError", { error: loadError })}
         </p>
       )}
 
@@ -209,40 +215,34 @@ function TemplateEditor({ templateId }: { templateId: string }) {
         <>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              <h2 className="text-xl font-semibold text-text">
                 {template.name}
               </h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {template.kind} · {template.active ? "Active" : "Inactive"}
+              <p className="text-sm text-muted">
+                {kindLabels[template.kind]} ·{" "}
+                {template.active ? t("manager.active") : t("manager.inactive")}
               </p>
             </div>
-            <button
-              type="button"
-              disabled={adding}
-              onClick={addItem}
-              className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-            >
-              {adding ? "Adding…" : "Add item"}
-            </button>
+            <Button type="button" disabled={adding} onClick={addItem}>
+              {adding ? t("manager.adding") : t("manager.addItem")}
+            </Button>
           </div>
 
           {actionError && (
-            <p className="mb-4 text-sm text-red-600 dark:text-red-400">
+            <p className="mb-4 text-sm font-medium text-danger">
               {actionError}
             </p>
           )}
 
           {items.length === 0 && (
-            <p className="text-zinc-500 dark:text-zinc-400">
-              No items yet. Add the first one.
-            </p>
+            <EmptyState title={t("manager.noItemsYet")} />
           )}
 
           <ul className="flex flex-col gap-3">
             {items.map((item, index) => (
               <li
                 key={item.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border"
               >
                 <div className="flex flex-1 flex-wrap items-center gap-3">
                   <div className="flex flex-col">
@@ -250,7 +250,8 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                       type="button"
                       disabled={index === 0 || savingId === item.id}
                       onClick={() => moveItem(item, "up")}
-                      className="text-xs text-zinc-500 hover:text-zinc-900 disabled:opacity-30 dark:text-zinc-400 dark:hover:text-zinc-50"
+                      aria-label={t("manager.moveUp")}
+                      className="text-xs text-muted hover:text-text disabled:opacity-30"
                     >
                       ▲
                     </button>
@@ -258,7 +259,8 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                       type="button"
                       disabled={index === items.length - 1 || savingId === item.id}
                       onClick={() => moveItem(item, "down")}
-                      className="text-xs text-zinc-500 hover:text-zinc-900 disabled:opacity-30 dark:text-zinc-400 dark:hover:text-zinc-50"
+                      aria-label={t("manager.moveDown")}
+                      className="text-xs text-muted hover:text-text disabled:opacity-30"
                     >
                       ▼
                     </button>
@@ -271,27 +273,27 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                         value={editingLabel}
                         onChange={(event) => setEditingLabel(event.target.value)}
                         autoFocus
-                        className="rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-base text-zinc-900 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                        className="min-h-[40px] rounded-lg border border-border bg-bg px-3 py-2 text-base text-text focus:border-accent focus:outline-none"
                       />
                       <button
                         type="button"
                         disabled={savingId === item.id}
                         onClick={() => saveLabel(item)}
-                        className="rounded-full bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+                        className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
                       >
-                        Save
+                        {t("common.save")}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                        className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </button>
                     </>
                   ) : (
                     <>
-                      <span className="text-base font-medium text-zinc-900 dark:text-zinc-50">
+                      <span className="text-base font-medium text-text">
                         {item.label}
                       </span>
                       <button
@@ -300,9 +302,9 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                           setEditingId(item.id);
                           setEditingLabel(item.label);
                         }}
-                        className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                        className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
                       >
-                        Edit
+                        {t("manager.edit")}
                       </button>
                     </>
                   )}
@@ -313,21 +315,21 @@ function TemplateEditor({ templateId }: { templateId: string }) {
                     type="button"
                     disabled={savingId === item.id}
                     onClick={() => toggleRequired(item)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+                    className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
                       item.required
-                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                        : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                        ? "bg-warning/15 text-warning"
+                        : "bg-border/50 text-muted"
                     }`}
                   >
-                    {item.required ? "Required" : "Optional"}
+                    {item.required ? t("manager.required") : t("manager.optional")}
                   </button>
                   <button
                     type="button"
                     disabled={savingId === item.id}
                     onClick={() => deleteItem(item)}
-                    className="rounded-full px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                    className="min-h-[40px] rounded-full px-4 py-2 text-sm font-medium text-danger hover:bg-danger/10 disabled:opacity-50"
                   >
-                    Delete
+                    {t("manager.delete")}
                   </button>
                 </div>
               </li>

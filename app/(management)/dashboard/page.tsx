@@ -4,19 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { todayInKolkata, formatTimeKolkata } from "@/lib/date";
 import { fetchStaffNames } from "@/lib/staff-names";
+import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { SubmissionModal, type SubmissionSummary } from "../submission-modal";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { ChecklistTemplate } from "@/lib/types";
 
 export default function DashboardPage() {
   const { selectedOutlet } = useOutletContext();
+  const { t } = useLanguage();
 
   if (!selectedOutlet) {
     return (
       <main className="flex flex-1 items-center justify-center p-6 text-center">
-        <p className="text-zinc-500 dark:text-zinc-400">
-          Choose an outlet to see its checklists.
-        </p>
+        <p className="text-muted">{t("manager.chooseOutletDashboard")}</p>
       </main>
     );
   }
@@ -25,6 +27,7 @@ export default function DashboardPage() {
 }
 
 function DashboardForOutlet({ outletId }: { outletId: string }) {
+  const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const [date, setDate] = useState(todayInKolkata());
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
@@ -85,7 +88,9 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
         if (latestByTemplate[row.template_id]) continue; // rows are newest-first
         latestByTemplate[row.template_id] = {
           id: row.id,
-          title: templateNameById.get(row.template_id) ?? "Checklist",
+          title:
+            templateNameById.get(row.template_id) ??
+            t("manager.checklistFallbackTitle"),
           staffName: staffNames[row.staff_id] ?? "Unknown staff",
           submittedAt: row.submitted_at,
           notes: row.notes,
@@ -102,34 +107,30 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [supabase, outletId, date]);
+  }, [supabase, outletId, date, t]);
 
   return (
-    <main className="flex-1 p-6">
+    <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Dashboard
+        <h2 className="text-xl font-semibold text-text">
+          {t("manager.dashboardHeading")}
         </h2>
         <input
           type="date"
           value={date}
           onChange={(event) => setDate(event.target.value)}
-          className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="min-h-[44px] rounded-lg border border-border bg-surface px-4 py-2 text-base text-text focus:border-accent focus:outline-none"
         />
       </div>
 
-      {loading && (
-        <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>
-      )}
+      {loading && <SkeletonList rows={3} rowClassName="h-24" />}
       {loadError && (
-        <p className="text-red-600 dark:text-red-400">
-          Couldn&apos;t load the dashboard: {loadError}
+        <p className="text-danger">
+          {t("manager.loadDashboardError", { error: loadError })}
         </p>
       )}
       {!loading && !loadError && templates.length === 0 && (
-        <p className="text-zinc-500 dark:text-zinc-400">
-          No active checklists for this outlet.
-        </p>
+        <EmptyState title={t("common.noActiveChecklists")} />
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -143,21 +144,23 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
               onClick={() => submission && setOpenSubmission(submission)}
               className={`rounded-2xl p-6 text-left shadow-sm ring-1 transition ${
                 submission
-                  ? "bg-emerald-50 ring-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:ring-emerald-900"
-                  : "cursor-default bg-amber-50 ring-amber-200 dark:bg-amber-950/30 dark:ring-amber-900"
+                  ? "bg-success/10 ring-success/30 hover:bg-success/15"
+                  : "cursor-default bg-warning/10 ring-warning/30"
               }`}
             >
-              <p className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              <p className="mb-2 text-lg font-semibold text-text">
                 {template.name}
               </p>
               {submission ? (
-                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                  Submitted by {submission.staffName} at{" "}
-                  {formatTimeKolkata(submission.submittedAt)}
+                <p className="text-sm font-medium text-success">
+                  {t("manager.submittedAt", {
+                    name: submission.staffName,
+                    time: formatTimeKolkata(submission.submittedAt),
+                  })}
                 </p>
               ) : (
-                <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                  Not submitted yet
+                <p className="text-sm font-medium text-warning">
+                  {t("manager.notSubmittedYet")}
                 </p>
               )}
             </button>

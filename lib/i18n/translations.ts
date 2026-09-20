@@ -37,6 +37,80 @@ const dictionary = {
   "common.themeDark": { en: "Dark", hi: "गहरा", mr: "गडद" },
   "common.themeSystem": { en: "System", hi: "सिस्टम", mr: "सिस्टम" },
   "common.language": { en: "Language", hi: "भाषा", mr: "भाषा" },
+  "common.backToChecklists": {
+    en: "Back to checklists",
+    hi: "चेकलिस्ट पर वापस जाएं",
+    mr: "चेकलिस्टवर परत जा",
+  },
+  "common.noOutlets": {
+    en: "No outlets are assigned to your account yet.",
+    hi: "अभी आपके खाते में कोई आउटलेट नहीं जोड़ा गया है।",
+    mr: "अजून तुमच्या खात्याला कोणतेही आउटलेट नियुक्त केलेले नाही.",
+  },
+  "common.checklistsHeading": {
+    en: "Checklists",
+    hi: "चेकलिस्ट",
+    mr: "चेकलिस्ट",
+  },
+  "common.loadChecklistsError": {
+    en: "Couldn't load checklists: {error}",
+    hi: "चेकलिस्ट लोड नहीं हो सकीं: {error}",
+    mr: "चेकलिस्ट लोड करता आल्या नाहीत: {error}",
+  },
+  "common.noActiveChecklists": {
+    en: "No active checklists for this outlet.",
+    hi: "इस आउटलेट के लिए कोई सक्रिय चेकलिस्ट नहीं है।",
+    mr: "या आउटलेटसाठी कोणतीही सक्रिय चेकलिस्ट नाही.",
+  },
+  "common.loadStaffError": {
+    en: "Couldn't load staff: {error}",
+    hi: "स्टाफ लोड नहीं हो सका: {error}",
+    mr: "स्टाफ लोड करता आला नाही: {error}",
+  },
+  "common.nameLabel": { en: "Name", hi: "नाम", mr: "नाव" },
+  "common.nameEmpty": {
+    en: "Name can't be empty.",
+    hi: "नाम खाली नहीं हो सकता।",
+    mr: "नाव रिकामे असू शकत नाही.",
+  },
+  "common.enterName": {
+    en: "Enter a name.",
+    hi: "एक नाम डालें।",
+    mr: "एक नाव टाका.",
+  },
+  "common.saving": { en: "Saving…", hi: "सेव हो रहा है…", mr: "सेव्ह होत आहे…" },
+
+  // /login
+  "auth.email": { en: "Email", hi: "ईमेल", mr: "ईमेल" },
+  "auth.password": { en: "Password", hi: "पासवर्ड", mr: "पासवर्ड" },
+  "auth.signIn": { en: "Sign in", hi: "साइन इन करें", mr: "साइन इन करा" },
+  "auth.signingIn": {
+    en: "Signing in…",
+    hi: "साइन इन हो रहा है…",
+    mr: "साइन इन होत आहे…",
+  },
+  "auth.enterCredentials": {
+    en: "Enter your email and password.",
+    hi: "अपना ईमेल और पासवर्ड डालें।",
+    mr: "तुमचा ईमेल आणि पासवर्ड टाका.",
+  },
+  "auth.incorrectCredentials": {
+    en: "Incorrect email or password.",
+    hi: "गलत ईमेल या पासवर्ड।",
+    mr: "चुकीचा ईमेल किंवा पासवर्ड.",
+  },
+  "auth.noProfile": {
+    en: "No profile is set up for this account.",
+    hi: "इस खाते के लिए कोई प्रोफ़ाइल सेट नहीं है।",
+    mr: "या खात्यासाठी कोणतीही प्रोफाइल सेट केलेली नाही.",
+  },
+
+  // Nav bar (manager roles)
+  "nav.dashboard": { en: "Dashboard", hi: "डैशबोर्ड", mr: "डॅशबोर्ड" },
+  "nav.history": { en: "History", hi: "इतिहास", mr: "इतिहास" },
+  "nav.staff": { en: "Staff", hi: "स्टाफ", mr: "स्टाफ" },
+  "nav.checklists": { en: "Checklists", hi: "चेकलिस्ट", mr: "चेकलिस्ट" },
+  "nav.tablet": { en: "Tablet", hi: "टैबलेट", mr: "टॅबलेट" },
 
   // /tablet — outlet & checklist list
   "tablet.switchOutlet": {
@@ -44,43 +118,18 @@ const dictionary = {
     hi: "आउटलेट बदलें",
     mr: "आउटलेट बदला",
   },
-  "tablet.noOutlets": {
-    en: "No outlets are assigned to your account yet.",
-    hi: "अभी आपके खाते में कोई आउटलेट नहीं जोड़ा गया है।",
-    mr: "अजून तुमच्या खात्याला कोणतेही आउटलेट नियुक्त केलेले नाही.",
-  },
   "tablet.chooseOutlet": {
     en: "Choose an outlet",
     hi: "एक आउटलेट चुनें",
     mr: "एक आउटलेट निवडा",
-  },
-  "tablet.checklistsHeading": {
-    en: "Checklists",
-    hi: "चेकलिस्ट",
-    mr: "चेकलिस्ट",
   },
   "tablet.loadingChecklists": {
     en: "Loading checklists…",
     hi: "चेकलिस्ट लोड हो रही हैं…",
     mr: "चेकलिस्ट लोड होत आहेत…",
   },
-  "tablet.loadChecklistsError": {
-    en: "Couldn't load checklists: {error}",
-    hi: "चेकलिस्ट लोड नहीं हो सकीं: {error}",
-    mr: "चेकलिस्ट लोड करता आल्या नाहीत: {error}",
-  },
-  "tablet.noActiveChecklists": {
-    en: "No active checklists for this outlet.",
-    hi: "इस आउटलेट के लिए कोई सक्रिय चेकलिस्ट नहीं है।",
-    mr: "या आउटलेटसाठी कोणतीही सक्रिय चेकलिस्ट नाही.",
-  },
 
   // /tablet — checklist detail
-  "tablet.backToChecklists": {
-    en: "Back to checklists",
-    hi: "चेकलिस्ट पर वापस जाएं",
-    mr: "चेकलिस्टवर परत जा",
-  },
   "tablet.loadingChecklist": {
     en: "Loading checklist…",
     hi: "चेकलिस्ट लोड हो रही है…",
@@ -134,11 +183,6 @@ const dictionary = {
     en: "Loading staff…",
     hi: "स्टाफ लोड हो रहा है…",
     mr: "स्टाफ लोड होत आहे…",
-  },
-  "tablet.loadStaffError": {
-    en: "Couldn't load staff: {error}",
-    hi: "स्टाफ लोड नहीं हो सका: {error}",
-    mr: "स्टाफ लोड करता आला नाही: {error}",
   },
   "tablet.noActiveStaff": {
     en: "No active staff found for this outlet.",
@@ -202,6 +246,185 @@ const dictionary = {
     hi: "{name} कुछ मिनटों के लिए लॉक है। थोड़ी देर बाद फिर कोशिश करें।",
     mr: "{name} काही मिनिटांसाठी लॉक आहे. थोड्या वेळाने पुन्हा प्रयत्न करा.",
   },
+
+  // Manager screens — shared outlet picker
+  "manager.outlet": { en: "Outlet", hi: "आउटलेट", mr: "आउटलेट" },
+
+  // /dashboard
+  "manager.dashboardHeading": { en: "Dashboard", hi: "डैशबोर्ड", mr: "डॅशबोर्ड" },
+  "manager.chooseOutletDashboard": {
+    en: "Choose an outlet to see its checklists.",
+    hi: "चेकलिस्ट देखने के लिए एक आउटलेट चुनें।",
+    mr: "चेकलिस्ट पाहण्यासाठी एक आउटलेट निवडा.",
+  },
+  "manager.loadDashboardError": {
+    en: "Couldn't load the dashboard: {error}",
+    hi: "डैशबोर्ड लोड नहीं हो सका: {error}",
+    mr: "डॅशबोर्ड लोड करता आले नाही: {error}",
+  },
+  "manager.notSubmittedYet": {
+    en: "Not submitted yet",
+    hi: "अभी सबमिट नहीं हुआ",
+    mr: "अजून सबमिट झाले नाही",
+  },
+  "manager.checklistFallbackTitle": {
+    en: "Checklist",
+    hi: "चेकलिस्ट",
+    mr: "चेकलिस्ट",
+  },
+  "manager.submittedAt": {
+    en: "Submitted by {name} at {time}",
+    hi: "{time} पर {name} द्वारा सबमिट किया गया",
+    mr: "{time} वाजता {name} यांनी सबमिट केले",
+  },
+
+  // /history
+  "manager.historyHeading": { en: "History", hi: "इतिहास", mr: "इतिहास" },
+  "manager.chooseOutletHistory": {
+    en: "Choose an outlet to see its history.",
+    hi: "इतिहास देखने के लिए एक आउटलेट चुनें।",
+    mr: "इतिहास पाहण्यासाठी एक आउटलेट निवडा.",
+  },
+  "manager.loadHistoryError": {
+    en: "Couldn't load history: {error}",
+    hi: "इतिहास लोड नहीं हो सका: {error}",
+    mr: "इतिहास लोड करता आला नाही: {error}",
+  },
+  "manager.dateColumn": { en: "Date", hi: "तारीख", mr: "तारीख" },
+
+  // Submission answers modal (dashboard + history)
+  "manager.loadingAnswers": {
+    en: "Loading answers…",
+    hi: "जवाब लोड हो रहे हैं…",
+    mr: "उत्तरे लोड होत आहेत…",
+  },
+  "manager.loadAnswersError": {
+    en: "Couldn't load answers: {error}",
+    hi: "जवाब लोड नहीं हो सके: {error}",
+    mr: "उत्तरे लोड करता आली नाहीत: {error}",
+  },
+  "manager.itemDone": { en: "Done", hi: "पूरा हुआ", mr: "पूर्ण झाले" },
+  "manager.itemNotDone": {
+    en: "Not done",
+    hi: "पूरा नहीं हुआ",
+    mr: "पूर्ण झाले नाही",
+  },
+  "manager.note": { en: "Note: {note}", hi: "नोट: {note}", mr: "नोंद: {note}" },
+  "manager.overallNotes": {
+    en: "Overall notes",
+    hi: "कुल नोट्स",
+    mr: "एकूण नोंदी",
+  },
+
+  // /staff
+  "manager.chooseOutletStaff": {
+    en: "Choose an outlet to manage its staff.",
+    hi: "स्टाफ प्रबंधित करने के लिए एक आउटलेट चुनें।",
+    mr: "स्टाफ व्यवस्थापित करण्यासाठी एक आउटलेट निवडा.",
+  },
+  "manager.staffHeading": { en: "Staff", hi: "स्टाफ", mr: "स्टाफ" },
+  "manager.addStaff": { en: "Add staff", hi: "स्टाफ जोड़ें", mr: "स्टाफ जोडा" },
+  "manager.noStaffYet": {
+    en: "No staff yet. Add your first staff member.",
+    hi: "अभी कोई स्टाफ नहीं है। पहला स्टाफ सदस्य जोड़ें।",
+    mr: "अजून कोणताही स्टाफ नाही. पहिला स्टाफ सदस्य जोडा.",
+  },
+  "manager.rename": { en: "Rename", hi: "नाम बदलें", mr: "नाव बदला" },
+  "manager.inactive": { en: "Inactive", hi: "निष्क्रिय", mr: "निष्क्रिय" },
+  "manager.lockedUntil": {
+    en: "Locked until {time}",
+    hi: "{time} तक लॉक है",
+    mr: "{time} पर्यंत लॉक आहे",
+  },
+  "manager.resetPin": {
+    en: "Reset PIN",
+    hi: "पिन रीसेट करें",
+    mr: "पिन रीसेट करा",
+  },
+  "manager.resetPinTitle": {
+    en: "Reset PIN for {name}",
+    hi: "{name} के लिए पिन रीसेट करें",
+    mr: "{name} साठी पिन रीसेट करा",
+  },
+  "manager.deactivate": {
+    en: "Deactivate",
+    hi: "निष्क्रिय करें",
+    mr: "निष्क्रिय करा",
+  },
+  "manager.activate": { en: "Activate", hi: "सक्रिय करें", mr: "सक्रिय करा" },
+  "manager.pinLabel": {
+    en: "PIN (4 to 6 digits)",
+    hi: "पिन (4 से 6 अंक)",
+    mr: "पिन (4 ते 6 अंक)",
+  },
+  "manager.pinMustBeDigits": {
+    en: "PIN must be 4 to 6 digits.",
+    hi: "पिन 4 से 6 अंकों का होना चाहिए।",
+    mr: "पिन 4 ते 6 अंकी असावा.",
+  },
+  "manager.add": { en: "Add", hi: "जोड़ें", mr: "जोडा" },
+
+  // /checklists
+  "manager.chooseOutletChecklists": {
+    en: "Choose an outlet to manage its checklists.",
+    hi: "चेकलिस्ट प्रबंधित करने के लिए एक आउटलेट चुनें।",
+    mr: "चेकलिस्ट व्यवस्थापित करण्यासाठी एक आउटलेट निवडा.",
+  },
+  "manager.newChecklist": {
+    en: "New checklist",
+    hi: "नई चेकलिस्ट",
+    mr: "नवीन चेकलिस्ट",
+  },
+  "manager.noChecklistsYet": {
+    en: "No checklists yet. Create your first one.",
+    hi: "अभी कोई चेकलिस्ट नहीं है। अपनी पहली चेकलिस्ट बनाएं।",
+    mr: "अजून कोणतीही चेकलिस्ट नाही. तुमची पहिली चेकलिस्ट तयार करा.",
+  },
+  "manager.active": { en: "Active", hi: "सक्रिय", mr: "सक्रिय" },
+  "manager.kindOpening": { en: "Opening", hi: "ओपनिंग", mr: "ओपनिंग" },
+  "manager.kindClosing": { en: "Closing", hi: "क्लोज़िंग", mr: "क्लोजिंग" },
+  "manager.kindLabel": { en: "Kind", hi: "प्रकार", mr: "प्रकार" },
+  "manager.create": { en: "Create", hi: "बनाएं", mr: "तयार करा" },
+  "manager.creating": {
+    en: "Creating…",
+    hi: "बनाया जा रहा है…",
+    mr: "तयार होत आहे…",
+  },
+  "manager.createError": {
+    en: "Something went wrong. Please try again.",
+    hi: "कुछ गड़बड़ हुई। कृपया फिर कोशिश करें।",
+    mr: "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.",
+  },
+
+  // /checklists/[templateId]
+  "manager.loadTemplateError": {
+    en: "Couldn't load this checklist: {error}",
+    hi: "यह चेकलिस्ट लोड नहीं हो सकी: {error}",
+    mr: "ही चेकलिस्ट लोड करता आली नाही: {error}",
+  },
+  "manager.addItem": { en: "Add item", hi: "आइटम जोड़ें", mr: "आयटम जोडा" },
+  "manager.adding": { en: "Adding…", hi: "जोड़ा जा रहा है…", mr: "जोडत आहे…" },
+  "manager.noItemsYet": {
+    en: "No items yet. Add the first one.",
+    hi: "अभी कोई आइटम नहीं है। पहला आइटम जोड़ें।",
+    mr: "अजून कोणताही आयटम नाही. पहिला आयटम जोडा.",
+  },
+  "manager.labelEmpty": {
+    en: "Label can't be empty.",
+    hi: "लेबल खाली नहीं हो सकता।",
+    mr: "लेबल रिकामे असू शकत नाही.",
+  },
+  "manager.edit": { en: "Edit", hi: "बदलें", mr: "बदला" },
+  "manager.required": { en: "Required", hi: "आवश्यक", mr: "आवश्यक" },
+  "manager.optional": { en: "Optional", hi: "वैकल्पिक", mr: "ऐच्छिक" },
+  "manager.delete": { en: "Delete", hi: "हटाएं", mr: "काढा" },
+  "manager.confirmDeleteItem": {
+    en: "Delete \"{label}\"? Past submissions keep their own copy of this item.",
+    hi: "\"{label}\" हटाएं? पुराने सबमिशन में इस आइटम की अपनी कॉपी बनी रहेगी।",
+    mr: "\"{label}\" काढायचे? जुन्या सबमिशनमध्ये या आयटमची स्वतःची प्रत राहील.",
+  },
+  "manager.moveUp": { en: "Move up", hi: "ऊपर ले जाएं", mr: "वर न्या" },
+  "manager.moveDown": { en: "Move down", hi: "नीचे ले जाएं", mr: "खाली न्या" },
 } satisfies Record<string, Entry>;
 
 export type TranslationKey = keyof typeof dictionary;

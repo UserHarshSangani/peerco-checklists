@@ -64,7 +64,7 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
       <div className="flex min-h-dvh flex-col bg-bg">
         {header}
         <main className="flex flex-1 items-center justify-center p-6">
-          <EmptyState title={t("tablet.noOutlets")} />
+          <EmptyState title={t("common.noOutlets")} />
         </main>
       </div>
     );
@@ -157,16 +157,16 @@ function TemplatesList({
   return (
     <main className="flex-1 p-4 sm:p-6">
       <h2 className="mb-6 text-xl font-semibold text-text">
-        {t("tablet.checklistsHeading")}
+        {t("common.checklistsHeading")}
       </h2>
       {loading && <SkeletonList rows={3} rowClassName="h-24" />}
       {loadError && (
         <p className="text-danger">
-          {t("tablet.loadChecklistsError", { error: loadError })}
+          {t("common.loadChecklistsError", { error: loadError })}
         </p>
       )}
       {!loading && !loadError && templates.length === 0 && (
-        <EmptyState title={t("tablet.noActiveChecklists")} />
+        <EmptyState title={t("common.noActiveChecklists")} />
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {templates.map((template) => (

@@ -330,7 +330,7 @@ export function SubmitModal({
       {loadingStaff && <SkeletonList rows={4} rowClassName="h-24" />}
       {staffError && (
         <p className="text-danger">
-          {t("tablet.loadStaffError", { error: staffError })}
+          {t("common.loadStaffError", { error: staffError })}
         </p>
       )}
       {!loadingStaff && !staffError && staff.length === 0 && (

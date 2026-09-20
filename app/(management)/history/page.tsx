@@ -8,8 +8,11 @@ import {
   lastDatesInKolkata,
 } from "@/lib/date";
 import { fetchStaffNames } from "@/lib/staff-names";
+import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { SubmissionModal, type SubmissionSummary } from "../submission-modal";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { ChecklistTemplate } from "@/lib/types";
 
 const DAYS_SHOWN = 14;
@@ -23,13 +26,12 @@ type Cell = {
 
 export default function HistoryPage() {
   const { selectedOutlet } = useOutletContext();
+  const { t } = useLanguage();
 
   if (!selectedOutlet) {
     return (
       <main className="flex flex-1 items-center justify-center p-6 text-center">
-        <p className="text-zinc-500 dark:text-zinc-400">
-          Choose an outlet to see its history.
-        </p>
+        <p className="text-muted">{t("manager.chooseOutletHistory")}</p>
       </main>
     );
   }
@@ -38,6 +40,7 @@ export default function HistoryPage() {
 }
 
 function HistoryForOutlet({ outletId }: { outletId: string }) {
+  const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const dates = useMemo(() => lastDatesInKolkata(DAYS_SHOWN), []);
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
@@ -141,35 +144,39 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
   }, [supabase, outletId, dates]);
 
   return (
-    <main className="flex-1 p-6">
-      <h2 className="mb-6 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-        History
+    <main className="flex-1 p-4 sm:p-6">
+      <h2 className="mb-6 text-xl font-semibold text-text">
+        {t("manager.historyHeading")}
       </h2>
 
-      {loading && <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>}
+      {loading && (
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 6 }, (_, index) => (
+            <Skeleton key={index} className="h-12 w-full" />
+          ))}
+        </div>
+      )}
       {loadError && (
-        <p className="text-red-600 dark:text-red-400">
-          Couldn&apos;t load history: {loadError}
+        <p className="text-danger">
+          {t("manager.loadHistoryError", { error: loadError })}
         </p>
       )}
       {!loading && !loadError && templates.length === 0 && (
-        <p className="text-zinc-500 dark:text-zinc-400">
-          No active checklists for this outlet.
-        </p>
+        <EmptyState title={t("common.noActiveChecklists")} />
       )}
 
       {!loading && !loadError && templates.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
+        <div className="overflow-x-auto rounded-2xl bg-surface shadow-sm ring-1 ring-border">
           <table className="min-w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                <th className="px-4 py-3 text-left font-semibold text-zinc-600 dark:text-zinc-300">
-                  Date
+              <tr className="border-b border-border">
+                <th className="px-4 py-3 text-left font-semibold text-muted">
+                  {t("manager.dateColumn")}
                 </th>
                 {templates.map((template) => (
                   <th
                     key={template.id}
-                    className="px-4 py-3 text-left font-semibold text-zinc-600 dark:text-zinc-300"
+                    className="px-4 py-3 text-left font-semibold text-muted"
                   >
                     {template.name}
                   </th>
@@ -182,11 +189,11 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
                 return (
                   <tr
                     key={date}
-                    className={`border-b border-zinc-100 last:border-0 dark:border-zinc-800/60 ${
-                      incomplete ? "bg-red-50 dark:bg-red-950/20" : ""
+                    className={`border-b border-border last:border-0 ${
+                      incomplete ? "bg-danger/10" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 font-medium whitespace-nowrap text-zinc-900 dark:text-zinc-50">
+                    <td className="px-4 py-3 font-medium whitespace-nowrap text-text">
                       {formatDateLabel(date)}
                     </td>
                     {templates.map((template) => {
@@ -205,14 +212,12 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
                                   notes: cell.notes,
                                 })
                               }
-                              className="font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                              className="font-medium text-success hover:underline"
                             >
                               ✓ {cell.staffName} · {formatTimeKolkata(cell.submittedAt)}
                             </button>
                           ) : (
-                            <span className="text-zinc-400 dark:text-zinc-600">
-                              —
-                            </span>
+                            <span className="text-muted">—</span>
                           )}
                         </td>
                       );
