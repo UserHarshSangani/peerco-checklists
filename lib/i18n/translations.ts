@@ -79,6 +79,7 @@ const dictionary = {
     mr: "एक नाव टाका.",
   },
   "common.saving": { en: "Saving…", hi: "सेव हो रहा है…", mr: "सेव्ह होत आहे…" },
+  "common.continue": { en: "Continue", hi: "जारी रखें", mr: "सुरू ठेवा" },
 
   // Install-this-app hint (/tablet)
   "install.prompt": {
@@ -313,6 +314,21 @@ const dictionary = {
     en: "Please retake the photo and try again.",
     hi: "कृपया फिर से फोटो लें और कोशिश करें।",
     mr: "कृपया पुन्हा फोटो घ्या आणि प्रयत्न करा.",
+  },
+  "tablet.checkingLocation": {
+    en: "Checking location…",
+    hi: "स्थान की जांच हो रही है…",
+    mr: "स्थान तपासले जात आहे…",
+  },
+  "tablet.locationExplainerBody": {
+    en: "When you submit, we check whether this device is at the outlet. Your exact location is not saved.",
+    hi: "जब आप सबमिट करते हैं, तो हम जांचते हैं कि यह डिवाइस आउटलेट पर है या नहीं। आपका सटीक स्थान सेव नहीं किया जाता।",
+    mr: "तुम्ही सबमिट करता तेव्हा, हे डिव्हाइस आउटलेटवर आहे की नाही हे आम्ही तपासतो. तुमचे नेमके स्थान सेव्ह केले जात नाही.",
+  },
+  "tablet.locationOffHint": {
+    en: "Location is off. Please allow location for this app in your browser settings.",
+    hi: "लोकेशन बंद है। कृपया अपनी ब्राउज़र सेटिंग्स में इस ऐप के लिए लोकेशन की अनुमति दें।",
+    mr: "लोकेशन बंद आहे. कृपया तुमच्या ब्राउझर सेटिंग्जमध्ये या अ‍ॅपसाठी लोकेशनला परवानगी द्या.",
   },
 
   // Manager screens — shared outlet picker

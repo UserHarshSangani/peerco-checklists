@@ -8,9 +8,31 @@ import type { TranslationKey } from "@/lib/i18n/translations";
 import type { ChecklistItemRow, ChecklistTemplate, Outlet, StaffMember } from "@/lib/types";
 import type { Answer } from "./checklist-view";
 import { isPhotoUploaded, type ItemPhotoState } from "./photo-capture";
+import {
+  getTabletLocationPayload,
+  type LocationPayload,
+} from "@/lib/geolocation";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
+
+const LOCATION_EXPLAINER_KEY = "peerco:location-explainer-seen";
+
+function hasSeenLocationExplainer(): boolean {
+  try {
+    return window.localStorage.getItem(LOCATION_EXPLAINER_KEY) === "1";
+  } catch {
+    return true; // storage unavailable — don't block the flow on it
+  }
+}
+
+function markLocationExplainerSeen() {
+  try {
+    window.localStorage.setItem(LOCATION_EXPLAINER_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
 
 const REASON_KEYS: Record<string, TranslationKey> = {
   invalid_pin: "tablet.reason.invalid_pin",
@@ -24,7 +46,12 @@ const REASON_KEYS: Record<string, TranslationKey> = {
 };
 
 type SubmitResult =
-  | { ok: true; submission_id: string }
+  | {
+      ok: true;
+      submission_id: string;
+      location_status: string;
+      distance_m: number | null;
+    }
   | { ok: false; reason: string; locked_until?: string };
 
 type Step = "staff" | "pin" | "success";
@@ -74,9 +101,14 @@ export function SubmitModal({
   );
   const [pin, setPin] = useState("");
   const [shake, setShake] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showExplainer, setShowExplainer] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [submittedLocationStatus, setSubmittedLocationStatus] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,15 +133,17 @@ export function SubmitModal({
   }, [supabase, outlet.id]);
 
   // Auto-close and forget the PIN after a minute of inactivity — this runs
-  // on a shared kiosk tablet, so someone can walk away mid-entry.
+  // on a shared kiosk tablet, so someone can walk away mid-entry. Paused
+  // while a submission is actually in flight so a slow network/GPS fix
+  // can't cause the modal to close out from under it.
   useEffect(() => {
-    if (step === "success") return;
+    if (step === "success" || locating || submitting) return;
     const timer = window.setTimeout(() => {
       setPin("");
       onClose();
     }, INACTIVITY_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
-  }, [step, pin, selectedStaff, onClose]);
+  }, [step, pin, selectedStaff, locating, submitting, onClose]);
 
   // Auto-return to the checklist list a few seconds after a successful
   // submission; unmounting (via onSuccess) fully resets this modal's state.
@@ -144,7 +178,7 @@ export function SubmitModal({
     setPin("");
   }
 
-  async function submit() {
+  async function submit(location: LocationPayload) {
     if (!selectedStaff || submitting) return;
     setSubmitting(true);
     setSubmitError(null);
@@ -164,6 +198,7 @@ export function SubmitModal({
         };
       }),
       p_notes: notes.trim() || null,
+      p_location: location,
     });
 
     setSubmitting(false);
@@ -178,6 +213,7 @@ export function SubmitModal({
 
     if (result.ok) {
       setSubmittedName(selectedStaff.name);
+      setSubmittedLocationStatus(result.location_status);
       setStep("success");
       return;
     }
@@ -208,7 +244,48 @@ export function SubmitModal({
     );
   }
 
+  async function proceedWithSubmit() {
+    setLocating(true);
+    const location = await getTabletLocationPayload();
+    setLocating(false);
+    await submit(location);
+  }
+
+  function handleSubmitTap() {
+    if (!hasSeenLocationExplainer()) {
+      setShowExplainer(true);
+      return;
+    }
+    void proceedWithSubmit();
+  }
+
+  function handleExplainerContinue() {
+    markLocationExplainerSeen();
+    setShowExplainer(false);
+    void proceedWithSubmit();
+  }
+
+  if (step === "pin" && selectedStaff && showExplainer) {
+    return (
+      <Modal onClose={onClose} closeOnOverlayClick={false}>
+        <p className="mb-6 text-base text-text">
+          {t("tablet.locationExplainerBody")}
+        </p>
+        <Button
+          type="button"
+          onClick={handleExplainerContinue}
+          className="w-full"
+        >
+          {t("common.continue")}
+        </Button>
+      </Modal>
+    );
+  }
+
   if (step === "success") {
+    const showLocationHint =
+      submittedLocationStatus === "denied" ||
+      submittedLocationStatus === "unavailable";
     return (
       <Modal onClose={onSuccess} closeOnOverlayClick={false}>
         <div className="flex flex-col items-center gap-4 py-6 text-center">
@@ -218,6 +295,11 @@ export function SubmitModal({
           <h3 className="text-xl font-semibold text-text">
             {t("tablet.submittedBy", { name: submittedName ?? "" })}
           </h3>
+          {showLocationHint && (
+            <p className="text-sm text-muted">
+              {t("tablet.locationOffHint")}
+            </p>
+          )}
           <Button type="button" onClick={onSuccess} className="mt-2 w-full">
             {t("common.done")}
           </Button>
@@ -312,11 +394,15 @@ export function SubmitModal({
         <Button
           type="button"
           disabled={pin.length < 4}
-          loading={submitting}
-          onClick={submit}
+          loading={submitting || locating}
+          onClick={handleSubmitTap}
           className="mt-4 w-full"
         >
-          {submitting ? t("tablet.submitting") : t("tablet.submit")}
+          {locating
+            ? t("tablet.checkingLocation")
+            : submitting
+              ? t("tablet.submitting")
+              : t("tablet.submit")}
         </Button>
       </Modal>
     );
