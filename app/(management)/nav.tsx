@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -15,9 +16,9 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
+    <header className="safe-top flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-4">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="mr-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+        <p className="mr-4 text-lg font-semibold text-text">
           PeerCo Checklists
         </p>
         <nav className="flex flex-wrap gap-1">
@@ -30,8 +31,8 @@ export function Nav() {
                 href={link.href}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                   active
-                    ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    ? "bg-accent text-white"
+                    : "text-muted hover:bg-border/40 hover:text-text"
                 }`}
               >
                 {link.label}
@@ -40,13 +41,16 @@ export function Nav() {
           })}
           <Link
             href="/tablet"
-            className="rounded-full px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="rounded-full px-4 py-2 text-sm font-medium text-muted transition hover:bg-border/40 hover:text-text"
           >
             Tablet
           </Link>
         </nav>
       </div>
-      <LogoutButton />
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
+        <LogoutButton />
+      </div>
     </header>
   );
 }
