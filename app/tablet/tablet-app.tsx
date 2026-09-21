@@ -5,56 +5,165 @@ import { createClient } from "@/lib/supabase/client";
 import { todayInKolkata, formatDateLabelForLocale } from "@/lib/date";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { useLanguage } from "@/lib/i18n/language-context";
-import type { ChecklistTemplate, Outlet } from "@/lib/types";
+import type { ChecklistTemplate, Outlet, StaffMember } from "@/lib/types";
 import { ChecklistView } from "./checklist-view";
 import { StockCountFlow } from "./stock/stock-count-flow";
 import { GoodsReceivedFlow } from "./stock/goods-received-flow";
 import { WastageFlow } from "./stock/wastage-flow";
+import { StaffPickerScreen } from "./staff-picker-screen";
+import { CurrentStaffProvider, useCurrentStaff } from "./current-staff-context";
+import { StaffChip } from "./staff-chip";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSwitcher } from "@/components/language/language-switcher";
+import { IconCircle } from "@/components/ui/icon-circle";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InstallHint } from "@/components/pwa/install-hint";
+import {
+  ClipboardCheck,
+  ChefHat as WastageIcon,
+  PackageSearch,
+  Truck,
+} from "lucide-react";
 
 type HomeTile = "checklists" | "stock-count" | "goods-received" | "wastage";
 
 export function TabletApp({ outlets }: { outlets: Outlet[] }) {
-  const { t, locale } = useLanguage();
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(
     outlets.length === 1 ? outlets[0] : null,
   );
-  const [activeTile, setActiveTile] = useState<HomeTile | null>(null);
-  const [activeTemplate, setActiveTemplate] =
-    useState<ChecklistTemplate | null>(null);
 
   // The tablet is meant to sit on a counter and stay lit the whole shift.
   useWakeLock(true);
 
   function chooseOutlet(outlet: Outlet | null) {
     setSelectedOutlet(outlet);
-    setActiveTile(null);
-    setActiveTemplate(null);
   }
+
+  if (outlets.length === 0) {
+    return <NoOutlets />;
+  }
+
+  if (!selectedOutlet) {
+    return <ChooseOutlet outlets={outlets} onChoose={chooseOutlet} />;
+  }
+
+  return (
+    <CurrentStaffProvider key={selectedOutlet.id}>
+      <OutletHome
+        outlet={selectedOutlet}
+        multiOutlet={outlets.length > 1}
+        onSwitchOutlet={() => chooseOutlet(null)}
+      />
+    </CurrentStaffProvider>
+  );
+}
+
+function NoOutlets() {
+  const { t } = useLanguage();
+  return (
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <main className="flex flex-1 items-center justify-center p-6">
+        <EmptyState title={t("common.noOutlets")} />
+      </main>
+      <InstallHint />
+    </div>
+  );
+}
+
+function ChooseOutlet({
+  outlets,
+  onChoose,
+}: {
+  outlets: Outlet[];
+  onChoose: (outlet: Outlet) => void;
+}) {
+  const { t } = useLanguage();
+  return (
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <header className="safe-top flex items-center justify-between border-b border-border bg-surface px-4 py-3 sm:px-6">
+        <span className="font-serif text-xl font-bold text-text">PeerCo Daybook</span>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
+          <LogoutButton />
+        </div>
+      </header>
+      <main className="flex-1 p-4 sm:p-6">
+        <h2 className="mb-6 text-xl font-semibold text-text">
+          {t("tablet.chooseOutlet")}
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {outlets.map((outlet) => (
+            <button
+              key={outlet.id}
+              type="button"
+              onClick={() => onChoose(outlet)}
+              className="min-h-16 rounded-2xl bg-surface p-6 text-left text-xl font-medium text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
+            >
+              {outlet.name}
+            </button>
+          ))}
+        </div>
+      </main>
+      <InstallHint />
+    </div>
+  );
+}
+
+function OutletHome({
+  outlet,
+  multiOutlet,
+  onSwitchOutlet,
+}: {
+  outlet: Outlet;
+  multiOutlet: boolean;
+  onSwitchOutlet: () => void;
+}) {
+  const { t, locale } = useLanguage();
+  const currentStaff = useCurrentStaff();
+  const [activeTile, setActiveTile] = useState<HomeTile | null>(null);
+  const [pendingTile, setPendingTile] = useState<HomeTile | null>(null);
+  const [activeTemplate, setActiveTemplate] =
+    useState<ChecklistTemplate | null>(null);
 
   const today = useMemo(
     () => formatDateLabelForLocale(todayInKolkata(), locale),
     [locale],
   );
 
+  function openTile(tile: HomeTile) {
+    if (currentStaff.staff) {
+      setActiveTile(tile);
+    } else {
+      setPendingTile(tile);
+    }
+  }
+
+  function handleStaffPicked(member: StaffMember) {
+    currentStaff.setStaff(member);
+    setActiveTile(pendingTile);
+    setPendingTile(null);
+  }
+
+  function exitToHome() {
+    setActiveTile(null);
+    setActiveTemplate(null);
+  }
+
   const header = (
     <header className="safe-top sticky top-0 z-40 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface/95 px-4 py-3 backdrop-blur sm:px-6">
       <div className="min-w-0">
-        <p className="truncate text-lg font-semibold text-text">
-          {selectedOutlet ? selectedOutlet.name : "PeerCo Checklists"}
-        </p>
+        <p className="truncate font-serif text-lg font-bold text-text">{outlet.name}</p>
         <p className="text-sm text-muted">{today}</p>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {outlets.length > 1 && selectedOutlet && (
+      <div className="flex flex-wrap items-center gap-3">
+        <StaffChip />
+        {multiOutlet && (
           <button
             type="button"
-            onClick={() => chooseOutlet(null)}
+            onClick={onSwitchOutlet}
             className="min-h-[40px] rounded-full px-3 py-2 text-sm font-medium text-muted transition hover:bg-border/40 hover:text-text"
           >
             {t("tablet.switchOutlet")}
@@ -67,41 +176,13 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
     </header>
   );
 
-  if (outlets.length === 0) {
+  if (pendingTile) {
     return (
-      <div className="flex min-h-dvh flex-col bg-bg">
-        {header}
-        <main className="flex flex-1 items-center justify-center p-6">
-          <EmptyState title={t("common.noOutlets")} />
-        </main>
-        <InstallHint />
-      </div>
-    );
-  }
-
-  if (!selectedOutlet) {
-    return (
-      <div className="flex min-h-dvh flex-col bg-bg">
-        {header}
-        <main className="flex-1 p-4 sm:p-6">
-          <h2 className="mb-6 text-xl font-semibold text-text">
-            {t("tablet.chooseOutlet")}
-          </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {outlets.map((outlet) => (
-              <button
-                key={outlet.id}
-                type="button"
-                onClick={() => chooseOutlet(outlet)}
-                className="min-h-16 rounded-2xl bg-surface p-6 text-left text-xl font-medium text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
-              >
-                {outlet.name}
-              </button>
-            ))}
-          </div>
-        </main>
-        <InstallHint />
-      </div>
+      <StaffPickerScreen
+        outlet={outlet}
+        onPick={handleStaffPicked}
+        onCancel={() => setPendingTile(null)}
+      />
     );
   }
 
@@ -109,51 +190,30 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
     return (
       <ChecklistView
         key={activeTemplate.id}
-        outlet={selectedOutlet}
+        outlet={outlet}
         template={activeTemplate}
         onBack={() => setActiveTemplate(null)}
-        onSubmitted={() => setActiveTemplate(null)}
+        onSubmitted={exitToHome}
       />
     );
   }
 
   if (activeTile === "stock-count") {
-    return (
-      <StockCountFlow
-        key={selectedOutlet.id}
-        outlet={selectedOutlet}
-        onExit={() => setActiveTile(null)}
-      />
-    );
+    return <StockCountFlow key={outlet.id} outlet={outlet} onExit={exitToHome} />;
   }
-
   if (activeTile === "goods-received") {
-    return (
-      <GoodsReceivedFlow
-        key={selectedOutlet.id}
-        outlet={selectedOutlet}
-        onExit={() => setActiveTile(null)}
-      />
-    );
+    return <GoodsReceivedFlow key={outlet.id} outlet={outlet} onExit={exitToHome} />;
   }
-
   if (activeTile === "wastage") {
-    return (
-      <WastageFlow
-        key={selectedOutlet.id}
-        outlet={selectedOutlet}
-        onExit={() => setActiveTile(null)}
-      />
-    );
+    return <WastageFlow key={outlet.id} outlet={outlet} onExit={exitToHome} />;
   }
-
   if (activeTile === "checklists") {
     return (
       <TemplatesList
-        key={selectedOutlet.id}
-        outlet={selectedOutlet}
+        key={outlet.id}
+        outlet={outlet}
         onSelect={setActiveTemplate}
-        onBack={() => setActiveTile(null)}
+        onBack={exitToHome}
       />
     );
   }
@@ -162,42 +222,61 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
     <div className="flex min-h-dvh flex-col bg-bg">
       {header}
       <main className="flex-1 p-4 sm:p-6">
-        <h2 className="mb-6 text-xl font-semibold text-text">
+        <h2 className="mb-6 font-serif text-2xl font-bold text-text">
           {t("tablet.home.heading")}
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => setActiveTile("checklists")}
-            className="min-h-32 rounded-3xl bg-surface p-6 text-left text-2xl font-semibold text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
-          >
-            {t("tablet.home.checklists")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTile("stock-count")}
-            className="min-h-32 rounded-3xl bg-surface p-6 text-left text-2xl font-semibold text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
-          >
-            {t("tablet.home.stockCount")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTile("goods-received")}
-            className="min-h-32 rounded-3xl bg-surface p-6 text-left text-2xl font-semibold text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
-          >
-            {t("tablet.home.goodsReceived")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTile("wastage")}
-            className="min-h-32 rounded-3xl bg-surface p-6 text-left text-2xl font-semibold text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
-          >
-            {t("tablet.home.wastage")}
-          </button>
+          <HomeTileButton
+            icon={<ClipboardCheck className="h-full w-full" />}
+            tone="accent"
+            label={t("tablet.home.checklists")}
+            onClick={() => openTile("checklists")}
+          />
+          <HomeTileButton
+            icon={<PackageSearch className="h-full w-full" />}
+            tone="info"
+            label={t("tablet.home.stockCount")}
+            onClick={() => openTile("stock-count")}
+          />
+          <HomeTileButton
+            icon={<Truck className="h-full w-full" />}
+            tone="success"
+            label={t("tablet.home.goodsReceived")}
+            onClick={() => openTile("goods-received")}
+          />
+          <HomeTileButton
+            icon={<WastageIcon className="h-full w-full" />}
+            tone="warning"
+            label={t("tablet.home.wastage")}
+            onClick={() => openTile("wastage")}
+          />
         </div>
       </main>
       <InstallHint />
     </div>
+  );
+}
+
+function HomeTileButton({
+  icon,
+  tone,
+  label,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  tone: "accent" | "success" | "warning" | "info";
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex min-h-32 items-center gap-4 rounded-3xl bg-surface p-6 text-left shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
+    >
+      <IconCircle icon={icon} tone={tone} size="lg" />
+      <span className="text-2xl font-semibold text-text">{label}</span>
+    </button>
   );
 }
 

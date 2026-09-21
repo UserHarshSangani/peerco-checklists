@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/lib/i18n/language-context";
 import type { TranslationKey } from "@/lib/i18n/translations";
@@ -9,27 +10,15 @@ import {
   getTabletLocationPayload,
   type LocationPayload,
 } from "@/lib/geolocation";
+import {
+  hasSeenLocationExplainer,
+  markLocationExplainerSeen,
+} from "@/lib/location-explainer";
+import { useCurrentStaff } from "../current-staff-context";
+import { Avatar } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
-
-const LOCATION_EXPLAINER_KEY = "peerco:location-explainer-seen";
-
-function hasSeenLocationExplainer(): boolean {
-  try {
-    return window.localStorage.getItem(LOCATION_EXPLAINER_KEY) === "1";
-  } catch {
-    return true; // storage unavailable — don't block the flow on it
-  }
-}
-
-function markLocationExplainerSeen() {
-  try {
-    window.localStorage.setItem(LOCATION_EXPLAINER_KEY, "1");
-  } catch {
-    // ignore
-  }
-}
 
 // Shared across all three stock RPCs (submit_stock_count, submit_receipt,
 // log_wastage) — each only ever returns a subset of these reasons, so one
@@ -67,13 +56,6 @@ const PIN_DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const INACTIVITY_TIMEOUT_MS = 60_000;
 const SUCCESS_AUTO_RETURN_MS = 5_000;
 
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 function vibrate(pattern: number | number[]) {
   navigator.vibrate?.(pattern);
 }
@@ -81,7 +63,9 @@ function vibrate(pattern: number | number[]) {
 // The staff-picker → PIN-pad → location-capture → submit → success shell,
 // generalized from app/tablet/submit-modal.tsx so the stock count, goods
 // received and wastage flows can share it — each just supplies its own
-// `onSubmit` RPC call and reacts to failure reasons it cares about.
+// `onSubmit` RPC call and reacts to failure reasons it cares about. Skips
+// straight to the PIN step when a staff member is already picked for this
+// tablet session (see current-staff-context).
 export function StockSubmitFlow({
   outlet,
   onClose,
@@ -101,12 +85,13 @@ export function StockSubmitFlow({
 }) {
   const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
-  const [step, setStep] = useState<Step>("staff");
+  const currentStaff = useCurrentStaff();
+  const [step, setStep] = useState<Step>(currentStaff.staff ? "pin" : "staff");
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [staffError, setStaffError] = useState<string | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(
-    null,
+    currentStaff.staff,
   );
   const [pin, setPin] = useState("");
   const [shake, setShake] = useState(false);
@@ -114,12 +99,12 @@ export function StockSubmitFlow({
   const [submitting, setSubmitting] = useState(false);
   const [showExplainer, setShowExplainer] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submittedName, setSubmittedName] = useState<string | null>(null);
   const [submittedLocationStatus, setSubmittedLocationStatus] = useState<
     string | null
   >(null);
 
   useEffect(() => {
+    if (step !== "staff") return;
     let cancelled = false;
     supabase
       .from("staff")
@@ -139,7 +124,7 @@ export function StockSubmitFlow({
     return () => {
       cancelled = true;
     };
-  }, [supabase, outlet.id]);
+  }, [supabase, outlet.id, step]);
 
   useEffect(() => {
     if (step === "success" || locating || submitting) return;
@@ -158,6 +143,7 @@ export function StockSubmitFlow({
 
   function pickStaff(member: StaffMember) {
     setSelectedStaff(member);
+    currentStaff.setStaff(member);
     setPin("");
     setSubmitError(null);
     setStep("pin");
@@ -192,9 +178,9 @@ export function StockSubmitFlow({
     setPin("");
 
     if (result.ok) {
-      setSubmittedName(selectedStaff.name);
       setSubmittedLocationStatus(result.location_status);
       setStep("success");
+      currentStaff.setStaff(null);
       return;
     }
 
@@ -271,11 +257,11 @@ export function StockSubmitFlow({
     return (
       <Modal onClose={onSuccess} closeOnOverlayClick={false}>
         <div className="flex flex-col items-center gap-4 py-6 text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-success text-3xl text-white">
-            ✓
+          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-success-bg text-success-fg">
+            <Check className="h-10 w-10" strokeWidth={3} aria-hidden="true" />
           </span>
-          <h3 className="text-xl font-semibold text-text">
-            {t("tablet.submittedBy", { name: submittedName ?? "" })}
+          <h3 className="font-serif text-2xl font-bold text-text">
+            {t("tablet.submittedBy", { name: selectedStaff?.name ?? "" })}
           </h3>
           {showLocationHint && (
             <p className="text-sm text-muted">
@@ -296,22 +282,16 @@ export function StockSubmitFlow({
         <div className="mb-4 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setStep("staff")}
-            className="min-h-[40px] text-sm font-medium text-muted hover:text-text"
-          >
-            ‹ {t("common.back")}
-          </button>
-          <button
-            type="button"
             onClick={onClose}
             className="min-h-[40px] text-sm font-medium text-muted hover:text-text"
           >
             {t("common.cancel")}
           </button>
         </div>
-        <h3 className="mb-1 text-center text-lg font-semibold text-text">
-          {selectedStaff.name}
-        </h3>
+        <div className="mb-4 flex flex-col items-center gap-2">
+          <Avatar name={selectedStaff.name} size="lg" />
+          <h3 className="text-lg font-semibold text-text">{selectedStaff.name}</h3>
+        </div>
         <p className="mb-4 text-center text-sm text-muted">
           {t("tablet.enterPin")}
         </p>
@@ -421,12 +401,7 @@ export function StockSubmitFlow({
             onClick={() => pickStaff(member)}
             className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl bg-bg p-4 text-center ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
           >
-            <span
-              aria-hidden="true"
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-base font-semibold text-white"
-            >
-              {getInitials(member.name)}
-            </span>
+            <Avatar name={member.name} />
             <span className="text-base font-medium text-text">
               {member.name}
             </span>

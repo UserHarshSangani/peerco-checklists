@@ -373,6 +373,55 @@ const dictionary = {
     mr: "लोकेशन बंद आहे. कृपया तुमच्या ब्राउझर सेटिंग्जमध्ये या अ‍ॅपसाठी लोकेशनला परवानगी द्या.",
   },
 
+  // /tablet — PeerCo Daybook redesign: name selection, location/online
+  // chips, draft autosave, offline banner, photo confirm step
+  "tablet.selectYourName": {
+    en: "Select your name",
+    hi: "अपना नाम चुनें",
+    mr: "तुमचे नाव निवडा",
+  },
+  "tablet.hiName": { en: "Hi, {name}", hi: "नमस्ते, {name}", mr: "नमस्कार, {name}" },
+  "tablet.notYou": { en: "Not you?", hi: "यह आप नहीं हैं?", mr: "हे तुम्ही नाही का?" },
+  "tablet.itemsRemaining": {
+    en: "{count} item(s) remaining",
+    hi: "{count} आइटम बाकी हैं",
+    mr: "{count} आयटम बाकी आहेत",
+  },
+  "tablet.locationVerified": {
+    en: "Location verified",
+    hi: "स्थान सत्यापित",
+    mr: "स्थान सत्यापित",
+  },
+  "tablet.locationAway": {
+    en: "Away from outlet",
+    hi: "आउटलेट से दूर",
+    mr: "आउटलेटपासून दूर",
+  },
+  "tablet.locationOffTapHelp": {
+    en: "Location off - tap for help",
+    hi: "लोकेशन बंद है - मदद के लिए टैप करें",
+    mr: "लोकेशन बंद आहे - मदतीसाठी टॅप करा",
+  },
+  "tablet.lastSaved": {
+    en: "Last saved {time}",
+    hi: "अंतिम बार {time} पर सेव हुआ",
+    mr: "शेवटचे {time} वाजता सेव्ह झाले",
+  },
+  "tablet.online": { en: "Online", hi: "ऑनलाइन", mr: "ऑनलाइन" },
+  "tablet.offline": { en: "Offline", hi: "ऑफ़लाइन", mr: "ऑफलाइन" },
+  "tablet.offlineBanner": {
+    en: "You're offline. Your progress is saved on this device. Submit when you're back online.",
+    hi: "आप ऑफ़लाइन हैं। आपकी प्रगति इस डिवाइस पर सेव है। ऑनलाइन आने पर सबमिट करें।",
+    mr: "तुम्ही ऑफलाइन आहात. तुमची प्रगती या डिव्हाइसवर सेव्ह आहे. ऑनलाइन आल्यावर सबमिट करा.",
+  },
+  "tablet.retake": { en: "Retake", hi: "फिर से लें", mr: "पुन्हा घ्या" },
+  "tablet.usePhoto": { en: "Use photo", hi: "फोटो उपयोग करें", mr: "फोटो वापरा" },
+  "tablet.submitSummary": {
+    en: "{done} of {total} done · {photos} photo(s)",
+    hi: "{total} में से {done} पूरे · {photos} फोटो",
+    mr: "{total} पैकी {done} पूर्ण · {photos} फोटो",
+  },
+
   // Manager screens — shared outlet picker
   "manager.outlet": { en: "Outlet", hi: "आउटलेट", mr: "आउटलेट" },
 

@@ -10,6 +10,8 @@ import type { CountSheetItem, Outlet } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { StatusPill } from "@/components/ui/status-pill";
+import { StaffChip } from "../staff-chip";
 import {
   StockSubmitFlow,
   reasonNeedsReload,
@@ -122,14 +124,17 @@ function TopBar({ onBack, title }: { onBack: () => void; title: string }) {
   const { t } = useLanguage();
   return (
     <div className="border-b border-border bg-surface px-4 py-3 sm:px-6">
-      <button
-        type="button"
-        onClick={onBack}
-        className="mb-2 min-h-[40px] text-sm font-medium text-muted hover:text-text"
-      >
-        ‹ {t("common.back")}
-      </button>
-      <p className="truncate text-lg font-semibold text-text">{title}</p>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="min-h-[40px] text-sm font-medium text-muted hover:text-text"
+        >
+          ‹ {t("common.back")}
+        </button>
+        <StaffChip />
+      </div>
+      <p className="truncate font-serif text-lg font-bold text-text">{title}</p>
     </div>
   );
 }
@@ -309,22 +314,25 @@ function CountSheetForDate({
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <div className="border-b border-border bg-surface px-4 py-3 sm:px-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-2 min-h-[40px] text-sm font-medium text-muted hover:text-text"
-        >
-          ‹ {t("common.back")}
-        </button>
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="min-h-[40px] text-sm font-medium text-muted hover:text-text"
+          >
+            ‹ {t("common.back")}
+          </button>
+          <StaffChip />
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="truncate text-lg font-semibold text-text">{title}</p>
+          <p className="truncate font-serif text-lg font-bold text-text">{title}</p>
           <div className="flex overflow-hidden rounded-full ring-1 ring-border">
             <button
               type="button"
               onClick={() => onChangeDateChoice("today")}
               className={`min-h-[36px] px-4 text-sm font-medium ${
                 dateChoice === "today"
-                  ? "bg-accent text-white"
+                  ? "bg-accent text-accent-fg"
                   : "bg-surface text-muted"
               }`}
             >
@@ -335,7 +343,7 @@ function CountSheetForDate({
               onClick={() => onChangeDateChoice("yesterday")}
               className={`min-h-[36px] px-4 text-sm font-medium ${
                 dateChoice === "yesterday"
-                  ? "bg-accent text-white"
+                  ? "bg-accent text-accent-fg"
                   : "bg-surface text-muted"
               }`}
             >
@@ -429,12 +437,14 @@ function CountSheetForDate({
 
       {items !== null && !loadError && items.length > 0 && (
         <div className="safe-bottom fixed inset-x-0 bottom-0 border-t border-border bg-surface/95 p-4 backdrop-blur">
-          <p className="mb-2 text-center text-sm font-medium text-muted">
-            {t("tablet.stock.countedProgress", {
-              done: doneCount,
-              total: totalCount,
-            })}
-          </p>
+          <div className="mb-2 flex justify-center">
+            <StatusPill tone={allDone ? "success" : "neutral"}>
+              {t("tablet.stock.countedProgress", {
+                done: doneCount,
+                total: totalCount,
+              })}
+            </StatusPill>
+          </div>
           <Button
             type="button"
             disabled={!allDone}

@@ -45,7 +45,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   async function fetchItems() {
     return supabase
       .from("checklist_items")
-      .select("id, label, required, position, requires_photo")
+      .select("id, label, required, position, requires_photo, section")
       .eq("template_id", templateId)
       .order("position");
   }

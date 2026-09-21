@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PhotoCapture, isPhotoUploaded, type ItemPhotoState } from "../photo-capture";
+import { StaffChip } from "../staff-chip";
 import { ItemPickerModal } from "./item-picker";
 import { StockSubmitFlow, type StockSubmitOutcome } from "./stock-submit-flow";
 
@@ -38,14 +39,17 @@ function TopBar({ onBack, title }: { onBack: () => void; title: string }) {
   const { t } = useLanguage();
   return (
     <div className="border-b border-border bg-surface px-4 py-3 sm:px-6">
-      <button
-        type="button"
-        onClick={onBack}
-        className="mb-2 min-h-[40px] text-sm font-medium text-muted hover:text-text"
-      >
-        ‹ {t("common.back")}
-      </button>
-      <p className="truncate text-lg font-semibold text-text">{title}</p>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="min-h-[40px] text-sm font-medium text-muted hover:text-text"
+        >
+          ‹ {t("common.back")}
+        </button>
+        <StaffChip />
+      </div>
+      <p className="truncate font-serif text-lg font-bold text-text">{title}</p>
     </div>
   );
 }
@@ -196,7 +200,7 @@ export function WastageFlow({
           <button
             type="button"
             onClick={() => setShowItemPicker(true)}
-            className="min-h-[40px] rounded-full bg-accent px-4 py-2 text-sm font-medium text-white"
+            className="min-h-[40px] rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-fg"
           >
             {t("tablet.wastage.addEntry")}
           </button>
@@ -257,7 +261,7 @@ export function WastageFlow({
                     onClick={() => updateEntry(entry.localId, { reason })}
                     className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium ring-1 ring-border ${
                       entry.reason === reason
-                        ? "bg-accent text-white"
+                        ? "bg-accent text-accent-fg"
                         : "bg-bg text-text"
                     }`}
                   >
