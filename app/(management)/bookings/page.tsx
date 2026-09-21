@@ -7,6 +7,7 @@ import { useOutletContext } from "../outlet-context";
 import { Tabs } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 import { SlotsTab } from "./slots-tab";
 import { EnterSlotsDrawer } from "./enter-slots-drawer";
 import { AlertsTab } from "./alerts-tab";
@@ -15,12 +16,33 @@ import type { BookingSource } from "./types";
 
 type Tab = "slots" | "alerts" | "hours";
 
-const SWEEP_THROTTLE_MS = 10 * 60 * 1000;
+// sessionStorage (not localStorage): the throttle is meant to bound how
+// often one open tab/session can trigger a sweep, not to persist across
+// browser restarts.
 const SWEEP_STORAGE_KEY = "peerco:booking-sweep-last-run";
+const AUTO_SWEEP_THROTTLE_MS = 10 * 60 * 1000;
+const RECHECK_THROTTLE_MS = 30 * 1000;
+
+function readLastSweepAt(): number {
+  try {
+    return Number(window.sessionStorage.getItem(SWEEP_STORAGE_KEY) ?? "0");
+  } catch {
+    return 0;
+  }
+}
+
+function writeLastSweepAt(timestamp: number) {
+  try {
+    window.sessionStorage.setItem(SWEEP_STORAGE_KEY, String(timestamp));
+  } catch {
+    // ignore — the throttle just won't be remembered this session
+  }
+}
 
 export default function BookingsPage() {
   const supabase = useMemo(() => createClient(), []);
   const { selectedOutlet } = useOutletContext();
+  const { showError } = useToast();
   const [tab, setTab] = useState<Tab>("slots");
   const [sources, setSources] = useState<BookingSource[]>([]);
   const [loadingSources, setLoadingSources] = useState(true);
@@ -52,18 +74,8 @@ export default function BookingsPage() {
     Promise.resolve().then(() => void maybeAutoSweep());
 
     async function maybeAutoSweep() {
-      let last = 0;
-      try {
-        last = Number(window.localStorage.getItem(SWEEP_STORAGE_KEY) ?? "0");
-      } catch {
-        // ignore
-      }
-      if (Date.now() - last < SWEEP_THROTTLE_MS) return;
-      try {
-        window.localStorage.setItem(SWEEP_STORAGE_KEY, String(Date.now()));
-      } catch {
-        // ignore
-      }
+      if (Date.now() - readLastSweepAt() < AUTO_SWEEP_THROTTLE_MS) return;
+      writeLastSweepAt(Date.now());
       await supabase.rpc("booking_health_sweep");
       setRefreshToken((prev) => prev + 1);
     }
@@ -71,13 +83,16 @@ export default function BookingsPage() {
   }, []);
 
   async function recheck() {
+    const sinceLast = Date.now() - readLastSweepAt();
+    if (sinceLast < RECHECK_THROTTLE_MS) {
+      showError(
+        `Please wait ${Math.ceil((RECHECK_THROTTLE_MS - sinceLast) / 1000)}s before rechecking again.`,
+      );
+      return;
+    }
+    writeLastSweepAt(Date.now());
     setSweeping(true);
     await supabase.rpc("booking_health_sweep");
-    try {
-      window.localStorage.setItem(SWEEP_STORAGE_KEY, String(Date.now()));
-    } catch {
-      // ignore
-    }
     setSweeping(false);
     setRefreshToken((prev) => prev + 1);
   }

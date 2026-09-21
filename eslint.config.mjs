@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Separate Node/Playwright tool, not part of the Next.js app.
+    "tools/**",
   ]),
 ]);
 

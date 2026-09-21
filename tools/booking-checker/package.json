@@ -1,0 +1,23 @@
+{
+  "name": "booking-checker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone Playwright tool that checks booking-platform slots and submits snapshots via the Supabase service role key. Not part of the Next.js app or its Vercel deploy.",
+  "scripts": {
+    "check": "tsx src/index.ts",
+    "discover": "tsx src/discover.ts",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.48.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
