@@ -18,6 +18,7 @@ import { OutletProgressList } from "./outlet-progress-list";
 import { TopVariances } from "./top-variances";
 import { ActivityFeed } from "./activity-feed";
 import { CollapsibleCard } from "./collapsible-card";
+import { BookingAlertsCard } from "./booking-alerts-card";
 import type { OverviewData, OverviewResponse } from "./types";
 
 function greetingForHour(): string {
@@ -212,6 +213,7 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-6">
           <AlertsBanner alerts={data.alerts} />
           <KpiCards kpis={data.kpis} />
+          <BookingAlertsCard outlets={outlets} />
 
           {isDesktop ? (
             <>
