@@ -16,6 +16,10 @@ const LINKS: { href: string; labelKey: TranslationKey }[] = [
   { href: "/checklists", labelKey: "nav.checklists" },
   { href: "/catalog", labelKey: "nav.catalog" },
   { href: "/stock", labelKey: "nav.stock" },
+  { href: "/recipes", labelKey: "nav.recipes" },
+  { href: "/sales", labelKey: "nav.sales" },
+  { href: "/mapping", labelKey: "nav.mapping" },
+  { href: "/variance", labelKey: "nav.variance" },
 ];
 
 export function Nav({ role }: { role: string | null }) {

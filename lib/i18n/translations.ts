@@ -132,6 +132,10 @@ const dictionary = {
   "nav.outlets": { en: "Outlets", hi: "आउटलेट", mr: "आउटलेट" },
   "nav.catalog": { en: "Catalog", hi: "कैटलॉग", mr: "कॅटलॉग" },
   "nav.stock": { en: "Stock", hi: "स्टॉक", mr: "स्टॉक" },
+  "nav.recipes": { en: "Recipes", hi: "रेसिपी", mr: "रेसिपी" },
+  "nav.sales": { en: "Sales", hi: "बिक्री", mr: "विक्री" },
+  "nav.mapping": { en: "Mapping", hi: "मैपिंग", mr: "मॅपिंग" },
+  "nav.variance": { en: "Variance", hi: "वेरिएंस", mr: "व्हेरियन्स" },
 
   // /tablet — outlet & checklist list
   "tablet.switchOutlet": {
