@@ -15,6 +15,31 @@ export function formatTimeKolkata(iso: string): string {
   });
 }
 
+export function formatTime12Kolkata(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+// Formats a plain "HH:MM" / "HH:MM:SS" time-of-day string (no date, no
+// timezone conversion needed — it's already the IST wall-clock time stored
+// in checklist_templates.due_time) as "8:30 AM".
+export function formatTimeOfDay12(time: string): string {
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = Number(hourStr);
+  const minute = Number(minuteStr);
+  const anchor = new Date(Date.UTC(2000, 0, 1, hour, minute));
+  return anchor.toLocaleTimeString("en-US", {
+    timeZone: "UTC",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 // Returns the last `count` calendar dates in Asia/Kolkata as "YYYY-MM-DD"
 // strings, most recent first (today included). India has no DST, so once we
 // have today's Kolkata date we can do the rest with plain UTC day math.
@@ -40,6 +65,16 @@ export function formatDateLabel(dateStr: string): string {
   return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-IN", {
     timeZone: "UTC",
     weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
+// "16 Sep" — no weekday, used for compact chart axis labels.
+export function formatShortDateLabel(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-IN", {
+    timeZone: "UTC",
     day: "numeric",
     month: "short",
   });

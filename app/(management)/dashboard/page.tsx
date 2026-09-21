@@ -2,188 +2,279 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { todayInKolkata, formatTimeKolkata } from "@/lib/date";
-import { fetchStaffNames } from "@/lib/staff-names";
-import { useLanguage } from "@/lib/i18n/language-context";
-import { useOutletContext } from "../outlet-context";
-import { SubmissionModal, type SubmissionSummary } from "../submission-modal";
-import { LocationBadge } from "@/components/location-badge";
+import { todayInKolkata, formatDateLabelForLocale } from "@/lib/date";
+import { fetchSignedPhotoUrls } from "@/lib/photo-signed-urls";
+import { useMediaQuery } from "@/lib/use-media-query";
+import { useOutletContext, type ManagedOutlet } from "../outlet-context";
+import { useToast } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { SkeletonList } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/ui/empty-state";
-import type { ChecklistTemplate } from "@/lib/types";
+import { AlertsBanner } from "./alerts-banner";
+import { KpiCards } from "./kpi-cards";
+import { CompletionTrendChart } from "./completion-trend-chart";
+import { OutletTable } from "./outlet-table";
+import { OutletProgressList } from "./outlet-progress-list";
+import { TopVariances } from "./top-variances";
+import { ActivityFeed } from "./activity-feed";
+import { CollapsibleCard } from "./collapsible-card";
+import type { OverviewData, OverviewResponse } from "./types";
 
-export default function DashboardPage() {
-  const { selectedOutlet } = useOutletContext();
-  const { t } = useLanguage();
-
-  if (!selectedOutlet) {
-    return (
-      <main className="flex flex-1 items-center justify-center p-6 text-center">
-        <p className="text-muted">{t("manager.chooseOutletDashboard")}</p>
-      </main>
-    );
-  }
-
-  return <DashboardForOutlet outletId={selectedOutlet.id} />;
+function greetingForHour(): string {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      hour12: false,
+    }).format(new Date()),
+  );
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
 }
 
-function DashboardForOutlet({ outletId }: { outletId: string }) {
-  const { t } = useLanguage();
+function reasonMessage(reason: string): string {
+  switch (reason) {
+    case "not_allowed":
+      return "You don't have permission to view this.";
+    case "bad_date":
+      return "That date isn't available.";
+    default:
+      return "Something went wrong. Please try again.";
+  }
+}
+
+export default function DashboardPage() {
+  const { outlets } = useOutletContext();
+  const { showError } = useToast();
   const supabase = useMemo(() => createClient(), []);
-  const [date, setDate] = useState(todayInKolkata());
-  const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
-  const [submissionByTemplate, setSubmissionByTemplate] = useState<
-    Record<string, SubmissionSummary>
-  >({});
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  const [userName, setUserName] = useState("");
+  const [date, setDate] = useState(() => todayInKolkata());
+  const [outletFilterId, setOutletFilterId] = useState<string | null>(null);
+  const [data, setData] = useState<OverviewData | null>(null);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [openSubmission, setOpenSubmission] =
-    useState<SubmissionSummary | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user || cancelled) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+      if (cancelled) return;
+      setUserName(profile?.full_name ?? "");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      const [templatesRes, submissionsRes] = await Promise.all([
-        supabase
-          .from("checklist_templates")
-          .select("id, name")
-          .eq("outlet_id", outletId)
-          .eq("active", true)
-          .order("name"),
-        supabase
-          .from("checklist_submissions")
-          .select(
-            "id, template_id, submitted_at, notes, staff_id, location_status, distance_from_outlet_m",
-          )
-          .eq("outlet_id", outletId)
-          .eq("business_date", date)
-          .order("submitted_at", { ascending: false }),
-      ]);
-
-      if (cancelled) return;
-
-      if (templatesRes.error) {
-        setLoading(false);
-        setLoadError(templatesRes.error.message);
-        return;
-      }
-      if (submissionsRes.error) {
-        setLoading(false);
-        setLoadError(submissionsRes.error.message);
-        return;
-      }
-
-      const templateRows = templatesRes.data ?? [];
-      const submissionRows = submissionsRes.data ?? [];
-      const staffNames = await fetchStaffNames(
-        supabase,
-        submissionRows.map((row) => row.staff_id),
-      );
-
-      if (cancelled) return;
-
-      const templateNameById = new Map(
-        templateRows.map((row) => [row.id, row.name]),
-      );
-      const latestByTemplate: Record<string, SubmissionSummary> = {};
-      for (const row of submissionRows) {
-        if (latestByTemplate[row.template_id]) continue; // rows are newest-first
-        latestByTemplate[row.template_id] = {
-          id: row.id,
-          title:
-            templateNameById.get(row.template_id) ??
-            t("manager.checklistFallbackTitle"),
-          staffName: staffNames[row.staff_id] ?? "Unknown staff",
-          submittedAt: row.submitted_at,
-          notes: row.notes,
-          locationStatus: row.location_status,
-          distanceM: row.distance_from_outlet_m,
-        };
-      }
-
-      setTemplates(templateRows);
-      setSubmissionByTemplate(latestByTemplate);
-      setLoading(false);
+      setLoading(true);
       setLoadError(null);
+      const { data: raw, error } = await supabase.rpc("get_overview", {
+        p_date: date,
+        p_outlet_id: outletFilterId,
+      });
+      if (cancelled) return;
+      if (error) {
+        setLoading(false);
+        setLoadError(error.message);
+        showError(error.message);
+        return;
+      }
+      const result = raw as OverviewResponse;
+      if (!result.ok) {
+        setLoading(false);
+        const message = reasonMessage(result.reason);
+        setLoadError(message);
+        showError(message);
+        return;
+      }
+      const paths = Array.from(new Set(result.activity.flatMap((entry) => entry.photos)));
+      const urls = await fetchSignedPhotoUrls(supabase, paths);
+      if (cancelled) return;
+      setData(result);
+      setPhotoUrls(urls);
+      setLoading(false);
     }
 
-    load();
+    // Deferred so load()'s own first statements (setLoading/setLoadError,
+    // before its first await) aren't a synchronous setState from within
+    // the effect body itself.
+    Promise.resolve().then(load);
     return () => {
       cancelled = true;
     };
-  }, [supabase, outletId, date, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase, date, outletFilterId, refreshToken]);
+
+  // Auto-refresh every 60s while the tab is visible and today is selected.
+  useEffect(() => {
+    if (date !== todayInKolkata()) return;
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        setRefreshToken((n) => n + 1);
+      }
+    }, 60_000);
+    return () => window.clearInterval(interval);
+  }, [date]);
+
+  const firstName = userName.trim().split(/\s+/)[0] || null;
+  const isToday = date === todayInKolkata();
+  const showBrand = new Set(outlets.map((outlet) => outlet.organizationId)).size > 1;
+
+  const groups = new Map<string, ManagedOutlet[]>();
+  for (const outlet of outlets) {
+    const key = outlet.organizationName ?? "Outlets";
+    const list = groups.get(key) ?? [];
+    list.push(outlet);
+    groups.set(key, list);
+  }
 
   return (
     <main className="flex-1 p-4 sm:p-6">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-serif text-xl font-bold text-text">
-          {t("manager.dashboardHeading")}
-        </h2>
-        <input
-          type="date"
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-          className="min-h-[44px] rounded-lg border border-border bg-surface px-4 py-2 text-base text-text focus:border-accent focus:outline-none"
-        />
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="font-serif text-2xl font-bold text-text">
+            {greetingForHour()}
+            {firstName ? `, ${firstName}` : ""}
+          </h2>
+          <p className="text-sm text-muted">
+            {isToday
+              ? "Here's what's happening across your outlets today."
+              : `Here's how ${formatDateLabelForLocale(date, "en")} went.`}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={date}
+            max={todayInKolkata()}
+            onChange={(event) => setDate(event.target.value)}
+            className="min-h-[44px] rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
+          />
+          <select
+            value={outletFilterId ?? ""}
+            onChange={(event) => setOutletFilterId(event.target.value || null)}
+            className="min-h-[44px] rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
+          >
+            <option value="">All outlets</option>
+            {showBrand
+              ? Array.from(groups.entries()).map(([groupName, groupOutlets]) => (
+                  <optgroup key={groupName} label={groupName}>
+                    {groupOutlets.map((outlet) => (
+                      <option key={outlet.id} value={outlet.id}>
+                        {outlet.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              : outlets.map((outlet) => (
+                  <option key={outlet.id} value={outlet.id}>
+                    {outlet.name}
+                  </option>
+                ))}
+          </select>
+          <Button
+            type="button"
+            variant="secondary"
+            loading={loading}
+            onClick={() => setRefreshToken((n) => n + 1)}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {loading && <SkeletonList rows={3} rowClassName="h-24" />}
+      {loading && !data && <SkeletonList rows={4} rowClassName="h-24" />}
+
       {loadError && (
-        <p className="text-danger">
-          {t("manager.loadDashboardError", { error: loadError })}
-        </p>
-      )}
-      {!loading && !loadError && templates.length === 0 && (
-        <EmptyState title={t("common.noActiveChecklists")} />
+        <Card className="mb-6">
+          <p className="mb-3 text-danger">{loadError}</p>
+          <Button type="button" onClick={() => setRefreshToken((n) => n + 1)}>
+            Retry
+          </Button>
+        </Card>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {templates.map((template) => {
-          const submission = submissionByTemplate[template.id];
-          return (
-            <button
-              key={template.id}
-              type="button"
-              disabled={!submission}
-              onClick={() => submission && setOpenSubmission(submission)}
-              className={`rounded-2xl p-6 text-left shadow-sm ring-1 transition ${
-                submission
-                  ? "bg-success/10 ring-success/30 hover:bg-success/15"
-                  : "cursor-default bg-warning/10 ring-warning/30"
-              }`}
-            >
-              <p className="mb-2 text-lg font-semibold text-text">
-                {template.name}
-              </p>
-              {submission ? (
-                <>
-                  <p className="mb-2 text-sm font-medium text-success">
-                    {t("manager.submittedAt", {
-                      name: submission.staffName,
-                      time: formatTimeKolkata(submission.submittedAt),
-                    })}
-                  </p>
-                  <LocationBadge
-                    status={submission.locationStatus}
-                    distanceM={submission.distanceM}
+      {data && (
+        <div className="flex flex-col gap-6">
+          <AlertsBanner alerts={data.alerts} />
+          <KpiCards kpis={data.kpis} />
+
+          {isDesktop ? (
+            <>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_2fr]">
+                <Card>
+                  <h3 className="mb-4 font-serif text-base font-bold text-text">
+                    Weekly checklist completion
+                  </h3>
+                  <CompletionTrendChart trend={data.trend} />
+                </Card>
+                <Card>
+                  <h3 className="mb-4 font-serif text-base font-bold text-text">
+                    Completion by outlet
+                  </h3>
+                  <OutletTable
+                    outlets={data.outlets}
+                    isAdmin={showBrand}
+                    onSelectOutlet={setOutletFilterId}
                   />
-                </>
-              ) : (
-                <p className="text-sm font-medium text-warning">
-                  {t("manager.notSubmittedYet")}
-                </p>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {openSubmission && (
-        <SubmissionModal
-          submission={openSubmission}
-          onClose={() => setOpenSubmission(null)}
-        />
+                </Card>
+              </div>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_3fr]">
+                <Card>
+                  <h3 className="mb-4 font-serif text-base font-bold text-text">
+                    Top variances (last 7 days)
+                  </h3>
+                  <TopVariances variances={data.top_variances} />
+                </Card>
+                <Card>
+                  <h3 className="mb-4 font-serif text-base font-bold text-text">
+                    Recent activity
+                  </h3>
+                  <ActivityFeed activity={data.activity} photoUrls={photoUrls} />
+                </Card>
+              </div>
+            </>
+          ) : (
+            <>
+              <Card>
+                <h3 className="mb-4 font-serif text-base font-bold text-text">
+                  Completion by outlet
+                </h3>
+                <OutletProgressList
+                  outlets={data.outlets}
+                  isAdmin={showBrand}
+                  onSelectOutlet={setOutletFilterId}
+                />
+              </Card>
+              <Card>
+                <h3 className="mb-4 font-serif text-base font-bold text-text">
+                  Recent activity
+                </h3>
+                <ActivityFeed activity={data.activity} photoUrls={photoUrls} />
+              </Card>
+              <CollapsibleCard title="Weekly checklist completion">
+                <CompletionTrendChart trend={data.trend} />
+              </CollapsibleCard>
+              <CollapsibleCard title="Top variances (last 7 days)">
+                <TopVariances variances={data.top_variances} />
+              </CollapsibleCard>
+            </>
+          )}
+        </div>
       )}
     </main>
   );
