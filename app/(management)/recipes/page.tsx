@@ -5,10 +5,24 @@ import { useOutletContext } from "../outlet-context";
 import { Button } from "@/components/ui/button";
 import { UploadModal } from "./upload-modal";
 import { RecipesList } from "./recipes-list";
+import { RecipeEditorModal } from "./recipe-editor-modal";
+import type { EditorInitial } from "./types";
+
+function blankEditorInitial(): EditorInitial {
+  return {
+    recipeId: null,
+    name: "",
+    batchYield: "1",
+    notes: "",
+    active: true,
+    lines: [],
+  };
+}
 
 export default function RecipesPage() {
   const { selectedOutlet } = useOutletContext();
   const [showUpload, setShowUpload] = useState(false);
+  const [editorInitial, setEditorInitial] = useState<EditorInitial | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
   if (!selectedOutlet) {
@@ -30,14 +44,25 @@ export default function RecipesPage() {
             </p>
           )}
         </div>
-        <Button type="button" onClick={() => setShowUpload(true)}>
-          Import workbook
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setShowUpload(true)}
+          >
+            Import workbook
+          </Button>
+          <Button type="button" onClick={() => setEditorInitial(blankEditorInitial())}>
+            New recipe
+          </Button>
+        </div>
       </div>
 
       <RecipesList
         key={`${selectedOutlet.organizationId}-${reloadToken}`}
         organizationId={selectedOutlet.organizationId}
+        onEdit={setEditorInitial}
+        onDuplicate={setEditorInitial}
       />
 
       {showUpload && (
@@ -45,6 +70,15 @@ export default function RecipesPage() {
           organizationId={selectedOutlet.organizationId}
           onClose={() => setShowUpload(false)}
           onImported={() => setReloadToken((n) => n + 1)}
+        />
+      )}
+
+      {editorInitial && (
+        <RecipeEditorModal
+          organizationId={selectedOutlet.organizationId}
+          initial={editorInitial}
+          onClose={() => setEditorInitial(null)}
+          onSaved={() => setReloadToken((n) => n + 1)}
         />
       )}
     </main>
