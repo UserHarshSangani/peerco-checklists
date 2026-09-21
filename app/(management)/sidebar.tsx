@@ -6,7 +6,13 @@ import { APP_SIGNOFF } from "@/lib/brand";
 import { NAV_GROUPS, navItemsForRole } from "./nav-items";
 import { Wordmark } from "./wordmark";
 
-export function Sidebar({ role }: { role: string | null }) {
+export function Sidebar({
+  role,
+  badgeCounts = {},
+}: {
+  role: string | null;
+  badgeCounts?: Record<string, number>;
+}) {
   const pathname = usePathname();
   const items = navItemsForRole(role);
 
@@ -30,6 +36,7 @@ export function Sidebar({ role }: { role: string | null }) {
                   const active =
                     pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const Icon = item.icon;
+                  const badge = badgeCounts[item.href];
                   return (
                     <li key={item.href}>
                       <Link
@@ -41,7 +48,12 @@ export function Sidebar({ role }: { role: string | null }) {
                         }`}
                       >
                         <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                        {item.label}
+                        <span className="flex-1">{item.label}</span>
+                        {!!badge && (
+                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger-fg px-1.5 text-xs font-semibold text-white">
+                            {badge}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );

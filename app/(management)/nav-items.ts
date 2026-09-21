@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  CalendarClock,
   ChefHat,
   ClipboardCheck,
   LayoutDashboard,
@@ -30,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, group: "OPERATE" },
   { href: "/checklists", label: "Checklists", icon: ClipboardCheck, group: "OPERATE" },
   { href: "/stock", label: "Stock", icon: Package, group: "OPERATE" },
+  { href: "/bookings", label: "Bookings", icon: CalendarClock, group: "OPERATE" },
   {
     href: "/sales",
     label: "Sales",

@@ -11,9 +11,11 @@ import { Wordmark } from "./wordmark";
 export function Topbar({
   role,
   userName,
+  badgeCounts,
 }: {
   role: string | null;
   userName: string;
+  badgeCounts?: Record<string, number>;
 }) {
   const [showNav, setShowNav] = useState(false);
 
@@ -46,7 +48,9 @@ export function Topbar({
         </div>
       </header>
 
-      {showNav && <NavDrawer role={role} onClose={() => setShowNav(false)} />}
+      {showNav && (
+        <NavDrawer role={role} badgeCounts={badgeCounts} onClose={() => setShowNav(false)} />
+      )}
     </>
   );
 }

@@ -11,9 +11,11 @@ import { Wordmark } from "./wordmark";
 // data so the two never drift apart.
 export function NavDrawer({
   role,
+  badgeCounts = {},
   onClose,
 }: {
   role: string | null;
+  badgeCounts?: Record<string, number>;
   onClose: () => void;
 }) {
   const pathname = usePathname();
@@ -37,6 +39,7 @@ export function NavDrawer({
                 const active =
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
                 const Icon = item.icon;
+                const badge = badgeCounts[item.href];
                 return (
                   <li key={item.href}>
                     <Link
@@ -47,7 +50,12 @@ export function NavDrawer({
                       }`}
                     >
                       <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                      {item.label}
+                      <span className="flex-1">{item.label}</span>
+                      {!!badge && (
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger-fg px-1.5 text-xs font-semibold text-white">
+                          {badge}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 );

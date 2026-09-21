@@ -80,6 +80,19 @@ export function formatShortDateLabel(dateStr: string): string {
   });
 }
 
+// "5 min ago", "3 hr ago", "2 days ago" — coarse, English-only (manager
+// screens), used for "last checked" style timestamps.
+export function formatRelativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.round(diffMs / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
 const INTL_LOCALE: Record<Locale, string> = {
   en: "en-IN",
   hi: "hi-IN",
