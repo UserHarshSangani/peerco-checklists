@@ -258,29 +258,33 @@ async function checkOneDate(
 
 async function checkSource(source: DueSource, dates: string[], ctx: AdapterContext): Promise<DateResult[]> {
   const results: DateResult[] = [];
-  let screenshotPath: string | null = null;
-
-  async function captureOnce() {
-    if (screenshotPath !== null) return;
-    const buffer = await captureScreenshotUnder1MB(ctx.page);
-    if (ctx.dryRun) {
-      screenshotPath = await saveScreenshotLocally(
-        buffer,
-        ctx.outDir,
-        `${source.platform}-${source.id}-${Date.now()}.jpg`,
-      );
-    } else {
-      screenshotPath = await uploadScreenshot(ctx.supabase, source.outlet_id, buffer);
-    }
-  }
+  // Real runs capture one screenshot per source (storage-conscious) and
+  // reuse it for every date's snapshot. Dry runs — used for testing and
+  // watching — capture one screenshot per date instead, so each date's
+  // result can be inspected on its own.
+  let sharedScreenshotPath: string | null = null;
 
   for (const dateStr of dates) {
     await ctx.onBeforeNavigate();
     const { result, blocked } = await checkOneDate(ctx.page, source, dateStr);
-    await captureOnce().catch((err) => {
+
+    try {
+      if (ctx.dryRun) {
+        const buffer = await captureScreenshotUnder1MB(ctx.page);
+        const filename = `${source.platform}-${source.id}-${dateStr}.jpg`;
+        result.screenshotPath = await saveScreenshotLocally(buffer, ctx.outDir, filename);
+      } else {
+        if (sharedScreenshotPath === null) {
+          if (!ctx.supabase) throw new Error("no Supabase client available for a real run");
+          const buffer = await captureScreenshotUnder1MB(ctx.page);
+          sharedScreenshotPath = await uploadScreenshot(ctx.supabase, source.outlet_id, buffer);
+        }
+        result.screenshotPath = sharedScreenshotPath;
+      }
+    } catch (err) {
       console.warn(`  [swiggy] screenshot failed: ${(err as Error).message}`);
-    });
-    result.screenshotPath = screenshotPath ?? undefined;
+    }
+
     results.push(result);
 
     if (blocked) {

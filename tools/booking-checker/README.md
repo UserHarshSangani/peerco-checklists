@@ -40,20 +40,39 @@ npm run check
 Useful flags:
 
 ```bash
-npm run check -- --dry-run --source swiggy --days 2   # limit scope while testing
+npm run check -- --dry-run --platform swiggy --days 2   # limit scope while testing
+npm run check -- --dry-run --include-inactive           # also dry-run inactive sources
 ```
 
-- `--source <platform>` — only check sources for that platform.
+- `--platform <platform>` — only check sources for that platform (`--source` still works as an alias).
 - `--days <n>` — cap how many of each source's `days_ahead` days to check.
+- `--include-inactive` — also read sources where `active = false` (database mode only; still respects the due-time check).
+
+## Watching it work (no database needed)
+
+**Direct mode** checks one URL you give it directly, with no database read and no Supabase contact at all — `tools/booking-checker/.env` is never opened. It always implies `--dry-run` (there's no real source to write a snapshot to):
+
+```bash
+npm run check -- --dry-run --headed --platform swiggy \
+  --url "https://www.swiggy.com/restaurants/835403/dineout/book" \
+  --days 2 --party-size 2
+```
+
+- `--url <url>` — the booking page to check directly. Requires `--platform`.
+- `--party-size <n>` — party size to select (defaults to 2 in direct mode).
+- `--headed` — opens a real, visible Chromium window instead of running headless, so you can watch it pick the guest count, load each date, and click the Lunch and Dinner tabs.
+- `--slowmo <ms>` — adds a delay after every Playwright action. Defaults to 600ms automatically when `--headed` is set (0 otherwise); pass it explicitly to override either way.
+
+Direct mode works the same in database mode too — add `--url`/`--headed`/`--slowmo` to a normal run to watch a real due source instead of the whole batch.
 
 ## What it does
 
-- Reads `booking_sources` where `active = true` and `method = 'auto'`, keeping only sources that are due (`last_checked_at` is null or older than `check_every_hours`).
+- Reads `booking_sources` where `method = 'auto'` (plus `active = true` unless `--include-inactive` is set), keeping only sources that are due (`last_checked_at` is null or older than `check_every_hours`). Skipped entirely in direct mode.
 - For each due source, checks `robots.txt` first. If the path is disallowed, it stops for that source (and, on a real run, submits a single `blocked` snapshot with error `robots.txt disallows`).
 - Platforms without an adapter yet (everything except `swiggy`) are logged as "no adapter yet" and skipped — no error, no snapshot.
-- The Swiggy adapter runs one shared headless Chromium context for the whole invocation, waits at least 3 seconds between page navigations, reads both the Lunch and Dinner tabs (clicking Dinner explicitly, since it isn't always pre-rendered), skips disabled/sold-out slots, and stops the **entire run** the moment it detects a CAPTCHA / access-denied / "unusual traffic" page — never retries around it.
+- The Swiggy adapter runs one shared Chromium context for the whole invocation, waits at least 3 seconds between page navigations, reads both the Lunch and Dinner tabs (clicking Dinner explicitly, since it isn't always pre-rendered), skips disabled/sold-out slots, and stops the **entire run** the moment it detects a CAPTCHA / access-denied / "unusual traffic" page — never retries around it.
 - If a date's page renders zero time buttons, or a bookable time isn't on a 15-minute grid, that date is submitted as `failed` with a screenshot rather than a false empty `ok`.
-- One screenshot is captured per source per run (not per date) and reused across that source's snapshots.
+- Screenshots: a real run captures one screenshot per source (storage-conscious) and reuses it for every date's snapshot. A dry run — direct mode or otherwise — captures and prints one screenshot path per date instead, saved locally under `tools/booking-checker/out/`, so each date can be inspected on its own.
 
 It never adds proxies, stealth/fingerprint-evasion plugins, rotating IPs, or CAPTCHA solving, and it never increases its own request frequency. If a site blocks it, it stops and reports that — it does not try to work around the block.
 

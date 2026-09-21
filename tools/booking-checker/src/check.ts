@@ -11,7 +11,18 @@ import type { DateResult, DueSource, WindowLabel } from "./types.js";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(here, "..", "out");
 
-export type CheckOptions = { dryRun: boolean; source?: string; days?: number };
+export type CheckOptions = {
+  dryRun: boolean;
+  platform?: string;
+  days?: number;
+  includeInactive: boolean;
+  headed: boolean;
+  slowMo?: number;
+  // Presence of `url` selects direct mode: no database read, no .env, no
+  // Supabase contact at all — just this one URL, checked and printed.
+  url?: string;
+  partySize?: number;
+};
 
 type BookingSourceRow = {
   id: string;
@@ -39,12 +50,30 @@ function outletName(row: BookingSourceRow): string {
   return outlet?.name ?? "Unknown outlet";
 }
 
-async function fetchDueSources(supabase: ServiceClient, platformFilter?: string): Promise<DueSource[]> {
-  let query = supabase
-    .from("booking_sources")
-    .select("*, outlets(name)")
-    .eq("active", true)
-    .eq("method", "auto");
+function buildDirectSource(options: CheckOptions): DueSource {
+  return {
+    id: "direct",
+    outlet_id: "direct",
+    outlet_name: "(direct mode — no outlet)",
+    platform: options.platform as DueSource["platform"],
+    label: null,
+    url: options.url!,
+    method: "auto",
+    party_size: options.partySize ?? 2,
+    days_ahead: options.days ?? 1,
+    check_every_hours: 3,
+    active: true,
+    last_checked_at: null,
+  };
+}
+
+async function fetchDueSources(
+  supabase: ServiceClient,
+  platformFilter: string | undefined,
+  includeInactive: boolean,
+): Promise<DueSource[]> {
+  let query = supabase.from("booking_sources").select("*, outlets(name)").eq("method", "auto");
+  if (!includeInactive) query = query.eq("active", true);
   if (platformFilter) query = query.eq("platform", platformFilter);
 
   const { data, error } = await query;
@@ -120,19 +149,33 @@ function logRpcResult(dateStr: string, data: unknown, error: { message: string }
 }
 
 export async function runCheck(options: CheckOptions): Promise<void> {
-  console.log(`Booking checker — ${options.dryRun ? "DRY RUN (no database writes)" : "real run"}`);
+  const direct = !!options.url;
+  console.log(
+    `Booking checker — ${options.dryRun ? "DRY RUN (no database writes)" : "real run"}` +
+      (direct ? " — direct mode (no database access, .env not read)" : ""),
+  );
 
-  const config = loadConfig();
-  const supabase = createServiceClient(config);
+  let supabase: ServiceClient | null = null;
+  let sources: DueSource[];
 
-  const sources = await fetchDueSources(supabase, options.source);
-  if (sources.length === 0) {
-    console.log("No due sources found (nothing active, auto, and past its check_every_hours).");
-    return;
+  if (direct) {
+    sources = [buildDirectSource(options)];
+    console.log(`Checking ${options.platform} directly at ${options.url}\n`);
+  } else {
+    const config = loadConfig();
+    supabase = createServiceClient(config);
+
+    sources = await fetchDueSources(supabase, options.platform, options.includeInactive);
+    if (sources.length === 0) {
+      console.log("No due sources found (nothing active, auto, and past its check_every_hours).");
+      return;
+    }
+    console.log(`${sources.length} source(s) due for a check.\n`);
   }
-  console.log(`${sources.length} source(s) due for a check.\n`);
 
-  const browser = await chromium.launch({ headless: true });
+  const headless = !options.headed;
+  const slowMo = options.slowMo ?? (options.headed ? 600 : undefined);
+  const browser = await chromium.launch({ headless, slowMo });
   const context = await browser.newContext({ viewport: { width: 1366, height: 4000 }, userAgent: USER_AGENT });
   const page = await context.newPage();
 
@@ -168,7 +211,9 @@ export async function runCheck(options: CheckOptions): Promise<void> {
         console.log(`[${source.platform}] ${label}: robots.txt disallows this path — stopping for this source`);
         blockedCount += 1;
         if (!options.dryRun) {
-          const { data, error } = await supabase.rpc("submit_booking_snapshot", {
+          // Only reachable in database mode — direct mode always implies
+          // --dry-run (enforced in index.ts), so `supabase` is set here.
+          const { data, error } = await supabase!.rpc("submit_booking_snapshot", {
             p_source_id: source.id,
             p_target_date: todayInKolkata(),
             p_slots: [],
@@ -203,7 +248,7 @@ export async function runCheck(options: CheckOptions): Promise<void> {
         if (options.dryRun) {
           printDryRunResult(result);
         } else {
-          const { data, error } = await supabase.rpc("submit_booking_snapshot", {
+          const { data, error } = await supabase!.rpc("submit_booking_snapshot", {
             p_source_id: source.id,
             p_target_date: result.targetDate,
             p_slots: result.slots,

@@ -4,7 +4,9 @@ import type { DateResult, DueSource } from "../types.js";
 
 export type AdapterContext = {
   page: Page;
-  supabase: ServiceClient;
+  // null in direct mode (--url), which never touches Supabase. Only read
+  // when dryRun is false, which direct mode never is.
+  supabase: ServiceClient | null;
   dryRun: boolean;
   outDir: string;
   // Enforces the "wait at least 3 seconds between navigations" rule across
