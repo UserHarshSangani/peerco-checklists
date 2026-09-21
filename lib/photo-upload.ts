@@ -62,6 +62,13 @@ export function checklistPhotoPath(
   return `${outletId}/${businessDate}/${crypto.randomUUID()}.jpg`;
 }
 
+// Booking screenshots live in the same bucket, under a fixed "booking"
+// segment instead of a business date — private.photo_ok() only checks the
+// leading `${outletId}/` prefix, so this still passes that check.
+export function bookingScreenshotPath(outletId: string): string {
+  return `${outletId}/booking/${crypto.randomUUID()}.jpg`;
+}
+
 export async function uploadChecklistPhoto(
   supabase: Supabase,
   path: string,
