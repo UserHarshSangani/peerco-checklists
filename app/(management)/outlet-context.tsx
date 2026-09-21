@@ -5,6 +5,7 @@ import { createContext, useContext, useMemo, useSyncExternalStore } from "react"
 export type ManagedOutlet = {
   id: string;
   name: string;
+  organizationId: string;
   organizationName: string | null;
 };
 

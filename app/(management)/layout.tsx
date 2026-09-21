@@ -30,7 +30,7 @@ export default async function ManagementLayout({
 
   const { data: outletRows, error } = await supabase
     .from("outlets")
-    .select("id, name, organizations(name)")
+    .select("id, name, organization_id, organizations(name)")
     .order("name");
 
   if (error) {
@@ -46,6 +46,7 @@ export default async function ManagementLayout({
   const outlets: ManagedOutlet[] = (outletRows ?? []).map((row) => ({
     id: row.id,
     name: row.name,
+    organizationId: row.organization_id,
     organizationName: unwrapOne(row.organizations)?.name ?? null,
   }));
 

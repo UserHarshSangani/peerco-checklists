@@ -14,6 +14,16 @@ const MIN_RADIUS = 30;
 const MAX_RADIUS = 1000;
 const ACCURACY_WARNING_THRESHOLD_M = 50;
 
+const WEEKDAY_KEYS = [
+  "outlets.weekday.sunday",
+  "outlets.weekday.monday",
+  "outlets.weekday.tuesday",
+  "outlets.weekday.wednesday",
+  "outlets.weekday.thursday",
+  "outlets.weekday.friday",
+  "outlets.weekday.saturday",
+] as const;
+
 export default function OutletDetailPage({
   params,
 }: PageProps<"/outlets/[outletId]">) {
@@ -30,6 +40,8 @@ function OutletEditor({ outletId }: { outletId: string }) {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [radius, setRadius] = useState(150);
+  const [weeklyCountDay, setWeeklyCountDay] = useState(1);
+  const [savingWeeklyDay, setSavingWeeklyDay] = useState(false);
   const [pasteInput, setPasteInput] = useState("");
   const [pasteError, setPasteError] = useState<string | null>(null);
   const [lastAccuracy, setLastAccuracy] = useState<number | null>(null);
@@ -42,7 +54,7 @@ function OutletEditor({ outletId }: { outletId: string }) {
     let cancelled = false;
     supabase
       .from("outlets")
-      .select("id, name, latitude, longitude, geofence_radius_m")
+      .select("id, name, latitude, longitude, geofence_radius_m, weekly_count_day")
       .eq("id", outletId)
       .single()
       .then(({ data, error }) => {
@@ -56,6 +68,7 @@ function OutletEditor({ outletId }: { outletId: string }) {
         setLat(data.latitude);
         setLng(data.longitude);
         setRadius(data.geofence_radius_m);
+        setWeeklyCountDay(data.weekly_count_day);
         setPasteInput(
           data.latitude != null && data.longitude != null
             ? `${data.latitude}, ${data.longitude}`
@@ -124,6 +137,21 @@ function OutletEditor({ outletId }: { outletId: string }) {
       return;
     }
     showSuccess(t("outlets.saveSuccess"));
+  }
+
+  async function handleSaveWeeklyDay(day: number) {
+    setWeeklyCountDay(day);
+    setSavingWeeklyDay(true);
+    const { error } = await supabase
+      .from("outlets")
+      .update({ weekly_count_day: day })
+      .eq("id", outletId);
+    setSavingWeeklyDay(false);
+    if (error) {
+      showError(error.message);
+      return;
+    }
+    showSuccess(t("outlets.weeklyCountDaySaved"));
   }
 
   async function handleClearLocation() {
@@ -229,6 +257,26 @@ function OutletEditor({ outletId }: { outletId: string }) {
             className="mb-1 w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
           />
           <p className="mb-6 text-sm text-muted">{t("outlets.radiusHint")}</p>
+
+          <label
+            htmlFor="weekly-count-day"
+            className="mb-1 block text-sm font-medium text-muted"
+          >
+            {t("outlets.weeklyCountDayLabel")}
+          </label>
+          <select
+            id="weekly-count-day"
+            value={weeklyCountDay}
+            disabled={savingWeeklyDay}
+            onChange={(event) => handleSaveWeeklyDay(Number(event.target.value))}
+            className="mb-6 w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text focus:border-accent focus:outline-none disabled:opacity-50"
+          >
+            {WEEKDAY_KEYS.map((key, day) => (
+              <option key={key} value={day}>
+                {t(key)}
+              </option>
+            ))}
+          </select>
 
           {lat != null && lng != null ? (
             <a
