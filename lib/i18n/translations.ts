@@ -130,6 +130,8 @@ const dictionary = {
   "nav.checklists": { en: "Checklists", hi: "चेकलिस्ट", mr: "चेकलिस्ट" },
   "nav.tablet": { en: "Tablet", hi: "टैबलेट", mr: "टॅबलेट" },
   "nav.outlets": { en: "Outlets", hi: "आउटलेट", mr: "आउटलेट" },
+  "nav.catalog": { en: "Catalog", hi: "कैटलॉग", mr: "कॅटलॉग" },
+  "nav.stock": { en: "Stock", hi: "स्टॉक", mr: "स्टॉक" },
 
   // /tablet — outlet & checklist list
   "tablet.switchOutlet": {
@@ -315,6 +317,41 @@ const dictionary = {
     en: "Please retake the photo and try again.",
     hi: "कृपया फिर से फोटो लें और कोशिश करें।",
     mr: "कृपया पुन्हा फोटो घ्या आणि प्रयत्न करा.",
+  },
+  "tablet.reason.bad_quantity": {
+    en: "One or more quantities are not valid.",
+    hi: "एक या अधिक मात्राएं सही नहीं हैं।",
+    mr: "एक किंवा अधिक प्रमाणे बरोबर नाहीत.",
+  },
+  "tablet.reason.duplicate_item": {
+    en: "The same item appears more than once.",
+    hi: "एक ही आइटम एक से ज़्यादा बार है।",
+    mr: "तोच आयटम एकापेक्षा जास्त वेळा आहे.",
+  },
+  "tablet.reason.invalid_item": {
+    en: "Some items are no longer available. The list has been refreshed — please check it and try again.",
+    hi: "कुछ आइटम अब उपलब्ध नहीं हैं। सूची फिर से लोड कर दी गई है — कृपया इसे जांचें और फिर कोशिश करें।",
+    mr: "काही आयटम आता उपलब्ध नाहीत. यादी पुन्हा लोड केली आहे — कृपया ती तपासा आणि पुन्हा प्रयत्न करा.",
+  },
+  "tablet.reason.incomplete": {
+    en: "Please enter a quantity for every item. The list has been refreshed — please check it and try again.",
+    hi: "कृपया हर आइटम के लिए मात्रा डालें। सूची फिर से लोड कर दी गई है — कृपया इसे जांचें और फिर कोशिश करें।",
+    mr: "कृपया प्रत्येक आयटमसाठी प्रमाण टाका. यादी पुन्हा लोड केली आहे — कृपया ती तपासा आणि पुन्हा प्रयत्न करा.",
+  },
+  "tablet.reason.invalid_vendor": {
+    en: "Please choose a valid vendor.",
+    hi: "कृपया एक सही वेंडर चुनें।",
+    mr: "कृपया योग्य विक्रेता निवडा.",
+  },
+  "tablet.reason.bad_reason": {
+    en: "Please choose a valid reason.",
+    hi: "कृपया एक सही कारण चुनें।",
+    mr: "कृपया योग्य कारण निवडा.",
+  },
+  "tablet.reason.note_required": {
+    en: "A note is required when the reason is \"Other\".",
+    hi: "कारण \"अन्य\" होने पर नोट ज़रूरी है।",
+    mr: "कारण \"इतर\" असल्यास नोंद आवश्यक आहे.",
   },
   "tablet.checkingLocation": {
     en: "Checking location…",
@@ -672,6 +709,510 @@ const dictionary = {
     hi: "अभी कोई स्थान सेट नहीं है।",
     mr: "अजून कोणतेही स्थान सेट केलेले नाही.",
   },
+  "outlets.weeklyCountDayLabel": {
+    en: "Weekly count day",
+    hi: "साप्ताहिक गिनती का दिन",
+    mr: "साप्ताहिक मोजणीचा दिवस",
+  },
+  "outlets.weeklyCountDaySaved": {
+    en: "Weekly count day saved.",
+    hi: "साप्ताहिक गिनती का दिन सेव हो गया।",
+    mr: "साप्ताहिक मोजणीचा दिवस सेव्ह झाला.",
+  },
+  "outlets.weekday.sunday": { en: "Sunday", hi: "रविवार", mr: "रविवार" },
+  "outlets.weekday.monday": { en: "Monday", hi: "सोमवार", mr: "सोमवार" },
+  "outlets.weekday.tuesday": { en: "Tuesday", hi: "मंगलवार", mr: "मंगळवार" },
+  "outlets.weekday.wednesday": { en: "Wednesday", hi: "बुधवार", mr: "बुधवार" },
+  "outlets.weekday.thursday": { en: "Thursday", hi: "गुरुवार", mr: "गुरुवार" },
+  "outlets.weekday.friday": { en: "Friday", hi: "शुक्रवार", mr: "शुक्रवार" },
+  "outlets.weekday.saturday": { en: "Saturday", hi: "शनिवार", mr: "शनिवार" },
+
+  // /tablet — home tiles (Checklists, Stock count, Goods received, Wastage)
+  "tablet.home.heading": {
+    en: "What would you like to do?",
+    hi: "आप क्या करना चाहते हैं?",
+    mr: "तुम्हाला काय करायचे आहे?",
+  },
+  "tablet.home.checklists": {
+    en: "Checklists",
+    hi: "चेकलिस्ट",
+    mr: "चेकलिस्ट",
+  },
+  "tablet.home.stockCount": {
+    en: "Stock count",
+    hi: "स्टॉक गिनती",
+    mr: "स्टॉक मोजणी",
+  },
+  "tablet.home.goodsReceived": {
+    en: "Goods received",
+    hi: "माल प्राप्त",
+    mr: "माल मिळाला",
+  },
+  "tablet.home.wastage": { en: "Wastage", hi: "बर्बादी", mr: "वाया गेलेला माल" },
+
+  // /tablet — stock count flow
+  "tablet.stock.countTitle": {
+    en: "Stock count",
+    hi: "स्टॉक गिनती",
+    mr: "स्टॉक मोजणी",
+  },
+  "tablet.stock.chooseKind": {
+    en: "What kind of count is this?",
+    hi: "यह किस तरह की गिनती है?",
+    mr: "ही कोणत्या प्रकारची मोजणी आहे?",
+  },
+  "tablet.stock.openingCount": {
+    en: "Opening count",
+    hi: "ओपनिंग गिनती",
+    mr: "ओपनिंग मोजणी",
+  },
+  "tablet.stock.closingCount": {
+    en: "Closing count",
+    hi: "क्लोज़िंग गिनती",
+    mr: "क्लोजिंग मोजणी",
+  },
+  "tablet.stock.today": { en: "Today", hi: "आज", mr: "आज" },
+  "tablet.stock.yesterday": { en: "Yesterday", hi: "कल", mr: "काल" },
+  "tablet.stock.loadSheetError": {
+    en: "Couldn't load the count sheet: {error}",
+    hi: "गिनती शीट लोड नहीं हो सकी: {error}",
+    mr: "मोजणी शीट लोड करता आली नाही: {error}",
+  },
+  "tablet.stock.loadEntryListsError": {
+    en: "Couldn't load items: {error}",
+    hi: "आइटम लोड नहीं हो सके: {error}",
+    mr: "आयटम लोड करता आले नाहीत: {error}",
+  },
+  "tablet.stock.noItemsToCount": {
+    en: "No items to count for this outlet today.",
+    hi: "आज इस आउटलेट के लिए गिनने के लिए कोई आइटम नहीं है।",
+    mr: "आज या आउटलेटसाठी मोजण्यासाठी कोणताही आयटम नाही.",
+  },
+  "tablet.stock.uncategorized": {
+    en: "Other",
+    hi: "अन्य",
+    mr: "इतर",
+  },
+  "tablet.stock.addNote": {
+    en: "+ Add note",
+    hi: "+ नोट जोड़ें",
+    mr: "+ नोंद जोडा",
+  },
+  "tablet.stock.notePlaceholder": {
+    en: "Note (optional)",
+    hi: "नोट (वैकल्पिक)",
+    mr: "नोंद (ऐच्छिक)",
+  },
+  "tablet.stock.countedProgress": {
+    en: "{done} of {total} counted",
+    hi: "{total} में से {done} गिने गए",
+    mr: "{total} पैकी {done} मोजले",
+  },
+  "tablet.stock.items": { en: "Items", hi: "आइटम", mr: "आयटम" },
+  "tablet.stock.addItem": {
+    en: "Add item",
+    hi: "आइटम जोड़ें",
+    mr: "आयटम जोडा",
+  },
+  "tablet.stock.removeItem": {
+    en: "Remove",
+    hi: "हटाएं",
+    mr: "काढा",
+  },
+  "tablet.stock.searchItems": {
+    en: "Search items…",
+    hi: "आइटम खोजें…",
+    mr: "आयटम शोधा…",
+  },
+  "tablet.stock.noItemsFound": {
+    en: "No items found.",
+    hi: "कोई आइटम नहीं मिला।",
+    mr: "कोणताही आयटम सापडला नाही.",
+  },
+  "tablet.stock.quantityLabel": {
+    en: "Qty",
+    hi: "मात्रा",
+    mr: "प्रमाण",
+  },
+
+  // /tablet — goods received flow
+  "tablet.receipt.title": {
+    en: "Goods received",
+    hi: "माल प्राप्त",
+    mr: "माल मिळाला",
+  },
+  "tablet.receipt.chooseVendor": {
+    en: "Choose a vendor",
+    hi: "एक वेंडर चुनें",
+    mr: "एक विक्रेता निवडा",
+  },
+  "tablet.receipt.noVendors": {
+    en: "No vendors set up for this outlet's brand yet.",
+    hi: "इस आउटलेट के ब्रांड के लिए अभी कोई वेंडर सेट नहीं है।",
+    mr: "या आउटलेटच्या ब्रँडसाठी अजून कोणताही विक्रेता सेट केलेला नाही.",
+  },
+  "tablet.receipt.invoiceRefLabel": {
+    en: "Invoice number (optional)",
+    hi: "इनवॉइस नंबर (वैकल्पिक)",
+    mr: "इनव्हॉइस क्रमांक (ऐच्छिक)",
+  },
+  "tablet.receipt.unitCostLabel": {
+    en: "Cost/unit",
+    hi: "लागत/यूनिट",
+    mr: "किंमत/युनिट",
+  },
+  "tablet.receipt.noItemsYet": {
+    en: "No items added yet.",
+    hi: "अभी कोई आइटम नहीं जोड़ा गया।",
+    mr: "अजून कोणताही आयटम जोडलेला नाही.",
+  },
+  "tablet.receipt.photoLabel": {
+    en: "Invoice photo (optional)",
+    hi: "इनवॉइस फोटो (वैकल्पिक)",
+    mr: "इनव्हॉइस फोटो (ऐच्छिक)",
+  },
+
+  // /tablet — wastage flow
+  "tablet.wastage.title": { en: "Wastage", hi: "बर्बादी", mr: "वाया गेलेला माल" },
+  "tablet.wastage.addEntry": {
+    en: "Add entry",
+    hi: "एंट्री जोड़ें",
+    mr: "नोंद जोडा",
+  },
+  "tablet.wastage.noEntriesYet": {
+    en: "No entries added yet.",
+    hi: "अभी कोई एंट्री नहीं जोड़ी गई।",
+    mr: "अजून कोणतीही नोंद जोडलेली नाही.",
+  },
+  "tablet.wastage.reasonLabel": {
+    en: "Reason",
+    hi: "कारण",
+    mr: "कारण",
+  },
+  "tablet.wastage.notePlaceholder": {
+    en: "Note (optional)",
+    hi: "नोट (वैकल्पिक)",
+    mr: "नोंद (ऐच्छिक)",
+  },
+  "tablet.wastage.noteRequiredHint": {
+    en: "A note is required for \"Other\".",
+    hi: "\"अन्य\" के लिए नोट ज़रूरी है।",
+    mr: "\"इतर\" साठी नोंद आवश्यक आहे.",
+  },
+  "tablet.wastage.reason.spoilage": {
+    en: "Spoilage",
+    hi: "खराब हुआ",
+    mr: "खराब झाले",
+  },
+  "tablet.wastage.reason.prep_waste": {
+    en: "Prep waste",
+    hi: "तैयारी में बर्बादी",
+    mr: "तयारीत वाया गेले",
+  },
+  "tablet.wastage.reason.breakage": {
+    en: "Breakage",
+    hi: "टूट-फूट",
+    mr: "तुटले/फुटले",
+  },
+  "tablet.wastage.reason.staff_meal": {
+    en: "Staff meal",
+    hi: "स्टाफ भोजन",
+    mr: "स्टाफ जेवण",
+  },
+  "tablet.wastage.reason.complimentary": {
+    en: "Complimentary",
+    hi: "मुफ़्त में दिया गया",
+    mr: "मोफत दिले",
+  },
+  "tablet.wastage.reason.other": { en: "Other", hi: "अन्य", mr: "इतर" },
+
+  // /catalog (peerco_admin, owner, manager)
+  "catalog.heading": { en: "Catalog", hi: "कैटलॉग", mr: "कॅटलॉग" },
+  "catalog.chooseOutlet": {
+    en: "Choose an outlet to manage its catalog.",
+    hi: "कैटलॉग प्रबंधित करने के लिए एक आउटलेट चुनें।",
+    mr: "कॅटलॉग व्यवस्थापित करण्यासाठी एक आउटलेट निवडा.",
+  },
+  "catalog.brandLabel": {
+    en: "Brand: {brand}",
+    hi: "ब्रांड: {brand}",
+    mr: "ब्रँड: {brand}",
+  },
+  "catalog.itemsTab": { en: "Items", hi: "आइटम", mr: "आयटम" },
+  "catalog.vendorsTab": { en: "Vendors", hi: "वेंडर", mr: "विक्रेते" },
+  "catalog.outletSettingsTab": {
+    en: "Outlet settings",
+    hi: "आउटलेट सेटिंग्स",
+    mr: "आउटलेट सेटिंग्ज",
+  },
+  "catalog.searchItemsPlaceholder": {
+    en: "Search by name, category or vendor…",
+    hi: "नाम, श्रेणी या वेंडर से खोजें…",
+    mr: "नाव, श्रेणी किंवा विक्रेत्यानुसार शोधा…",
+  },
+  "catalog.addItem": { en: "Add item", hi: "आइटम जोड़ें", mr: "आयटम जोडा" },
+  "catalog.editItem": { en: "Edit item", hi: "आइटम बदलें", mr: "आयटम बदला" },
+  "catalog.noItemsYet": {
+    en: "No items yet.",
+    hi: "अभी कोई आइटम नहीं है।",
+    mr: "अजून कोणताही आयटम नाही.",
+  },
+  "catalog.loadItemsError": {
+    en: "Couldn't load items: {error}",
+    hi: "आइटम लोड नहीं हो सके: {error}",
+    mr: "आयटम लोड करता आले नाहीत: {error}",
+  },
+  "catalog.duplicateItemName": {
+    en: "An item with this name already exists.",
+    hi: "इस नाम का आइटम पहले से मौजूद है।",
+    mr: "या नावाचा आयटम आधीच अस्तित्वात आहे.",
+  },
+  "catalog.countUnitRequired": {
+    en: "Count unit can't be empty.",
+    hi: "गिनती इकाई खाली नहीं हो सकती।",
+    mr: "मोजणी युनिट रिकामे असू शकत नाही.",
+  },
+  "catalog.categoryLabel": { en: "Category", hi: "श्रेणी", mr: "श्रेणी" },
+  "catalog.countUnitLabel": {
+    en: "Count unit",
+    hi: "गिनती इकाई",
+    mr: "मोजणी युनिट",
+  },
+  "catalog.orderUnitLabel": {
+    en: "Order unit",
+    hi: "ऑर्डर इकाई",
+    mr: "ऑर्डर युनिट",
+  },
+  "catalog.orderUnitSizeLabel": {
+    en: "Order unit size",
+    hi: "ऑर्डर इकाई आकार",
+    mr: "ऑर्डर युनिट आकार",
+  },
+  "catalog.unitPlaceholder": {
+    en: "e.g. kg, pack, box",
+    hi: "जैसे kg, pack, box",
+    mr: "उदा. kg, pack, box",
+  },
+  "catalog.costPerUnitLabel": {
+    en: "Cost/unit (₹)",
+    hi: "लागत/यूनिट (₹)",
+    mr: "किंमत/युनिट (₹)",
+  },
+  "catalog.vendorLabel": { en: "Vendor", hi: "वेंडर", mr: "विक्रेता" },
+  "catalog.noVendor": { en: "No vendor", hi: "कोई वेंडर नहीं", mr: "विक्रेता नाही" },
+  "catalog.countFrequencyLabel": {
+    en: "Count frequency",
+    hi: "गिनती की आवृत्ति",
+    mr: "मोजणीची वारंवारता",
+  },
+  "catalog.frequencyDaily": { en: "Daily", hi: "रोज़ाना", mr: "दररोज" },
+  "catalog.frequencyWeekly": { en: "Weekly", hi: "साप्ताहिक", mr: "साप्ताहिक" },
+  "catalog.addVendor": { en: "Add vendor", hi: "वेंडर जोड़ें", mr: "विक्रेता जोडा" },
+  "catalog.editVendor": { en: "Edit vendor", hi: "वेंडर बदलें", mr: "विक्रेता बदला" },
+  "catalog.noVendorsYet": {
+    en: "No vendors yet.",
+    hi: "अभी कोई वेंडर नहीं है।",
+    mr: "अजून कोणताही विक्रेता नाही.",
+  },
+  "catalog.loadVendorsError": {
+    en: "Couldn't load vendors: {error}",
+    hi: "वेंडर लोड नहीं हो सके: {error}",
+    mr: "विक्रेते लोड करता आले नाहीत: {error}",
+  },
+  "catalog.duplicateVendorName": {
+    en: "A vendor with this name already exists.",
+    hi: "इस नाम का वेंडर पहले से मौजूद है।",
+    mr: "या नावाचा विक्रेता आधीच अस्तित्वात आहे.",
+  },
+  "catalog.phoneLabel": { en: "Phone", hi: "फ़ोन", mr: "फोन" },
+  "catalog.notesLabel": { en: "Notes", hi: "नोट्स", mr: "नोंदी" },
+  "catalog.outletSettings.stockedHere": {
+    en: "Stocked here",
+    hi: "यहां स्टॉक किया गया",
+    mr: "इथे स्टॉक केले",
+  },
+  "catalog.outletSettings.stocked": {
+    en: "Stocked",
+    hi: "स्टॉक किया गया",
+    mr: "स्टॉक केले",
+  },
+  "catalog.outletSettings.notStocked": {
+    en: "Not stocked",
+    hi: "स्टॉक नहीं किया गया",
+    mr: "स्टॉक केलेले नाही",
+  },
+  "catalog.outletSettings.parLevel": {
+    en: "Par level",
+    hi: "पार लेवल",
+    mr: "पार लेव्हल",
+  },
+  "catalog.outletSettings.maxLevel": {
+    en: "Max level",
+    hi: "मैक्स लेवल",
+    mr: "मॅक्स लेव्हल",
+  },
+  "catalog.outletSettings.leadTimeDays": {
+    en: "Lead time (days)",
+    hi: "लीड टाइम (दिन)",
+    mr: "लीड टाइम (दिवस)",
+  },
+  "catalog.outletSettings.leadTimeError": {
+    en: "Lead time must be between 0 and 60 days.",
+    hi: "लीड टाइम 0 से 60 दिनों के बीच होना चाहिए।",
+    mr: "लीड टाइम 0 ते 60 दिवसांदरम्यान असावा.",
+  },
+  "catalog.outletSettings.addAll": {
+    en: "Add all items to this outlet",
+    hi: "सभी आइटम इस आउटलेट में जोड़ें",
+    mr: "सर्व आयटम या आउटलेटमध्ये जोडा",
+  },
+  "catalog.outletSettings.saved": {
+    en: "Saved.",
+    hi: "सेव हो गया।",
+    mr: "सेव्ह झाले.",
+  },
+  "catalog.import.button": {
+    en: "Bulk import",
+    hi: "बल्क इंपोर्ट",
+    mr: "बल्क इंपोर्ट",
+  },
+  "catalog.import.title": {
+    en: "Bulk import items",
+    hi: "आइटम बल्क इंपोर्ट करें",
+    mr: "आयटम बल्क इंपोर्ट करा",
+  },
+  "catalog.import.downloadTemplate": {
+    en: "Download CSV template",
+    hi: "CSV टेम्पलेट डाउनलोड करें",
+    mr: "CSV टेम्प्लेट डाउनलोड करा",
+  },
+  "catalog.import.chooseFile": {
+    en: "Choose CSV file",
+    hi: "CSV फ़ाइल चुनें",
+    mr: "CSV फाइल निवडा",
+  },
+  "catalog.import.previewSummary": {
+    en: "{valid} row(s) ready to import, {invalid} with errors.",
+    hi: "{valid} पंक्ति(यां) इंपोर्ट के लिए तैयार, {invalid} में गड़बड़ी है।",
+    mr: "{valid} ओळ(ी) इंपोर्टसाठी तयार, {invalid} मध्ये त्रुटी आहेत.",
+  },
+  "catalog.import.statusColumn": {
+    en: "Status",
+    hi: "स्थिति",
+    mr: "स्थिती",
+  },
+  "catalog.import.ok": { en: "OK", hi: "ठीक है", mr: "ठीक आहे" },
+  "catalog.import.errorName": {
+    en: "Name is required.",
+    hi: "नाम ज़रूरी है।",
+    mr: "नाव आवश्यक आहे.",
+  },
+  "catalog.import.errorDuplicateInFile": {
+    en: "Duplicate name in this file.",
+    hi: "इस फ़ाइल में यह नाम दोहराया गया है।",
+    mr: "या फाइलमध्ये हे नाव पुन्हा आले आहे.",
+  },
+  "catalog.import.errorCountUnit": {
+    en: "Count unit is required.",
+    hi: "गिनती इकाई ज़रूरी है।",
+    mr: "मोजणी युनिट आवश्यक आहे.",
+  },
+  "catalog.import.errorFrequency": {
+    en: "Count frequency must be \"daily\" or \"weekly\".",
+    hi: "गिनती की आवृत्ति \"daily\" या \"weekly\" होनी चाहिए।",
+    mr: "मोजणीची वारंवारता \"daily\" किंवा \"weekly\" असावी.",
+  },
+  "catalog.import.errorOrderUnitSize": {
+    en: "Order unit size must be a number greater than 0.",
+    hi: "ऑर्डर इकाई आकार 0 से बड़ी संख्या होनी चाहिए।",
+    mr: "ऑर्डर युनिट आकार 0 पेक्षा मोठी संख्या असावी.",
+  },
+  "catalog.import.errorCostPerUnit": {
+    en: "Cost/unit must be a number of 0 or more.",
+    hi: "लागत/यूनिट 0 या उससे बड़ी संख्या होनी चाहिए।",
+    mr: "किंमत/युनिट 0 किंवा त्यापेक्षा मोठी संख्या असावी.",
+  },
+  "catalog.import.errorEmptyFile": {
+    en: "This file doesn't have any rows.",
+    hi: "इस फ़ाइल में कोई पंक्ति नहीं है।",
+    mr: "या फाइलमध्ये कोणतीही ओळ नाही.",
+  },
+  "catalog.import.confirm": {
+    en: "Confirm import",
+    hi: "इंपोर्ट की पुष्टि करें",
+    mr: "इंपोर्टची पुष्टी करा",
+  },
+  "catalog.import.summary": {
+    en: "{created} item(s) created, {updated} updated, {skipped} skipped.",
+    hi: "{created} आइटम बनाए गए, {updated} अपडेट हुए, {skipped} छोड़े गए।",
+    mr: "{created} आयटम तयार केले, {updated} अपडेट केले, {skipped} वगळले.",
+  },
+
+  // /stock (peerco_admin, owner, manager)
+  "stock.heading": { en: "Stock", hi: "स्टॉक", mr: "स्टॉक" },
+  "stock.chooseOutlet": {
+    en: "Choose an outlet to see its stock activity.",
+    hi: "स्टॉक गतिविधि देखने के लिए एक आउटलेट चुनें।",
+    mr: "स्टॉक क्रियाकलाप पाहण्यासाठी एक आउटलेट निवडा.",
+  },
+  "stock.dateLabel": { en: "Date", hi: "तारीख", mr: "तारीख" },
+  "stock.countsTab": { en: "Counts", hi: "गिनती", mr: "मोजणी" },
+  "stock.receiptsTab": { en: "Receipts", hi: "रसीदें", mr: "पावत्या" },
+  "stock.wastageTab": { en: "Wastage", hi: "बर्बादी", mr: "वाया गेलेला माल" },
+  "stock.loadError": {
+    en: "Couldn't load this: {error}",
+    hi: "यह लोड नहीं हो सका: {error}",
+    mr: "हे लोड करता आले नाही: {error}",
+  },
+  "stock.noSubmissions": {
+    en: "Not submitted yet.",
+    hi: "अभी सबमिट नहीं हुआ।",
+    mr: "अजून सबमिट झाले नाही.",
+  },
+  "stock.openingVsClosing": {
+    en: "Opening vs closing",
+    hi: "ओपनिंग बनाम क्लोज़िंग",
+    mr: "ओपनिंग वि. क्लोजिंग",
+  },
+  "stock.difference": { en: "Difference", hi: "अंतर", mr: "फरक" },
+  "stock.overnightGap": {
+    en: "Overnight gap",
+    hi: "रात भर का अंतर",
+    mr: "रात्रीचा फरक",
+  },
+  "stock.overnightGapHint": {
+    en: "Yesterday's closing count compared with today's opening count.",
+    hi: "कल की क्लोज़िंग गिनती की आज की ओपनिंग गिनती से तुलना।",
+    mr: "कालच्या क्लोजिंग मोजणीची आजच्या ओपनिंग मोजणीशी तुलना.",
+  },
+  "stock.yesterdayClosing": {
+    en: "Yesterday's closing",
+    hi: "कल की क्लोज़िंग",
+    mr: "कालचे क्लोजिंग",
+  },
+  "stock.todayOpening": {
+    en: "Today's opening",
+    hi: "आज की ओपनिंग",
+    mr: "आजचे ओपनिंग",
+  },
+  "stock.noReceipts": {
+    en: "No receipts for this date.",
+    hi: "इस तारीख के लिए कोई रसीद नहीं है।",
+    mr: "या तारखेसाठी कोणतीही पावती नाही.",
+  },
+  "stock.invoiceRef": {
+    en: "Invoice #{ref}",
+    hi: "इनवॉइस #{ref}",
+    mr: "इनव्हॉइस #{ref}",
+  },
+  "stock.noWastage": {
+    en: "No wastage logged for this date.",
+    hi: "इस तारीख के लिए कोई बर्बादी दर्ज नहीं है।",
+    mr: "या तारखेसाठी कोणताही वाया गेलेला माल नोंदवलेला नाही.",
+  },
+  "stock.reasonColumn": { en: "Reason", hi: "कारण", mr: "कारण" },
+  "stock.entriesColumn": { en: "Entries", hi: "एंट्री", mr: "नोंदी" },
+  "stock.valueColumn": { en: "Value", hi: "मूल्य", mr: "मूल्य" },
 } satisfies Record<string, Entry>;
 
 export type TranslationKey = keyof typeof dictionary;

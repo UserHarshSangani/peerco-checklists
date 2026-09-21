@@ -26,6 +26,15 @@ export function lastDatesInKolkata(count: number): string[] {
   );
 }
 
+// Shifts a plain "YYYY-MM-DD" calendar date by `days` (may be negative).
+// Business dates are plain calendar dates already anchored to Asia/Kolkata
+// at submission time, so this is pure UTC day math — no timezone involved.
+export function addDaysToDateString(dateStr: string, days: number): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const shifted = new Date(Date.UTC(year, month - 1, day) + days * 86_400_000);
+  return shifted.toISOString().slice(0, 10);
+}
+
 export function formatDateLabel(dateStr: string): string {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-IN", {
