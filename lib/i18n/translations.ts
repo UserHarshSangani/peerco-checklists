@@ -148,6 +148,11 @@ const dictionary = {
     hi: "एक आउटलेट चुनें",
     mr: "एक आउटलेट निवडा",
   },
+  "tablet.dueAt": {
+    en: "Due {time}",
+    hi: "{time} तक",
+    mr: "{time} पर्यंत",
+  },
   "tablet.loadingChecklists": {
     en: "Loading checklists…",
     hi: "चेकलिस्ट लोड हो रही हैं…",

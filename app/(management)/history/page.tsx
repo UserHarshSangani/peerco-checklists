@@ -72,7 +72,7 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
       const [templatesRes, submissionsRes] = await Promise.all([
         supabase
           .from("checklist_templates")
-          .select("id, name")
+          .select("id, name, due_time")
           .eq("outlet_id", outletId)
           .eq("active", true)
           .order("name"),

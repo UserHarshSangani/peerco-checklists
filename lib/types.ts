@@ -6,6 +6,7 @@ export type Outlet = {
 export type ChecklistTemplate = {
   id: string;
   name: string;
+  due_time: string | null;
 };
 
 export type ChecklistItemRow = {

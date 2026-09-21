@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { todayInKolkata, formatDateLabelForLocale } from "@/lib/date";
+import { todayInKolkata, formatDateLabelForLocale, formatTimeOfDay12 } from "@/lib/date";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { APP_NAME } from "@/lib/brand";
@@ -18,11 +18,13 @@ import { LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSwitcher } from "@/components/language/language-switcher";
 import { IconCircle } from "@/components/ui/icon-circle";
+import { StatusPill } from "@/components/ui/status-pill";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InstallHint } from "@/components/pwa/install-hint";
 import {
   ClipboardCheck,
+  Clock,
   ChefHat as WastageIcon,
   PackageSearch,
   Truck,
@@ -300,7 +302,7 @@ function TemplatesList({
     let cancelled = false;
     supabase
       .from("checklist_templates")
-      .select("id, name")
+      .select("id, name, due_time")
       .eq("outlet_id", outlet.id)
       .eq("active", true)
       .order("name")
@@ -346,9 +348,14 @@ function TemplatesList({
               key={template.id}
               type="button"
               onClick={() => onSelect(template)}
-              className="min-h-16 rounded-2xl bg-surface p-6 text-left text-xl font-medium text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
+              className="flex min-h-16 flex-col items-start gap-2 rounded-2xl bg-surface p-6 text-left text-xl font-medium text-text shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
             >
               {template.name}
+              {template.due_time && (
+                <StatusPill tone="neutral" icon={<Clock className="h-full w-full" />}>
+                  {t("tablet.dueAt", { time: formatTimeOfDay12(template.due_time) })}
+                </StatusPill>
+              )}
             </button>
           ))}
         </div>

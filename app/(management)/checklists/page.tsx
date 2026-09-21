@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatTimeOfDay12 } from "@/lib/date";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { NewChecklistModal, type ChecklistKind } from "./new-checklist-modal";
@@ -17,6 +18,7 @@ type TemplateRow = {
   name: string;
   kind: ChecklistKind;
   active: boolean;
+  due_time: string | null;
 };
 
 export default function ChecklistsPage() {
@@ -55,7 +57,7 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
   async function fetchTemplates() {
     return supabase
       .from("checklist_templates")
-      .select("id, name, kind, active")
+      .select("id, name, kind, active, due_time")
       .eq("outlet_id", outletId)
       .order("name");
   }
@@ -83,6 +85,25 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
       .from("checklist_templates")
       .update({ active: !row.active })
       .eq("id", row.id);
+    setSavingId(null);
+    if (error) {
+      showError(error.message);
+      return;
+    }
+    const { data, error: refreshError } = await fetchTemplates();
+    if (refreshError) {
+      showError(refreshError.message);
+      return;
+    }
+    setTemplates(data ?? []);
+  }
+
+  async function saveDueTime(templateId: string, value: string) {
+    setSavingId(templateId);
+    const { error } = await supabase
+      .from("checklist_templates")
+      .update({ due_time: value || null })
+      .eq("id", templateId);
     setSavingId(null);
     if (error) {
       showError(error.message);
@@ -142,15 +163,45 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
             key={template.id}
             className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border"
           >
-            <Link
-              href={`/checklists/${template.id}`}
-              className="flex-1 text-base font-medium text-text hover:underline"
-            >
-              {template.name}
-              <span className="ml-2 text-sm font-normal text-muted">
-                {kindLabels[template.kind]}
-              </span>
-            </Link>
+            <div className="min-w-0 flex-1">
+              <Link
+                href={`/checklists/${template.id}`}
+                className="text-base font-medium text-text hover:underline"
+              >
+                {template.name}
+                <span className="ml-2 text-sm font-normal text-muted">
+                  {kindLabels[template.kind]}
+                </span>
+              </Link>
+              {template.due_time && (
+                <p className="mt-1 text-xs font-medium text-muted">
+                  Due {formatTimeOfDay12(template.due_time)}
+                </p>
+              )}
+            </div>
+
+            <label className="flex items-center gap-1.5 text-xs text-muted">
+              Due by
+              <input
+                type="time"
+                value={template.due_time?.slice(0, 5) ?? ""}
+                disabled={savingId === template.id}
+                onChange={(event) => saveDueTime(template.id, event.target.value)}
+                className="min-h-[36px] rounded-lg border border-border bg-bg px-2 py-1 text-sm text-text focus:border-accent focus:outline-none"
+              />
+              {template.due_time && (
+                <button
+                  type="button"
+                  disabled={savingId === template.id}
+                  onClick={() => saveDueTime(template.id, "")}
+                  aria-label="Clear due time"
+                  className="text-muted hover:text-text"
+                >
+                  ✕
+                </button>
+              )}
+            </label>
+
             <button
               type="button"
               disabled={savingId === template.id}
@@ -166,6 +217,9 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
           </li>
         ))}
       </ul>
+      <p className="mt-3 text-xs text-muted">
+        Used for overdue alerts and the dashboard. Leave empty if this checklist has no fixed time.
+      </p>
 
       {showNewModal && (
         <NewChecklistModal
