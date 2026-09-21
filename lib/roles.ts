@@ -18,3 +18,14 @@ export function isManagementRole(role: string | null | undefined): boolean {
 export function isOutletAdminRole(role: string | null | undefined): boolean {
   return role === "peerco_admin" || role === "owner";
 }
+
+const ROLE_LABEL: Record<string, string> = {
+  peerco_admin: "Admin",
+  owner: "Owner",
+  manager: "Manager",
+  device: "Tablet",
+};
+
+export function roleLabel(role: string | null | undefined): string {
+  return (role && ROLE_LABEL[role]) || "";
+}

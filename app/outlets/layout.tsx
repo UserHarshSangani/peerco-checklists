@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { homeForRole, isOutletAdminRole } from "@/lib/roles";
-import { Nav } from "@/app/(management)/nav";
+import { AppFrame } from "@/app/(management)/app-frame";
 
 export default async function OutletsLayout({
   children,
@@ -19,7 +19,7 @@ export default async function OutletsLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, full_name")
     .eq("id", user.id)
     .single();
 
@@ -27,10 +27,11 @@ export default async function OutletsLayout({
     redirect(homeForRole(profile?.role));
   }
 
+  const userName = profile.full_name || user.email || "Account";
+
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
-      <Nav role={profile.role} />
-      <div className="flex flex-1 flex-col">{children}</div>
-    </div>
+    <AppFrame role={profile.role} userName={userName}>
+      {children}
+    </AppFrame>
   );
 }

@@ -20,13 +20,15 @@ export default async function ManagementLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, full_name")
     .eq("id", user.id)
     .single();
 
   if (!profile || profile.role === "device") {
     redirect("/tablet");
   }
+
+  const userName = profile.full_name || user.email || "Account";
 
   const { data: outletRows, error } = await supabase
     .from("outlets")
@@ -51,7 +53,7 @@ export default async function ManagementLayout({
   }));
 
   return (
-    <ManagementShell outlets={outlets} role={profile.role}>
+    <ManagementShell outlets={outlets} role={profile.role} userName={userName}>
       {children}
     </ManagementShell>
   );
