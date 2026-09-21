@@ -236,7 +236,7 @@ export function RecipesList({
               type="button"
               onClick={() => setFilter(item.id)}
               className={`min-h-[36px] rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                filter === item.id ? "bg-accent text-white" : "text-muted hover:text-text"
+                filter === item.id ? "bg-accent text-accent-fg" : "text-muted hover:text-text"
               }`}
             >
               {item.label}

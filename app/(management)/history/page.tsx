@@ -169,7 +169,7 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
   return (
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-text">
+        <h2 className="font-serif text-xl font-bold text-text">
           {t("manager.historyHeading")}
         </h2>
         <button
@@ -177,7 +177,7 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
           onClick={() => setShowOnlyFlagged((prev) => !prev)}
           className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium ${
             showOnlyFlagged
-              ? "bg-accent text-white"
+              ? "bg-accent text-accent-fg"
               : "bg-border/50 text-muted"
           }`}
         >

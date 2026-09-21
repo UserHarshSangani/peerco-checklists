@@ -117,7 +117,7 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
   return (
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-text">
+        <h2 className="font-serif text-xl font-bold text-text">
           {t("manager.dashboardHeading")}
         </h2>
         <input

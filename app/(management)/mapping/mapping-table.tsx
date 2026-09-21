@@ -226,7 +226,7 @@ export function MappingTable({
             type="button"
             onClick={() => setTab(item.id)}
             className={`min-h-[40px] flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
-              tab === item.id ? "bg-accent text-white" : "text-muted hover:text-text"
+              tab === item.id ? "bg-accent text-accent-fg" : "text-muted hover:text-text"
             }`}
           >
             {item.label}
@@ -310,7 +310,7 @@ export function MappingTable({
                             type="button"
                             disabled={savingId === item.id}
                             onClick={() => saveMapping(item)}
-                            className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
+                            className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg disabled:opacity-40"
                           >
                             Save
                           </button>

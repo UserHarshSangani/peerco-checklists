@@ -33,7 +33,7 @@ export default function StockPage() {
   return (
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-text">
+        <h2 className="font-serif text-xl font-bold text-text">
           {t("stock.heading")}
         </h2>
         <label className="flex items-center gap-2 text-sm font-medium text-muted">
@@ -56,7 +56,7 @@ export default function StockPage() {
             onClick={() => setTab(item.id)}
             className={`min-h-[40px] flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
               tab === item.id
-                ? "bg-accent text-white"
+                ? "bg-accent text-accent-fg"
                 : "text-muted hover:text-text"
             }`}
           >

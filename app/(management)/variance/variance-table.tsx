@@ -192,7 +192,7 @@ export function VarianceTable({
             type="button"
             onClick={() => setAckFilter(value)}
             className={`min-h-[36px] rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-border ${
-              ackFilter === value ? "bg-accent text-white" : "text-muted"
+              ackFilter === value ? "bg-accent text-accent-fg" : "text-muted"
             }`}
           >
             {value === "all" ? "All" : value === "open" ? "Open" : "Acknowledged"}

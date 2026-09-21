@@ -37,7 +37,7 @@ export default function RecipesPage() {
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-text">Recipes</h2>
+          <h2 className="font-serif text-xl font-bold text-text">Recipes</h2>
           {selectedOutlet.organizationName && (
             <p className="text-sm text-muted">
               Brand: {selectedOutlet.organizationName}

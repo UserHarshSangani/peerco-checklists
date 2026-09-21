@@ -40,7 +40,7 @@ export default function VariancePage() {
   return (
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-        <h2 className="text-xl font-semibold text-text">Variance</h2>
+        <h2 className="font-serif text-xl font-bold text-text">Variance</h2>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col text-sm text-muted">
             From

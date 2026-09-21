@@ -385,7 +385,7 @@ export function OutletSettingsTab({
                         type="button"
                         disabled={!isStocked || savingId === item.id}
                         onClick={() => saveRow(item)}
-                        className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
+                        className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg disabled:opacity-40"
                       >
                         {t("common.save")}
                       </button>

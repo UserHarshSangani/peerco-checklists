@@ -283,7 +283,7 @@ export function RecipeEditorModal({
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="min-h-[40px] rounded-full bg-accent px-4 py-2 text-sm font-medium text-white"
+            className="min-h-[40px] rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-fg"
           >
             Add ingredient
           </button>

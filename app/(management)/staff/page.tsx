@@ -152,7 +152,7 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
   return (
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-text">
+        <h2 className="font-serif text-xl font-bold text-text">
           {t("manager.staffHeading")}
         </h2>
         <Button type="button" onClick={() => setShowAddModal(true)}>
@@ -190,7 +190,7 @@ function StaffForOutlet({ outletId }: { outletId: string }) {
                     type="button"
                     disabled={savingId === row.id}
                     onClick={() => saveName(row)}
-                    className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                    className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg disabled:opacity-50"
                   >
                     {t("common.save")}
                   </button>

@@ -91,7 +91,7 @@ export default function OutletsPage() {
 
   return (
     <main className="flex-1 p-4 sm:p-6">
-      <h2 className="mb-6 text-xl font-semibold text-text">
+      <h2 className="mb-6 font-serif text-xl font-bold text-text">
         {t("outlets.heading")}
       </h2>
 

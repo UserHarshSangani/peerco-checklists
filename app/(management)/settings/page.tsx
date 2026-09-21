@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 export default function SettingsPage() {
   return (
     <main className="flex-1 p-4 sm:p-6">
-      <h2 className="mb-6 text-xl font-semibold text-text">Settings</h2>
+      <h2 className="mb-6 font-serif text-xl font-bold text-text">Settings</h2>
 
       <div className="flex max-w-md flex-col gap-4">
         <Card>

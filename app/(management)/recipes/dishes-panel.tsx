@@ -172,7 +172,7 @@ export function DishesPanel({
             type="button"
             disabled={linking}
             onClick={handleLink}
-            className="min-h-[40px] rounded-full bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="min-h-[40px] rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-fg disabled:opacity-50"
           >
             Link
           </button>

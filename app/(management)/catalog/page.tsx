@@ -30,7 +30,7 @@ export default function CatalogPage() {
 
   return (
     <main className="flex-1 p-4 sm:p-6">
-      <h2 className="mb-4 text-xl font-semibold text-text">
+      <h2 className="mb-4 font-serif text-xl font-bold text-text">
         {t("catalog.heading")}
       </h2>
       {selectedOutlet.organizationName && (
@@ -46,7 +46,7 @@ export default function CatalogPage() {
             onClick={() => setTab(item.id)}
             className={`min-h-[40px] flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
               tab === item.id
-                ? "bg-accent text-white"
+                ? "bg-accent text-accent-fg"
                 : "text-muted hover:text-text"
             }`}
           >

@@ -289,7 +289,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
         <>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-text">
+              <h2 className="font-serif text-xl font-bold text-text">
                 {template.name}
               </h2>
               <p className="text-sm text-muted">

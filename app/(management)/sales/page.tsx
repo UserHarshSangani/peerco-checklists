@@ -22,7 +22,7 @@ export default function SalesPage() {
   return (
     <main className="flex-1 p-4 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-text">Sales</h2>
+        <h2 className="font-serif text-xl font-bold text-text">Sales</h2>
         <Button type="button" onClick={() => setShowImport(true)}>
           Import sales
         </Button>

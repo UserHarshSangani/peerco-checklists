@@ -191,7 +191,7 @@ function OutletEditor({ outletId }: { outletId: string }) {
 
       {!loading && !loadError && (
         <div className="max-w-lg">
-          <h2 className="mb-6 text-xl font-semibold text-text">
+          <h2 className="mb-6 font-serif text-xl font-bold text-text">
             {outletName}
           </h2>
 
