@@ -49,5 +49,9 @@ export default async function ManagementLayout({
     organizationName: unwrapOne(row.organizations)?.name ?? null,
   }));
 
-  return <ManagementShell outlets={outlets}>{children}</ManagementShell>;
+  return (
+    <ManagementShell outlets={outlets} role={profile.role}>
+      {children}
+    </ManagementShell>
+  );
 }

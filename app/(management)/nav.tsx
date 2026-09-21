@@ -6,6 +6,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSwitcher } from "@/components/language/language-switcher";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { isOutletAdminRole } from "@/lib/roles";
 import type { TranslationKey } from "@/lib/i18n/translations";
 
 const LINKS: { href: string; labelKey: TranslationKey }[] = [
@@ -15,9 +16,12 @@ const LINKS: { href: string; labelKey: TranslationKey }[] = [
   { href: "/checklists", labelKey: "nav.checklists" },
 ];
 
-export function Nav() {
+export function Nav({ role }: { role: string | null }) {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const links = isOutletAdminRole(role)
+    ? [...LINKS, { href: "/outlets", labelKey: "nav.outlets" as const }]
+    : LINKS;
 
   return (
     <header className="safe-top flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-4">
@@ -26,7 +30,7 @@ export function Nav() {
           PeerCo Checklists
         </p>
         <nav className="flex flex-wrap gap-1">
-          {LINKS.map((link) => {
+          {links.map((link) => {
             const active =
               pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (

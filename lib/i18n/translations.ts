@@ -129,6 +129,7 @@ const dictionary = {
   "nav.staff": { en: "Staff", hi: "स्टाफ", mr: "स्टाफ" },
   "nav.checklists": { en: "Checklists", hi: "चेकलिस्ट", mr: "चेकलिस्ट" },
   "nav.tablet": { en: "Tablet", hi: "टैबलेट", mr: "टॅबलेट" },
+  "nav.outlets": { en: "Outlets", hi: "आउटलेट", mr: "आउटलेट" },
 
   // /tablet — outlet & checklist list
   "tablet.switchOutlet": {
@@ -552,6 +553,124 @@ const dictionary = {
     en: "Show only flagged",
     hi: "केवल फ़्लैग की गई दिखाएं",
     mr: "फक्त फ्लॅग केलेले दाखवा",
+  },
+
+  // /outlets (peerco_admin, owner only)
+  "outlets.heading": { en: "Outlets", hi: "आउटलेट", mr: "आउटलेट" },
+  "outlets.locationSet": {
+    en: "Location set - radius {radius} m",
+    hi: "स्थान सेट है - त्रिज्या {radius} मी",
+    mr: "स्थान सेट आहे - त्रिज्या {radius} मी",
+  },
+  "outlets.locationNotSet": {
+    en: "Not set",
+    hi: "सेट नहीं है",
+    mr: "सेट केलेले नाही",
+  },
+  "outlets.loadError": {
+    en: "Couldn't load outlets: {error}",
+    hi: "आउटलेट लोड नहीं हो सके: {error}",
+    mr: "आउटलेट लोड करता आले नाहीत: {error}",
+  },
+  "outlets.backToOutlets": {
+    en: "Back to outlets",
+    hi: "आउटलेट पर वापस जाएं",
+    mr: "आउटलेटवर परत जा",
+  },
+  "outlets.loadOutletError": {
+    en: "Couldn't load this outlet: {error}",
+    hi: "यह आउटलेट लोड नहीं हो सका: {error}",
+    mr: "हा आउटलेट लोड करता आला नाही: {error}",
+  },
+  "outlets.useMyLocation": {
+    en: "Use my current location",
+    hi: "मेरा वर्तमान स्थान उपयोग करें",
+    mr: "माझे सध्याचे स्थान वापरा",
+  },
+  "outlets.locating": {
+    en: "Getting your location…",
+    hi: "आपका स्थान प्राप्त किया जा रहा है…",
+    mr: "तुमचे स्थान मिळवले जात आहे…",
+  },
+  "outlets.accuracyLabel": {
+    en: "Accuracy: ~{accuracy} m",
+    hi: "सटीकता: ~{accuracy} मी",
+    mr: "अचूकता: ~{accuracy} मी",
+  },
+  "outlets.accuracyWarning": {
+    en: "Move near a window or outdoors and try again.",
+    hi: "खिड़की के पास या बाहर जाकर फिर कोशिश करें।",
+    mr: "खिडकीजवळ किंवा बाहेर जाऊन पुन्हा प्रयत्न करा.",
+  },
+  "outlets.pasteCoordinatesLabel": {
+    en: "Paste coordinates",
+    hi: "निर्देशांक पेस्ट करें",
+    mr: "निर्देशांक पेस्ट करा",
+  },
+  "outlets.pasteCoordinatesPlaceholder": {
+    en: "18.5362, 73.8940",
+    hi: "18.5362, 73.8940",
+    mr: "18.5362, 73.8940",
+  },
+  "outlets.pasteCoordinatesError": {
+    en: 'Enter coordinates like "18.5362, 73.8940".',
+    hi: '"18.5362, 73.8940" जैसे निर्देशांक डालें।',
+    mr: '"18.5362, 73.8940" सारखे निर्देशांक टाका.',
+  },
+  "outlets.radiusLabel": {
+    en: "Radius (metres)",
+    hi: "त्रिज्या (मीटर)",
+    mr: "त्रिज्या (मीटर)",
+  },
+  "outlets.radiusHint": {
+    en: "GPS indoors can be off by 30 to 100 m. 150 m works for most outlets.",
+    hi: "घर के अंदर GPS 30 से 100 मी तक गलत हो सकता है। ज़्यादातर आउटलेट के लिए 150 मी ठीक रहता है।",
+    mr: "घरामध्ये GPS 30 ते 100 मी पर्यंत चुकीचे असू शकते. बहुतेक आउटलेटसाठी 150 मी योग्य असते.",
+  },
+  "outlets.radiusError": {
+    en: "Radius must be between 30 and 1000 m.",
+    hi: "त्रिज्या 30 से 1000 मी के बीच होनी चाहिए।",
+    mr: "त्रिज्या 30 ते 1000 मी दरम्यान असावी.",
+  },
+  "outlets.openInGoogleMaps": {
+    en: "Open in Google Maps",
+    hi: "Google Maps में खोलें",
+    mr: "Google Maps मध्ये उघडा",
+  },
+  "outlets.clearLocation": {
+    en: "Clear location",
+    hi: "स्थान हटाएं",
+    mr: "स्थान काढा",
+  },
+  "outlets.confirmClearLocation": {
+    en: "Clear this outlet's saved location?",
+    hi: "इस आउटलेट का सेव किया गया स्थान हटाएं?",
+    mr: "या आउटलेटचे सेव्ह केलेले स्थान काढायचे?",
+  },
+  "outlets.saveSuccess": {
+    en: "Location saved.",
+    hi: "स्थान सेव हो गया।",
+    mr: "स्थान सेव्ह झाले.",
+  },
+  "outlets.locationCleared": {
+    en: "Location cleared.",
+    hi: "स्थान हटा दिया गया।",
+    mr: "स्थान काढले गेले.",
+  },
+  "outlets.locationDenied": {
+    en: "Location access is blocked. Allow location for this site in your browser settings.",
+    hi: "लोकेशन एक्सेस ब्लॉक है। अपनी ब्राउज़र सेटिंग्स में इस साइट के लिए लोकेशन की अनुमति दें।",
+    mr: "लोकेशन अ‍ॅक्सेस ब्लॉक आहे. तुमच्या ब्राउझर सेटिंग्जमध्ये या साइटसाठी लोकेशनला परवानगी द्या.",
+  },
+  "outlets.locationUnavailable": {
+    en: "Couldn't get your location. Try again.",
+    hi: "आपका स्थान नहीं मिल सका। फिर कोशिश करें।",
+    mr: "तुमचे स्थान मिळू शकले नाही. पुन्हा प्रयत्न करा.",
+  },
+  "outlets.noLocationSet": {
+    en: "No location set yet.",
+    hi: "अभी कोई स्थान सेट नहीं है।",
+    mr: "अजून कोणतेही स्थान सेट केलेले नाही.",
   },
 } satisfies Record<string, Entry>;
 
