@@ -3,6 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import type { InventoryItemRow, Vendor } from "@/lib/types";
+import {
+  isValidRecipeUnitPair,
+  recipeUnitFactor,
+  RECIPE_UNIT_MISMATCH_MESSAGE,
+  type RecipeUnit,
+} from "@/lib/units";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +22,7 @@ export type ItemFormValues = {
   vendor_id: string;
   count_frequency: "daily" | "weekly";
   active: boolean;
+  recipe_unit: RecipeUnit | "";
 };
 
 export function ItemModal({
@@ -40,6 +47,7 @@ export function ItemModal({
     vendor_id: item?.vendor_id ?? "",
     count_frequency: item?.count_frequency ?? "daily",
     active: item?.active ?? true,
+    recipe_unit: item?.recipe_unit ?? "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +64,10 @@ export function ItemModal({
     }
     if (!values.count_unit.trim()) {
       setError(t("catalog.countUnitRequired"));
+      return;
+    }
+    if (!isValidRecipeUnitPair(values.recipe_unit, values.count_unit.trim())) {
+      setError(RECIPE_UNIT_MISMATCH_MESSAGE);
       return;
     }
     setSubmitting(true);
@@ -152,6 +164,47 @@ export function ItemModal({
               onChange={(event) => set("order_unit_size", event.target.value)}
               className="w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
             />
+          </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-muted">
+              Recipe unit
+            </label>
+            <select
+              value={values.recipe_unit}
+              onChange={(event) =>
+                set("recipe_unit", event.target.value as RecipeUnit | "")
+              }
+              className="w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
+            >
+              <option value="">Not used in recipes</option>
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+              <option value="pcs">pcs</option>
+            </select>
+            {!isValidRecipeUnitPair(values.recipe_unit, values.count_unit.trim()) && (
+              <p className="mt-1 text-sm text-danger">{RECIPE_UNIT_MISMATCH_MESSAGE}</p>
+            )}
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-muted">
+              Recipe units per stock unit
+            </label>
+            <p className="flex h-[50px] items-center rounded-lg bg-bg px-4 text-base text-muted">
+              {values.recipe_unit
+                ? (() => {
+                    const factor = recipeUnitFactor(
+                      values.recipe_unit,
+                      values.count_unit.trim(),
+                    );
+                    return factor != null
+                      ? `${factor} ${values.recipe_unit} per ${values.count_unit.trim()}`
+                      : "—";
+                  })()
+                : "—"}
+            </p>
           </div>
         </div>
 

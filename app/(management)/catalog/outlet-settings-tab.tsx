@@ -55,7 +55,7 @@ export function OutletSettingsTab({
       supabase
         .from("inventory_items")
         .select(
-          "id, name, category, count_unit, order_unit, order_unit_size, cost_per_unit, vendor_id, count_frequency, active",
+          "id, name, category, count_unit, order_unit, order_unit_size, cost_per_unit, vendor_id, count_frequency, active, recipe_unit, recipe_factor",
         )
         .eq("organization_id", organizationId)
         .eq("active", true)

@@ -68,6 +68,8 @@ export type InventoryItemRow = {
   vendor_id: string | null;
   count_frequency: "daily" | "weekly";
   active: boolean;
+  recipe_unit: "g" | "ml" | "pcs" | null;
+  recipe_factor: number;
 };
 
 export type OutletItemRow = {

@@ -6,6 +6,7 @@ import { formatRupees } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useToast } from "@/components/ui/toast";
 import type { InventoryItemRow, Vendor } from "@/lib/types";
+import { isRecipeUnitMismatchError, RECIPE_UNIT_MISMATCH_MESSAGE } from "@/lib/units";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -35,7 +36,7 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
       supabase
         .from("inventory_items")
         .select(
-          "id, name, category, count_unit, order_unit, order_unit_size, cost_per_unit, vendor_id, count_frequency, active",
+          "id, name, category, count_unit, order_unit, order_unit_size, cost_per_unit, vendor_id, count_frequency, active, recipe_unit, recipe_factor",
         )
         .eq("organization_id", organizationId)
         .order("name"),
@@ -115,6 +116,7 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
       vendor_id: values.vendor_id || null,
       count_frequency: values.count_frequency,
       active: values.active,
+      recipe_unit: values.recipe_unit || null,
     };
     const { error } = existing
       ? await supabase
@@ -126,9 +128,11 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
           .insert({ ...payload, organization_id: organizationId });
     if (error) {
       return {
-        error: isDuplicateNameError(error.message)
-          ? t("catalog.duplicateItemName")
-          : error.message,
+        error: isRecipeUnitMismatchError(error)
+          ? RECIPE_UNIT_MISMATCH_MESSAGE
+          : isDuplicateNameError(error.message)
+            ? t("catalog.duplicateItemName")
+            : error.message,
       };
     }
     await refresh();
@@ -196,6 +200,9 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
                   {t("catalog.countFrequencyLabel")}
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-muted">
+                  Recipe unit
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted">
                   {t("manager.active")}
                 </th>
                 <th className="px-4 py-3" />
@@ -232,6 +239,11 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
                     {item.count_frequency === "daily"
                       ? t("catalog.frequencyDaily")
                       : t("catalog.frequencyWeekly")}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-muted">
+                    {item.recipe_unit
+                      ? `${item.recipe_unit} (${item.recipe_factor}/${item.count_unit})`
+                      : "—"}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span
