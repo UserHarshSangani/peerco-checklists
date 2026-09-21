@@ -7,6 +7,7 @@ import { fetchStaffNames } from "@/lib/staff-names";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { SubmissionModal, type SubmissionSummary } from "../submission-modal";
+import { LocationBadge } from "@/components/location-badge";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { ChecklistTemplate } from "@/lib/types";
@@ -52,7 +53,9 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
           .order("name"),
         supabase
           .from("checklist_submissions")
-          .select("id, template_id, submitted_at, notes, staff_id")
+          .select(
+            "id, template_id, submitted_at, notes, staff_id, location_status, distance_from_outlet_m",
+          )
           .eq("outlet_id", outletId)
           .eq("business_date", date)
           .order("submitted_at", { ascending: false }),
@@ -94,6 +97,8 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
           staffName: staffNames[row.staff_id] ?? "Unknown staff",
           submittedAt: row.submitted_at,
           notes: row.notes,
+          locationStatus: row.location_status,
+          distanceM: row.distance_from_outlet_m,
         };
       }
 
@@ -152,12 +157,18 @@ function DashboardForOutlet({ outletId }: { outletId: string }) {
                 {template.name}
               </p>
               {submission ? (
-                <p className="text-sm font-medium text-success">
-                  {t("manager.submittedAt", {
-                    name: submission.staffName,
-                    time: formatTimeKolkata(submission.submittedAt),
-                  })}
-                </p>
+                <>
+                  <p className="mb-2 text-sm font-medium text-success">
+                    {t("manager.submittedAt", {
+                      name: submission.staffName,
+                      time: formatTimeKolkata(submission.submittedAt),
+                    })}
+                  </p>
+                  <LocationBadge
+                    status={submission.locationStatus}
+                    distanceM={submission.distanceM}
+                  />
+                </>
               ) : (
                 <p className="text-sm font-medium text-warning">
                   {t("manager.notSubmittedYet")}

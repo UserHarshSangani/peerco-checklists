@@ -11,6 +11,12 @@ import { fetchStaffNames } from "@/lib/staff-names";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { SubmissionModal, type SubmissionSummary } from "../submission-modal";
+import {
+  LocationBadge,
+  isFlaggedLocationStatus,
+  isMarkerLocationStatus,
+  type LocationStatus,
+} from "@/components/location-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { ChecklistTemplate } from "@/lib/types";
@@ -22,6 +28,8 @@ type Cell = {
   staffName: string;
   submittedAt: string;
   notes: string | null;
+  locationStatus: LocationStatus;
+  distanceM: number | null;
 };
 
 export default function HistoryPage() {
@@ -48,6 +56,8 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
   const [incompleteDates, setIncompleteDates] = useState<Set<string>>(
     new Set(),
   );
+  const [flaggedDates, setFlaggedDates] = useState<Set<string>>(new Set());
+  const [showOnlyFlagged, setShowOnlyFlagged] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [openSubmission, setOpenSubmission] =
@@ -68,7 +78,9 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
           .order("name"),
         supabase
           .from("checklist_submissions")
-          .select("id, template_id, business_date, submitted_at, notes, staff_id")
+          .select(
+            "id, template_id, business_date, submitted_at, notes, staff_id, location_status, distance_from_outlet_m",
+          )
           .eq("outlet_id", outletId)
           .gte("business_date", oldest)
           .lte("business_date", newest)
@@ -109,8 +121,12 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
 
       const nextGrid: Record<string, Record<string, Cell>> = {};
       const dateBySubmissionId = new Map<string, string>();
+      const nextFlaggedDates = new Set<string>();
       for (const row of submissionRows) {
         dateBySubmissionId.set(row.id, row.business_date);
+        if (isFlaggedLocationStatus(row.location_status as LocationStatus)) {
+          nextFlaggedDates.add(row.business_date);
+        }
         const byTemplate = nextGrid[row.business_date] ?? {};
         if (!byTemplate[row.template_id]) {
           // rows are newest-first, so the first one wins per date+template
@@ -119,6 +135,8 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
             staffName: staffNames[row.staff_id] ?? "Unknown staff",
             submittedAt: row.submitted_at,
             notes: row.notes,
+            locationStatus: row.location_status as LocationStatus,
+            distanceM: row.distance_from_outlet_m,
           };
         }
         nextGrid[row.business_date] = byTemplate;
@@ -133,6 +151,7 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
       setTemplates(templatesRes.data ?? []);
       setGrid(nextGrid);
       setIncompleteDates(nextIncompleteDates);
+      setFlaggedDates(nextFlaggedDates);
       setLoading(false);
       setLoadError(null);
     }
@@ -143,11 +162,28 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
     };
   }, [supabase, outletId, dates]);
 
+  const visibleDates = showOnlyFlagged
+    ? dates.filter((date) => flaggedDates.has(date))
+    : dates;
+
   return (
     <main className="flex-1 p-4 sm:p-6">
-      <h2 className="mb-6 text-xl font-semibold text-text">
-        {t("manager.historyHeading")}
-      </h2>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-text">
+          {t("manager.historyHeading")}
+        </h2>
+        <button
+          type="button"
+          onClick={() => setShowOnlyFlagged((prev) => !prev)}
+          className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium ${
+            showOnlyFlagged
+              ? "bg-accent text-white"
+              : "bg-border/50 text-muted"
+          }`}
+        >
+          {t("location.showOnlyFlagged")}
+        </button>
+      </div>
 
       {loading && (
         <div className="flex flex-col gap-2">
@@ -184,7 +220,7 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
               </tr>
             </thead>
             <tbody>
-              {dates.map((date) => {
+              {visibleDates.map((date) => {
                 const incomplete = incompleteDates.has(date);
                 return (
                   <tr
@@ -210,11 +246,25 @@ function HistoryForOutlet({ outletId }: { outletId: string }) {
                                   staffName: cell.staffName,
                                   submittedAt: cell.submittedAt,
                                   notes: cell.notes,
+                                  locationStatus: cell.locationStatus,
+                                  distanceM: cell.distanceM,
                                 })
                               }
-                              className="font-medium text-success hover:underline"
+                              className="flex flex-col items-start gap-1 text-left"
                             >
-                              ✓ {cell.staffName} · {formatTimeKolkata(cell.submittedAt)}
+                              <span className="font-medium text-success hover:underline">
+                                {isMarkerLocationStatus(cell.locationStatus) && (
+                                  <span
+                                    aria-hidden="true"
+                                    className="mr-1 inline-block h-2 w-2 rounded-full bg-danger align-middle"
+                                  />
+                                )}
+                                ✓ {cell.staffName} · {formatTimeKolkata(cell.submittedAt)}
+                              </span>
+                              <LocationBadge
+                                status={cell.locationStatus}
+                                distanceM={cell.distanceM}
+                              />
                             </button>
                           ) : (
                             <span className="text-muted">—</span>

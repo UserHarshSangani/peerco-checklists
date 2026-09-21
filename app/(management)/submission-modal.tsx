@@ -7,6 +7,7 @@ import { fetchSignedPhotoUrls } from "@/lib/photo-signed-urls";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { Modal } from "@/components/ui/modal";
 import { SkeletonList } from "@/components/ui/skeleton";
+import { LocationBadge, type LocationStatus } from "@/components/location-badge";
 
 type Answer = {
   id: string;
@@ -22,6 +23,8 @@ export type SubmissionSummary = {
   staffName: string;
   submittedAt: string;
   notes: string | null;
+  locationStatus: LocationStatus;
+  distanceM: number | null;
 };
 
 export function SubmissionModal({
@@ -75,12 +78,16 @@ export function SubmissionModal({
             <h3 className="text-lg font-semibold text-text">
               {submission.title}
             </h3>
-            <p className="text-sm text-muted">
+            <p className="mb-1 text-sm text-muted">
               {t("manager.submittedAt", {
                 name: submission.staffName,
                 time: formatTimeKolkata(submission.submittedAt),
               })}
             </p>
+            <LocationBadge
+              status={submission.locationStatus}
+              distanceM={submission.distanceM}
+            />
           </div>
           <button
             type="button"

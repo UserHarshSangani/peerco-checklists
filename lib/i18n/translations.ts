@@ -520,6 +520,39 @@ const dictionary = {
     hi: "फोटो आवश्यक",
     mr: "फोटो आवश्यक",
   },
+
+  // Location status badge (dashboard cards, history cells, answers view)
+  "location.inside": { en: "At outlet", hi: "आउटलेट पर", mr: "आउटलेटवर" },
+  "location.outside": {
+    en: "Outside outlet ({distance})",
+    hi: "आउटलेट से बाहर ({distance})",
+    mr: "आउटलेटच्या बाहेर ({distance})",
+  },
+  "location.lowAccuracy": {
+    en: "Location uncertain",
+    hi: "स्थान अनिश्चित है",
+    mr: "स्थान अनिश्चित आहे",
+  },
+  "location.denied": {
+    en: "Location blocked",
+    hi: "लोकेशन ब्लॉक है",
+    mr: "लोकेशन ब्लॉक आहे",
+  },
+  "location.unavailable": {
+    en: "Location unavailable",
+    hi: "लोकेशन उपलब्ध नहीं",
+    mr: "लोकेशन उपलब्ध नाही",
+  },
+  "location.notConfigured": {
+    en: "Outlet location not set",
+    hi: "आउटलेट का स्थान सेट नहीं है",
+    mr: "आउटलेटचे स्थान सेट केलेले नाही",
+  },
+  "location.showOnlyFlagged": {
+    en: "Show only flagged",
+    hi: "केवल फ़्लैग की गई दिखाएं",
+    mr: "फक्त फ्लॅग केलेले दाखवा",
+  },
 } satisfies Record<string, Entry>;
 
 export type TranslationKey = keyof typeof dictionary;
