@@ -12,10 +12,13 @@ import { LocationBadge, type LocationStatus } from "@/components/location-badge"
 type Answer = {
   id: string;
   item_label: string;
+  item_section: string | null;
   done: boolean;
   note: string | null;
   photo_path: string | null;
 };
+
+const GENERAL_SECTION = "General";
 
 export type SubmissionSummary = {
   id: string;
@@ -42,11 +45,22 @@ export function SubmissionModal({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
 
+  const groupedAnswers = useMemo(() => {
+    const map = new Map<string, Answer[]>();
+    for (const answer of answers) {
+      const key = answer.item_section?.trim() || GENERAL_SECTION;
+      const list = map.get(key) ?? [];
+      list.push(answer);
+      map.set(key, list);
+    }
+    return Array.from(map.entries());
+  }, [answers]);
+
   useEffect(() => {
     let cancelled = false;
     supabase
       .from("submission_answers")
-      .select("id, item_label, done, note, photo_path")
+      .select("id, item_label, item_section, done, note, photo_path")
       .eq("submission_id", submission.id)
       .then(async ({ data, error }) => {
         if (cancelled) return;
@@ -106,66 +120,75 @@ export function SubmissionModal({
         )}
 
         {!loading && !loadError && (
-          <ul className="flex flex-col gap-2">
-            {answers.map((answer) => {
-              const photoUrl = answer.photo_path
-                ? photoUrls[answer.photo_path]
-                : null;
-              return (
-                <li
-                  key={answer.id}
-                  className={`rounded-xl p-4 ring-1 ${
-                    answer.done
-                      ? "bg-bg ring-border"
-                      : "bg-danger/10 ring-danger/40"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium text-text">
-                      {answer.item_label}
-                    </span>
-                    <span
-                      className={`shrink-0 text-xs font-semibold tracking-wide uppercase ${
-                        answer.done ? "text-success" : "text-danger"
-                      }`}
-                    >
-                      {answer.done
-                        ? t("manager.itemDone")
-                        : t("manager.itemNotDone")}
-                    </span>
-                  </div>
-                  {answer.note && (
-                    <p className="mt-1 text-sm text-muted">
-                      {t("manager.note", { note: answer.note })}
-                    </p>
-                  )}
-                  {answer.photo_path && (
-                    <div className="mt-2">
-                      {photoUrl ? (
-                        <button
-                          type="button"
-                          onClick={() => setViewerUrl(photoUrl)}
-                          aria-label={t("manager.viewPhoto")}
-                          className="block"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element -- signed Storage URL, not an optimizable static asset */}
-                          <img
-                            src={photoUrl}
-                            alt={t("manager.viewPhoto")}
-                            className="h-16 w-16 rounded-lg object-cover ring-1 ring-border transition hover:opacity-80"
-                          />
-                        </button>
-                      ) : (
-                        <p className="text-sm text-muted">
-                          {t("manager.photoUnavailable")}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <div className="flex flex-col gap-4">
+            {groupedAnswers.map(([section, sectionAnswers]) => (
+              <div key={section}>
+                <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">
+                  {section}
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {sectionAnswers.map((answer) => {
+                    const photoUrl = answer.photo_path
+                      ? photoUrls[answer.photo_path]
+                      : null;
+                    return (
+                      <li
+                        key={answer.id}
+                        className={`rounded-xl p-4 ring-1 ${
+                          answer.done
+                            ? "bg-bg ring-border"
+                            : "bg-danger/10 ring-danger/40"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-medium text-text">
+                            {answer.item_label}
+                          </span>
+                          <span
+                            className={`shrink-0 text-xs font-semibold tracking-wide uppercase ${
+                              answer.done ? "text-success" : "text-danger"
+                            }`}
+                          >
+                            {answer.done
+                              ? t("manager.itemDone")
+                              : t("manager.itemNotDone")}
+                          </span>
+                        </div>
+                        {answer.note && (
+                          <p className="mt-1 text-sm text-muted">
+                            {t("manager.note", { note: answer.note })}
+                          </p>
+                        )}
+                        {answer.photo_path && (
+                          <div className="mt-2">
+                            {photoUrl ? (
+                              <button
+                                type="button"
+                                onClick={() => setViewerUrl(photoUrl)}
+                                aria-label={t("manager.viewPhoto")}
+                                className="block"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element -- signed Storage URL, not an optimizable static asset */}
+                                <img
+                                  src={photoUrl}
+                                  alt={t("manager.viewPhoto")}
+                                  className="h-16 w-16 rounded-lg object-cover ring-1 ring-border transition hover:opacity-80"
+                                />
+                              </button>
+                            ) : (
+                              <p className="text-sm text-muted">
+                                {t("manager.photoUnavailable")}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
         )}
 
         {submission.notes && (

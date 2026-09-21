@@ -36,6 +36,10 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
+  // Buffers in-progress edits to a section field until it's saved on blur,
+  // so retyping doesn't trigger a save (and a refetch that could steal
+  // focus) on every keystroke.
+  const [sectionDrafts, setSectionDrafts] = useState<Record<string, string>>({});
 
   const kindLabels = {
     opening: t("manager.kindOpening"),
@@ -204,6 +208,67 @@ function TemplateEditor({ templateId }: { templateId: string }) {
     await refreshItems();
   }
 
+  function sectionValue(item: ChecklistItemRow): string {
+    return sectionDrafts[item.id] ?? item.section ?? "";
+  }
+
+  function updateSectionDraft(itemId: string, value: string) {
+    setSectionDrafts((prev) => ({ ...prev, [itemId]: value.slice(0, 60) }));
+  }
+
+  async function saveSection(item: ChecklistItemRow) {
+    const draftValue = sectionDrafts[item.id];
+    if (draftValue === undefined) return;
+    const trimmed = draftValue.trim();
+    if (trimmed === (item.section ?? "")) {
+      setSectionDrafts((prev) => {
+        const next = { ...prev };
+        delete next[item.id];
+        return next;
+      });
+      return;
+    }
+    setSavingId(item.id);
+    const { error } = await supabase
+      .from("checklist_items")
+      .update({ section: trimmed || null })
+      .eq("id", item.id);
+    setSavingId(null);
+    if (error) {
+      showError(error.message);
+      return;
+    }
+    setSectionDrafts((prev) => {
+      const next = { ...prev };
+      delete next[item.id];
+      return next;
+    });
+    await refreshItems();
+  }
+
+  const sectionSuggestions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          items
+            .map((item) => item.section)
+            .filter((section): section is string => !!section?.trim()),
+        ),
+      ),
+    [items],
+  );
+
+  const groupedItems = useMemo(() => {
+    const map = new Map<string, ChecklistItemRow[]>();
+    for (const item of items) {
+      const key = item.section?.trim() || "General";
+      const list = map.get(key) ?? [];
+      list.push(item);
+      map.set(key, list);
+    }
+    return Array.from(map.entries());
+  }, [items]);
+
   return (
     <main className="flex-1 p-4 sm:p-6">
       <Link
@@ -241,120 +306,153 @@ function TemplateEditor({ templateId }: { templateId: string }) {
             <EmptyState title={t("manager.noItemsYet")} />
           )}
 
-          <ul className="flex flex-col gap-3">
-            {items.map((item, index) => (
-              <li
-                key={item.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border"
-              >
-                <div className="flex flex-1 flex-wrap items-center gap-3">
-                  <div className="flex flex-col">
-                    <button
-                      type="button"
-                      disabled={index === 0 || savingId === item.id}
-                      onClick={() => moveItem(item, "up")}
-                      aria-label={t("manager.moveUp")}
-                      className="text-xs text-muted hover:text-text disabled:opacity-30"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      disabled={index === items.length - 1 || savingId === item.id}
-                      onClick={() => moveItem(item, "down")}
-                      aria-label={t("manager.moveDown")}
-                      className="text-xs text-muted hover:text-text disabled:opacity-30"
-                    >
-                      ▼
-                    </button>
-                  </div>
-
-                  {editingId === item.id ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editingLabel}
-                        onChange={(event) => setEditingLabel(event.target.value)}
-                        autoFocus
-                        className="min-h-[40px] rounded-lg border border-border bg-bg px-3 py-2 text-base text-text focus:border-accent focus:outline-none"
-                      />
-                      <button
-                        type="button"
-                        disabled={savingId === item.id}
-                        onClick={() => saveLabel(item)}
-                        className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-                      >
-                        {t("common.save")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(null)}
-                        className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
-                      >
-                        {t("common.cancel")}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-base font-medium text-text">
-                        {item.label}
-                      </span>
-                      {item.requires_photo && (
-                        <span aria-hidden="true" title={t("manager.photoRequiredToggle")}>
-                          📷
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingId(item.id);
-                          setEditingLabel(item.label);
-                        }}
-                        className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
-                      >
-                        {t("manager.edit")}
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={savingId === item.id}
-                    onClick={() => toggleRequired(item)}
-                    className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
-                      item.required
-                        ? "bg-warning/15 text-warning"
-                        : "bg-border/50 text-muted"
-                    }`}
-                  >
-                    {item.required ? t("manager.required") : t("manager.optional")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={savingId === item.id}
-                    onClick={() => toggleRequiresPhoto(item)}
-                    className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
-                      item.requires_photo
-                        ? "bg-accent/15 text-accent"
-                        : "bg-border/50 text-muted"
-                    }`}
-                  >
-                    📷 {t("manager.photoRequiredToggle")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={savingId === item.id}
-                    onClick={() => deleteItem(item)}
-                    className="min-h-[40px] rounded-full px-4 py-2 text-sm font-medium text-danger hover:bg-danger/10 disabled:opacity-50"
-                  >
-                    {t("manager.delete")}
-                  </button>
-                </div>
-              </li>
+          <datalist id="section-suggestions">
+            {sectionSuggestions.map((section) => (
+              <option key={section} value={section} />
             ))}
-          </ul>
+          </datalist>
+
+          <div className="flex flex-col gap-6">
+            {groupedItems.map(([section, sectionItems]) => (
+              <div key={section}>
+                <h3 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
+                  {section}
+                </h3>
+                <ul className="flex flex-col gap-3">
+                  {sectionItems.map((item) => {
+                    const index = items.findIndex((row) => row.id === item.id);
+                    return (
+                      <li
+                        key={item.id}
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border"
+                      >
+                        <div className="flex flex-1 flex-wrap items-center gap-3">
+                          <div className="flex flex-col">
+                            <button
+                              type="button"
+                              disabled={index === 0 || savingId === item.id}
+                              onClick={() => moveItem(item, "up")}
+                              aria-label={t("manager.moveUp")}
+                              className="text-xs text-muted hover:text-text disabled:opacity-30"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              disabled={index === items.length - 1 || savingId === item.id}
+                              onClick={() => moveItem(item, "down")}
+                              aria-label={t("manager.moveDown")}
+                              className="text-xs text-muted hover:text-text disabled:opacity-30"
+                            >
+                              ▼
+                            </button>
+                          </div>
+
+                          {editingId === item.id ? (
+                            <>
+                              <input
+                                type="text"
+                                value={editingLabel}
+                                onChange={(event) => setEditingLabel(event.target.value)}
+                                autoFocus
+                                className="min-h-[40px] rounded-lg border border-border bg-bg px-3 py-2 text-base text-text focus:border-accent focus:outline-none"
+                              />
+                              <button
+                                type="button"
+                                disabled={savingId === item.id}
+                                onClick={() => saveLabel(item)}
+                                className="min-h-[36px] rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg disabled:opacity-50"
+                              >
+                                {t("common.save")}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingId(null)}
+                                className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
+                              >
+                                {t("common.cancel")}
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-base font-medium text-text">
+                                {item.label}
+                              </span>
+                              {item.requires_photo && (
+                                <span aria-hidden="true" title={t("manager.photoRequiredToggle")}>
+                                  📷
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingId(item.id);
+                                  setEditingLabel(item.label);
+                                }}
+                                className="min-h-[36px] text-sm font-medium text-muted hover:text-text"
+                              >
+                                {t("manager.edit")}
+                              </button>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <label className="flex items-center gap-1.5 text-xs text-muted">
+                            Section
+                            <input
+                              type="text"
+                              list="section-suggestions"
+                              maxLength={60}
+                              value={sectionValue(item)}
+                              onChange={(event) =>
+                                updateSectionDraft(item.id, event.target.value)
+                              }
+                              onBlur={() => saveSection(item)}
+                              placeholder="General"
+                              className="min-h-[36px] w-32 rounded-lg border border-border bg-bg px-2 py-1 text-sm text-text focus:border-accent focus:outline-none"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            disabled={savingId === item.id}
+                            onClick={() => toggleRequired(item)}
+                            className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+                              item.required
+                                ? "bg-warning/15 text-warning"
+                                : "bg-border/50 text-muted"
+                            }`}
+                          >
+                            {item.required ? t("manager.required") : t("manager.optional")}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={savingId === item.id}
+                            onClick={() => toggleRequiresPhoto(item)}
+                            className={`min-h-[40px] rounded-full px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+                              item.requires_photo
+                                ? "bg-accent/15 text-accent"
+                                : "bg-border/50 text-muted"
+                            }`}
+                          >
+                            📷 {t("manager.photoRequiredToggle")}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={savingId === item.id}
+                            onClick={() => deleteItem(item)}
+                            className="min-h-[40px] rounded-full px-4 py-2 text-sm font-medium text-danger hover:bg-danger/10 disabled:opacity-50"
+                          >
+                            {t("manager.delete")}
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
         </>
       )}
     </main>
