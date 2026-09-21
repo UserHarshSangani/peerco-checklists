@@ -77,4 +77,7 @@ export type OutletItemRow = {
   max_level: number | null;
   lead_time_days: number;
   active: boolean;
+  track_variance: boolean;
+  variance_tolerance_pct: number;
+  variance_tolerance_qty: number;
 };

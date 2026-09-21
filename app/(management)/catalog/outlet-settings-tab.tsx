@@ -14,6 +14,9 @@ type RowDraft = {
   max: string;
   leadTime: string;
   active: boolean;
+  trackVariance: boolean;
+  tolerancePct: string;
+  toleranceQty: string;
 };
 
 function draftFromOutletItem(row: OutletItemRow | undefined): RowDraft {
@@ -22,6 +25,9 @@ function draftFromOutletItem(row: OutletItemRow | undefined): RowDraft {
     max: row?.max_level != null ? String(row.max_level) : "",
     leadTime: row ? String(row.lead_time_days) : "1",
     active: row?.active ?? true,
+    trackVariance: row?.track_variance ?? true,
+    tolerancePct: row ? String(row.variance_tolerance_pct) : "5",
+    toleranceQty: row ? String(row.variance_tolerance_qty) : "0",
   };
 }
 
@@ -56,7 +62,9 @@ export function OutletSettingsTab({
         .order("name"),
       supabase
         .from("outlet_items")
-        .select("outlet_id, item_id, par_level, max_level, lead_time_days, active")
+        .select(
+          "outlet_id, item_id, par_level, max_level, lead_time_days, active, track_variance, variance_tolerance_pct, variance_tolerance_qty",
+        )
         .eq("outlet_id", outletId),
     ]);
   }
@@ -136,6 +144,16 @@ export function OutletSettingsTab({
       showError(t("catalog.outletSettings.leadTimeError"));
       return;
     }
+    const tolerancePct = Number(draft.tolerancePct);
+    if (!Number.isFinite(tolerancePct) || tolerancePct < 0) {
+      showError("Tolerance % must be 0 or more.");
+      return;
+    }
+    const toleranceQty = Number(draft.toleranceQty);
+    if (!Number.isFinite(toleranceQty) || toleranceQty < 0) {
+      showError("Tolerance quantity must be 0 or more.");
+      return;
+    }
     setSavingId(item.id);
     const { error } = await supabase
       .from("outlet_items")
@@ -144,6 +162,9 @@ export function OutletSettingsTab({
         max_level: draft.max.trim() ? Number(draft.max) : null,
         lead_time_days: leadTime,
         active: draft.active,
+        track_variance: draft.trackVariance,
+        variance_tolerance_pct: tolerancePct,
+        variance_tolerance_qty: toleranceQty,
       })
       .eq("outlet_id", outletId)
       .eq("item_id", item.id);
@@ -234,6 +255,15 @@ export function OutletSettingsTab({
                 <th className="px-4 py-3 text-left font-semibold text-muted">
                   {t("manager.active")}
                 </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted">
+                  Track variance
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted">
+                  Tolerance %
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted">
+                  Tolerance qty
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -311,6 +341,43 @@ export function OutletSettingsTab({
                           updateDraft(item.id, { active: event.target.checked })
                         }
                         className="h-4 w-4 rounded border-border disabled:opacity-40"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        disabled={!isStocked}
+                        checked={draft.trackVariance}
+                        onChange={(event) =>
+                          updateDraft(item.id, { trackVariance: event.target.checked })
+                        }
+                        className="h-4 w-4 rounded border-border disabled:opacity-40"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        disabled={!isStocked}
+                        value={draft.tolerancePct}
+                        onChange={(event) =>
+                          updateDraft(item.id, { tolerancePct: event.target.value })
+                        }
+                        className="w-20 rounded-lg border border-border bg-bg px-3 py-2 text-text focus:border-accent focus:outline-none disabled:opacity-40"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        disabled={!isStocked}
+                        value={draft.toleranceQty}
+                        onChange={(event) =>
+                          updateDraft(item.id, { toleranceQty: event.target.value })
+                        }
+                        className="w-20 rounded-lg border border-border bg-bg px-3 py-2 text-text focus:border-accent focus:outline-none disabled:opacity-40"
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
