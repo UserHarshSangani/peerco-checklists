@@ -5,18 +5,24 @@ import { useEffect, useId, useRef, type ReactNode } from "react";
 const DEFAULT_PANEL_CLASSNAME =
   "max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-surface p-6 shadow-xl outline-none";
 
+const DRAWER_PANEL_CLASSNAME =
+  "safe-bottom max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-surface p-6 shadow-xl outline-none";
+
 export function Modal({
   title,
   onClose,
   children,
   closeOnOverlayClick = true,
-  panelClassName = DEFAULT_PANEL_CLASSNAME,
+  panelClassName,
+  variant = "center",
 }: {
   title?: string;
   onClose: () => void;
   children: ReactNode;
   closeOnOverlayClick?: boolean;
   panelClassName?: string;
+  /** "bottom" renders as a full-width bottom sheet (a Drawer) instead of a centred dialog. */
+  variant?: "center" | "bottom";
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -51,9 +57,17 @@ export function Modal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  const resolvedPanelClassName =
+    panelClassName ??
+    (variant === "bottom" ? DRAWER_PANEL_CLASSNAME : DEFAULT_PANEL_CLASSNAME);
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className={`fixed inset-0 z-50 flex bg-black/50 ${
+        variant === "bottom"
+          ? "items-end justify-center"
+          : "items-center justify-center p-4"
+      }`}
       onClick={closeOnOverlayClick ? onClose : undefined}
     >
       <div
@@ -63,7 +77,7 @@ export function Modal({
         aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        className={panelClassName}
+        className={resolvedPanelClassName}
       >
         {title && (
           <h3
@@ -77,4 +91,11 @@ export function Modal({
       </div>
     </div>
   );
+}
+
+// A bottom sheet — same dialog behaviour as Modal (focus trap, Escape,
+// overlay click), just anchored to the bottom edge full-width. Handy on
+// mobile where a centred dialog feels out of place.
+export function Drawer(props: Omit<Parameters<typeof Modal>[0], "variant">) {
+  return <Modal {...props} variant="bottom" />;
 }

@@ -1,6 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "secondary" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
@@ -10,8 +10,9 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 // Solid variants (primary/danger) use a fixed accent/danger fill in both
 // themes, dark enough that white text stays readable — see app/globals.css.
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-accent text-white hover:opacity-90",
+  primary: "bg-accent text-accent-fg hover:bg-accent-pressed",
   secondary: "bg-surface text-text ring-1 ring-border hover:bg-border/40",
+  ghost: "bg-transparent text-text hover:bg-border/30",
   danger: "bg-danger text-white hover:opacity-90",
 };
 
