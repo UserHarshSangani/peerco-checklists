@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { todayInKolkata, formatDateLabelForLocale } from "@/lib/date";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { APP_NAME } from "@/lib/brand";
 import type { ChecklistTemplate, Outlet, StaffMember } from "@/lib/types";
 import { ChecklistView } from "./checklist-view";
 import { StockCountFlow } from "./stock/stock-count-flow";
@@ -83,7 +84,7 @@ function ChooseOutlet({
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <header className="safe-top flex items-center justify-between border-b border-border bg-surface px-4 py-3 sm:px-6">
-        <span className="font-serif text-xl font-bold text-text">PeerCo Daybook</span>
+        <span className="font-serif text-xl font-bold text-text">{APP_NAME}</span>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />

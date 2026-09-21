@@ -83,19 +83,19 @@ const dictionary = {
 
   // Install-this-app hint (/tablet)
   "install.prompt": {
-    en: "Install this app for quick access from your home screen.",
-    hi: "होम स्क्रीन से जल्दी खोलने के लिए यह ऐप इंस्टॉल करें।",
-    mr: "होम स्क्रीनवरून पटकन उघडण्यासाठी हे अ‍ॅप इन्स्टॉल करा.",
+    en: "Install {name} for quick access from your home screen.",
+    hi: "होम स्क्रीन से जल्दी खोलने के लिए {name} इंस्टॉल करें।",
+    mr: "होम स्क्रीनवरून पटकन उघडण्यासाठी {name} इन्स्टॉल करा.",
   },
   "install.installAction": {
-    en: "Install",
-    hi: "इंस्टॉल करें",
-    mr: "इन्स्टॉल करा",
+    en: "Install {name}",
+    hi: "{name} इंस्टॉल करें",
+    mr: "{name} इन्स्टॉल करा",
   },
   "install.iosHint": {
-    en: 'Tap Share, then "Add to Home Screen" to install this app.',
-    hi: 'यह ऐप इंस्टॉल करने के लिए शेयर बटन दबाएं, फिर "होम स्क्रीन पर जोड़ें" चुनें।',
-    mr: 'हे अ‍ॅप इन्स्टॉल करण्यासाठी शेअर बटण दाबा, नंतर "होम स्क्रीनवर जोडा" निवडा.',
+    en: 'Tap Share, then "Add to Home Screen" to install {name}.',
+    hi: '{name} इंस्टॉल करने के लिए शेयर बटन दबाएं, फिर "होम स्क्रीन पर जोड़ें" चुनें।',
+    mr: '{name} इन्स्टॉल करण्यासाठी शेअर बटण दाबा, नंतर "होम स्क्रीनवर जोडा" निवडा.',
   },
 
   // /login
