@@ -6,6 +6,7 @@ export type IngredientOption = {
   category: string | null;
   recipe_unit: RecipeUnit;
   recipe_factor: number;
+  pack_buffer_units: number;
   cost_per_unit: number | null;
 };
 
@@ -19,6 +20,7 @@ export type RecipeLineDraft = {
   // dropped, shown with a warning instead.
   recipe_unit: RecipeUnit | null;
   recipe_factor: number;
+  pack_buffer_units: number;
   cost_per_unit: number | null;
   quantity: string;
   note: string;

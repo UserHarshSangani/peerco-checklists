@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
+  isManualPackUnit,
   isRecipeUnitMismatchError,
   isValidRecipeUnitPair,
   RECIPE_UNIT_MISMATCH_MESSAGE,
@@ -40,9 +41,14 @@ export function IngredientPickerModal({
   const [newCategory, setNewCategory] = useState("");
   const [newCountUnit, setNewCountUnit] = useState("");
   const [newRecipeUnit, setNewRecipeUnit] = useState<RecipeUnit>("g");
+  const [newRecipeFactor, setNewRecipeFactor] = useState("");
+  const [newPackBuffer, setNewPackBuffer] = useState("0");
   const [newCost, setNewCost] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  const newCountUnitTrimmed = newCountUnit.trim();
+  const newManualPack = isManualPackUnit(newRecipeUnit, newCountUnitTrimmed);
 
   const results = useMemo(() => {
     const available = items.filter((item) => !excludeIds.has(item.id));
@@ -68,6 +74,22 @@ export function IngredientPickerModal({
       setCreateError(RECIPE_UNIT_MISMATCH_MESSAGE);
       return;
     }
+    const newFactorNum = Number(newRecipeFactor);
+    const newBufferNum = newPackBuffer.trim() ? Number(newPackBuffer) : 0;
+    if (newManualPack) {
+      if (!newRecipeFactor.trim() || !Number.isFinite(newFactorNum) || newFactorNum <= 0) {
+        setCreateError(`Enter how many pieces are in one ${newCountUnitTrimmed}.`);
+        return;
+      }
+      if (!Number.isFinite(newBufferNum) || newBufferNum < 0) {
+        setCreateError(`Enter a valid buffer for one ${newCountUnitTrimmed}.`);
+        return;
+      }
+      if (newBufferNum >= newFactorNum) {
+        setCreateError(`The buffer must be less than the pieces per ${newCountUnitTrimmed}.`);
+        return;
+      }
+    }
     setCreating(true);
     setCreateError(null);
     const { data, error } = await supabase
@@ -80,8 +102,10 @@ export function IngredientPickerModal({
         recipe_unit: newRecipeUnit,
         cost_per_unit: newCost.trim() ? Number(newCost) : null,
         active: true,
+        ...(newManualPack ? { recipe_factor: newFactorNum } : {}),
+        pack_buffer_units: newManualPack ? newBufferNum : 0,
       })
-      .select("id, name, category, recipe_unit, recipe_factor, cost_per_unit")
+      .select("id, name, category, recipe_unit, recipe_factor, pack_buffer_units, cost_per_unit")
       .single();
     setCreating(false);
     if (error || !data) {
@@ -189,6 +213,32 @@ export function IngredientPickerModal({
               </select>
             </label>
           </div>
+          {newManualPack && (
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-sm font-medium text-muted">
+                {`Pieces per ${newCountUnitTrimmed}`}
+                <input
+                  type="number"
+                  min="0.001"
+                  step="any"
+                  value={newRecipeFactor}
+                  onChange={(event) => setNewRecipeFactor(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
+                />
+              </label>
+              <label className="text-sm font-medium text-muted">
+                {`Buffer / wastage per ${newCountUnitTrimmed}`}
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={newPackBuffer}
+                  onChange={(event) => setNewPackBuffer(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
+                />
+              </label>
+            </div>
+          )}
           <label className="text-sm font-medium text-muted">
             Cost per stock unit (₹, optional)
             <input

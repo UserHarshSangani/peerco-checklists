@@ -25,6 +25,7 @@ type Item = {
   // (with its last-known unit) when editing, not vanish silently.
   recipe_unit: RecipeUnit | null;
   recipe_factor: number;
+  pack_buffer_units: number;
   cost_per_unit: number | null;
 };
 
@@ -87,7 +88,7 @@ export function RecipesList({
       // drop the line.
       const { data: itemRows, error: itemError } = await supabase
         .from("inventory_items")
-        .select("id, name, category, recipe_unit, recipe_factor, cost_per_unit")
+        .select("id, name, category, recipe_unit, recipe_factor, pack_buffer_units, cost_per_unit")
         .eq("organization_id", organizationId);
       if (cancelled) return;
       if (itemError) {
@@ -139,7 +140,9 @@ export function RecipesList({
           costMissing = true;
           continue;
         }
-        costTotal += (line.quantity / item.recipe_factor) * item.cost_per_unit;
+        const usable = item.recipe_factor - item.pack_buffer_units;
+        if (usable <= 0) continue;
+        costTotal += (line.quantity / usable) * item.cost_per_unit;
       }
       const costPerPortion = recipe.batch_yield > 0 ? costTotal / recipe.batch_yield : null;
       const dishCount = dishCountByRecipe[recipe.id] ?? 0;
@@ -177,6 +180,7 @@ export function RecipesList({
           category: item.category,
           recipe_unit: item.recipe_unit,
           recipe_factor: item.recipe_factor,
+          pack_buffer_units: item.pack_buffer_units,
           cost_per_unit: item.cost_per_unit,
           quantity: String(line.quantity),
           note: line.note ?? "",

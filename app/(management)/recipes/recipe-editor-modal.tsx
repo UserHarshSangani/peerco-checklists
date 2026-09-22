@@ -67,7 +67,7 @@ export function RecipeEditorModal({
     let cancelled = false;
     supabase
       .from("inventory_items")
-      .select("id, name, category, recipe_unit, recipe_factor, cost_per_unit")
+      .select("id, name, category, recipe_unit, recipe_factor, pack_buffer_units, cost_per_unit")
       .eq("organization_id", organizationId)
       .eq("active", true)
       .not("recipe_unit", "is", null)
@@ -114,6 +114,7 @@ export function RecipeEditorModal({
         category: item.category,
         recipe_unit: item.recipe_unit,
         recipe_factor: item.recipe_factor,
+        pack_buffer_units: item.pack_buffer_units,
         cost_per_unit: item.cost_per_unit,
         quantity: "",
         note: "",
@@ -144,7 +145,9 @@ export function RecipeEditorModal({
   const costPerBatch = lines.reduce((sum, line) => {
     const quantity = Number(line.quantity);
     if (line.cost_per_unit == null || !Number.isFinite(quantity)) return sum;
-    return sum + (quantity / line.recipe_factor) * line.cost_per_unit;
+    const usable = line.recipe_factor - line.pack_buffer_units;
+    if (usable <= 0) return sum;
+    return sum + (quantity / usable) * line.cost_per_unit;
   }, 0);
   const yieldNum = Number(batchYield);
   const costPerPortion =
