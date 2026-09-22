@@ -40,3 +40,13 @@ export function isOn15MinuteGrid(time24: string): boolean {
   const minute = Number(time24.split(":")[1]);
   return Number.isFinite(minute) && minute % 15 === 0;
 }
+
+// Accepts either an already-24-hour "HH:MM" / "HH:MM:SS" string (as several
+// booking-platform JSON APIs return) or a 12-hour "H:MM AM/PM" string, and
+// normalizes either to "HH:MM". Returns null for anything else.
+export function normalizeApiTime(value: string): string | null {
+  const trimmed = value.trim();
+  const match24 = trimmed.match(/^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/);
+  if (match24) return `${match24[1]}:${match24[2]}`;
+  return to24Hour(trimmed);
+}

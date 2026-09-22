@@ -99,21 +99,20 @@ function sourceLabel(source: DueSource): string {
   return `${source.platform}${source.label ? ` (${source.label})` : ""} — ${source.outlet_name}`;
 }
 
-function windowSlots(slots: string[], window: WindowLabel | undefined): string[] {
-  if (!window) return [];
+function windowSlots(slots: string[], window: WindowLabel): string[] {
   return slots.filter((t) => t >= window.from && t < window.to);
 }
 
 function printDryRunResult(result: DateResult) {
-  const lunch = result.windowLabels.find((w) => w.name === "Lunch");
-  const dinner = result.windowLabels.find((w) => w.name === "Dinner");
   console.log(`  ${result.targetDate} [${result.status}]`);
-  console.log(
-    `    Lunch: ${lunch ? `${lunch.from}-${lunch.to}` : "not found"} — ${windowSlots(result.slots, lunch).length} slot(s)`,
-  );
-  console.log(
-    `    Dinner: ${dinner ? `${dinner.from}-${dinner.to}` : "not found"} — ${windowSlots(result.slots, dinner).length} slot(s)`,
-  );
+  if (result.windowLabels.length === 0) {
+    console.log("    No meal-period windows found.");
+  }
+  for (const window of result.windowLabels) {
+    console.log(
+      `    ${window.name}: ${window.from}-${window.to} — ${windowSlots(result.slots, window).length} slot(s)`,
+    );
+  }
   if (result.slots.length > 0) {
     console.log(`    First: ${result.slots[0]}  Last: ${result.slots[result.slots.length - 1]}`);
   }

@@ -1,6 +1,6 @@
 # booking-checker
 
-A standalone Node + Playwright tool that checks booking-platform slots (Swiggy Dineout first) and submits snapshots to Supabase via `submit_booking_snapshot`. It is **not** part of the Next.js app — it has its own `package.json`, is excluded from the app's `tsconfig.json` and ESLint config, and never touches the Vercel deploy.
+A standalone Node + Playwright tool that checks booking-platform slots (Swiggy Dineout and EazyDiner) and submits snapshots to Supabase via `submit_booking_snapshot`. It is **not** part of the Next.js app — it has its own `package.json`, is excluded from the app's `tsconfig.json` and ESLint config, and never touches the Vercel deploy.
 
 It is the only place in this codebase allowed to use the Supabase **service role key**. The Next.js app must never see it.
 
@@ -69,10 +69,18 @@ Direct mode works the same in database mode too — add `--url`/`--headed`/`--sl
 
 - Reads `booking_sources` where `method = 'auto'` (plus `active = true` unless `--include-inactive` is set), keeping only sources that are due (`last_checked_at` is null or older than `check_every_hours`). Skipped entirely in direct mode.
 - For each due source, checks `robots.txt` first. If the path is disallowed, it stops for that source (and, on a real run, submits a single `blocked` snapshot with error `robots.txt disallows`).
-- Platforms without an adapter yet (everything except `swiggy`) are logged as "no adapter yet" and skipped — no error, no snapshot.
+- Platforms without an adapter yet (everything except `swiggy` and `eazydiner`) are logged as "no adapter yet" and skipped — no error, no snapshot.
 - The Swiggy adapter runs one shared Chromium context for the whole invocation, waits at least 3 seconds between page navigations, reads both the Lunch and Dinner tabs (clicking Dinner explicitly, since it isn't always pre-rendered), skips disabled/sold-out slots, and stops the **entire run** the moment it detects a CAPTCHA / access-denied / "unusual traffic" page — never retries around it.
 - If a date's page renders zero time buttons, or a bookable time isn't on a 15-minute grid, that date is submitted as `failed` with a screenshot rather than a false empty `ok`.
 - Screenshots: a real run captures one screenshot per source (storage-conscious) and reuses it for every date's snapshot. A dry run — direct mode or otherwise — captures and prints one screenshot path per date instead, saved locally under `tools/booking-checker/out/`, so each date can be inspected on its own.
+
+### EazyDiner
+
+The EazyDiner adapter calls `getSlots` directly as a plain JSON `fetch` (no Playwright page) — discovered via `npm run discover -- --platform eazydiner`. It builds the restaurant slug from the `actionUrl` query parameter already saved in `booking_sources.url`, and reads `pax` from `booking_sources.party_size`.
+
+**As of this writing, it never actually returns data**: the real endpoint lives on `force.eazydiner.com`, not `www.eazydiner.com`, and `force.eazydiner.com/robots.txt` disallows every path (`Disallow: /` for `User-agent: *`) — so every run reports a single `blocked` snapshot with error `robots.txt disallows` and stops for that source, exactly like any other disallowed source. This was verified directly against the live site; it isn't a bug in this tool, and the adapter does not work around it.
+
+The rest of the logic (verified with a mocked `fetch`, since the real one can't be exercised without breaking robots.txt) still matters for if that ever changes: `data.meal_periods` becomes `window_labels`, `data.slot_timings` entries with `confirmed_inventory > 0` become bookable slots (both already come back as 24-hour times), sold-out entries are excluded and counted, missing/malformed `meal_periods`/`slot_timings` or an off-grid time fails the date rather than submitting an empty `ok`, and a non-empty `alert_message` is surfaced in the snapshot's `error` field without turning an otherwise-good result into a failure. The `time` query parameter was empirically checked (not assumed) to have no effect on which slots come back, so a fixed value is used for every request. The first raw JSON response of a run is saved to `tools/booking-checker/out/` for debugging — never treated as a screenshot path.
 
 It never adds proxies, stealth/fingerprint-evasion plugins, rotating IPs, or CAPTCHA solving, and it never increases its own request frequency. If a site blocks it, it stops and reports that — it does not try to work around the block.
 
@@ -128,10 +136,10 @@ launchctl load ~/Library/LaunchAgents/com.peerco.booking-checker.plist
 
 Both cron and launchd only fire while the machine is awake. If the laptop is asleep when a run is due, that run is simply skipped — it does not queue up or run late, and it does not "catch up" with extra checks once the machine wakes (which is also the right behavior, since more-frequent checking is explicitly out of scope). For a schedule that needs to survive sleep, this tool would need to run somewhere that stays on — that's a deliberate non-goal for now, not an oversight.
 
-## EazyDiner discovery (no adapter yet)
+## EazyDiner discovery
 
 ```bash
 npm run discover -- --platform eazydiner
 ```
 
-Opens the EazyDiner link from `booking_sources` in a **headed** browser, checks `robots.txt`, and prints whether slots are visible, which network response(s) look like they carry slot data (URL path and JSON key shape only — never response values), and whether a login is required. It writes nothing to the database and builds no adapter.
+Opens the EazyDiner link from `booking_sources` in a **headed** browser, checks `robots.txt`, and prints whether slots are visible, which network response(s) look like they carry slot data (URL path and JSON key shape only — never response values), and whether a login is required. It writes nothing to the database. This is what found the `getSlots` endpoint the EazyDiner adapter (above) is built on — and, separately, that `force.eazydiner.com` disallows it in `robots.txt`.
