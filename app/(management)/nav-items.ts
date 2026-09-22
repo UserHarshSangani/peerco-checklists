@@ -3,6 +3,7 @@ import {
   CalendarClock,
   ChefHat,
   ClipboardCheck,
+  ClipboardList,
   LayoutDashboard,
   Link2,
   Package,
@@ -31,6 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, group: "OPERATE" },
   { href: "/checklists", label: "Checklists", icon: ClipboardCheck, group: "OPERATE" },
   { href: "/stock", label: "Stock", icon: Package, group: "OPERATE" },
+  { href: "/orders", label: "Orders", icon: ClipboardList, group: "OPERATE" },
   { href: "/bookings", label: "Bookings", icon: CalendarClock, group: "OPERATE" },
   {
     href: "/sales",
