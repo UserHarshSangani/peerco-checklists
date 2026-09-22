@@ -5,13 +5,19 @@ import { ChevronDown } from "lucide-react";
 import { IconCircle, type IconTone } from "./icon-circle";
 
 // A collapsible group of items with an icon, title and a "done/total" tally
-// — used to group checklist items by section on /tablet.
+// — used to group checklist items by section on /tablet, and by the Orders
+// vendor groups. `titleClassName`/`tallyClassName` default to the original
+// sizing so every existing caller is unaffected; a caller that wants a
+// smaller step (e.g. the checklist screen) passes its own classes instead
+// of this component's own default text size changing for everyone.
 export function SectionCard({
   icon,
   iconTone = "accent",
   title,
+  titleClassName = "text-base font-semibold text-text",
   done,
   total,
+  tallyClassName = "text-sm font-medium text-muted",
   defaultOpen = true,
   onOpenChange,
   children,
@@ -19,8 +25,10 @@ export function SectionCard({
   icon: ReactNode;
   iconTone?: IconTone;
   title: string;
+  titleClassName?: string;
   done: number;
   total: number;
+  tallyClassName?: string;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   children: ReactNode;
@@ -45,8 +53,8 @@ export function SectionCard({
         className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left"
       >
         <IconCircle icon={icon} tone={complete ? "success" : iconTone} size="sm" />
-        <span className="flex-1 text-base font-semibold text-text">{title}</span>
-        <span className="shrink-0 text-sm font-medium text-muted">
+        <span className={`flex-1 ${titleClassName}`}>{title}</span>
+        <span className={`shrink-0 ${tallyClassName}`}>
           {done}/{total}
         </span>
         <ChevronDown

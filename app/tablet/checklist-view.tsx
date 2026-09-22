@@ -263,7 +263,7 @@ export function ChecklistView({
           <p className="truncate font-serif text-lg font-bold text-text">
             {template.name}
           </p>
-          <p className="text-sm text-muted">
+          <p className="text-xs text-muted">
             {t("tablet.itemsRemaining", { count: remaining })}
           </p>
         </div>
@@ -333,8 +333,10 @@ export function ChecklistView({
                   return <Icon className="h-full w-full" />;
                 })()}
                 title={section}
+                titleClassName="text-sm font-semibold text-text leading-snug"
                 done={sectionDone}
                 total={sectionItems.length}
+                tallyClassName="text-xs font-medium text-muted"
                 defaultOpen={!closedSections.has(section)}
                 onOpenChange={(open) => toggleSection(section, open)}
               >
@@ -365,7 +367,7 @@ export function ChecklistView({
                           >
                             {answer.done ? "✓" : ""}
                           </span>
-                          <span className="flex-1 text-lg font-medium text-text">
+                          <span className="flex-1 text-base leading-snug font-medium text-text">
                             {item.label}
                           </span>
                           {item.required && (
@@ -388,10 +390,10 @@ export function ChecklistView({
                               value={answer.note}
                               onChange={(event) => setNote(item.id, event.target.value)}
                               placeholder={t("tablet.notDonePlaceholder")}
-                              className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none"
+                              className="min-h-[48px] w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm leading-snug text-text placeholder:text-muted focus:border-accent focus:outline-none"
                             />
                             {hasNoteError && (
-                              <p className="mt-1 text-sm text-danger">
+                              <p className="mt-1 text-xs text-danger">
                                 {t("tablet.noteValidation")}
                               </p>
                             )}
@@ -407,7 +409,7 @@ export function ChecklistView({
                           />
                         )}
                         {hasPhotoError && (
-                          <p className="mt-1 text-sm text-danger">
+                          <p className="mt-1 text-xs text-danger">
                             {t("tablet.photoNeededInline")}
                           </p>
                         )}
@@ -423,7 +425,7 @@ export function ChecklistView({
         <div className="mt-6">
           <label
             htmlFor="checklist-notes"
-            className="mb-2 block text-sm font-medium text-muted"
+            className="mb-2 block text-xs font-medium text-muted"
           >
             {t("tablet.notesLabel")}
           </label>
@@ -432,7 +434,7 @@ export function ChecklistView({
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none"
+            className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm leading-snug text-text placeholder:text-muted focus:border-accent focus:outline-none"
             placeholder={t("tablet.notesPlaceholder")}
           />
         </div>
@@ -440,12 +442,12 @@ export function ChecklistView({
 
       <div className="safe-bottom fixed inset-x-0 bottom-0 border-t border-border bg-surface/95 p-4 backdrop-blur">
         {missingRequiredItems.length > 0 && (
-          <p className="mb-1 text-center text-sm font-medium text-warning">
+          <p className="mb-1 text-center text-xs font-medium text-warning">
             {t("tablet.missingItems", { count: missingRequiredItems.length })}
           </p>
         )}
         {missingPhotoItems.length > 0 && (
-          <p className="mb-2 text-center text-sm font-medium text-warning">
+          <p className="mb-2 text-center text-xs font-medium text-warning">
             {t("tablet.photoNeeded", {
               labels: missingPhotoItems.map((item) => item.label).join(", "),
             })}
