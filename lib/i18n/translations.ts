@@ -260,6 +260,11 @@ const dictionary = {
     hi: "इस आउटलेट के लिए कोई सक्रिय स्टाफ नहीं मिला।",
     mr: "या आउटलेटसाठी कोणताही सक्रिय स्टाफ आढळला नाही.",
   },
+  "tablet.someStaffNoAccess": {
+    en: "Some staff don't have access to this.",
+    hi: "कुछ स्टाफ के पास इसकी अनुमति नहीं है।",
+    mr: "काही स्टाफना यासाठी परवानगी नाही.",
+  },
   "tablet.enterPin": {
     en: "Enter your PIN",
     hi: "अपना पिन डालें",
@@ -361,6 +366,11 @@ const dictionary = {
     en: "A note is required when the reason is \"Other\".",
     hi: "कारण \"अन्य\" होने पर नोट ज़रूरी है।",
     mr: "कारण \"इतर\" असल्यास नोंद आवश्यक आहे.",
+  },
+  "tablet.reason.task_not_allowed": {
+    en: "You don't have access to this. Ask your manager.",
+    hi: "आपके पास इसकी अनुमति नहीं है। अपने मैनेजर से पूछें।",
+    mr: "तुम्हाला यासाठी परवानगी नाही. तुमच्या मॅनेजरला विचारा.",
   },
   "tablet.checkingLocation": {
     en: "Checking location…",
@@ -549,6 +559,46 @@ const dictionary = {
     mr: "पिन 4 ते 6 अंकी असावा.",
   },
   "manager.add": { en: "Add", hi: "जोड़ें", mr: "जोडा" },
+  "manager.permissions.sectionTitle": {
+    en: "Task access",
+    hi: "कार्य पहुंच",
+    mr: "कार्य प्रवेश",
+  },
+  "manager.permissions.checklists": {
+    en: "Checklists",
+    hi: "चेकलिस्ट",
+    mr: "चेकलिस्ट",
+  },
+  "manager.permissions.stockCounts": {
+    en: "Stock counts",
+    hi: "स्टॉक गिनती",
+    mr: "स्टॉक मोजणी",
+  },
+  "manager.permissions.goodsReceived": {
+    en: "Goods received",
+    hi: "माल प्राप्त",
+    mr: "माल मिळाला",
+  },
+  "manager.permissions.wastage": {
+    en: "Wastage",
+    hi: "बर्बादी",
+    mr: "वाया गेलेला माल",
+  },
+  "manager.permissions.onlyX": {
+    en: "{task} only",
+    hi: "केवल {task}",
+    mr: "फक्त {task}",
+  },
+  "manager.permissions.allExceptX": {
+    en: "All except {task}",
+    hi: "{task} को छोड़कर सभी",
+    mr: "{task} वगळता सर्व",
+  },
+  "manager.permissions.none": {
+    en: "No tasks enabled",
+    hi: "कोई कार्य सक्षम नहीं",
+    mr: "कोणतेही काम सक्षम नाही",
+  },
 
   // /checklists
   "manager.chooseOutletChecklists": {
@@ -807,6 +857,11 @@ const dictionary = {
     mr: "माल मिळाला",
   },
   "tablet.home.wastage": { en: "Wastage", hi: "बर्बादी", mr: "वाया गेलेला माल" },
+  "tablet.home.taskDisabledHint": {
+    en: "Ask your manager to enable this.",
+    hi: "इसे चालू करने के लिए अपने मैनेजर से कहें।",
+    mr: "हे सुरू करण्यासाठी तुमच्या मॅनेजरला सांगा.",
+  },
 
   // /tablet — stock count flow
   "tablet.stock.countTitle": {
