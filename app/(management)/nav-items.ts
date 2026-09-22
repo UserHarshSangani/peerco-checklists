@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Building2,
   CalendarClock,
   ChefHat,
   ClipboardCheck,
@@ -58,6 +59,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Store,
     group: "SET UP",
     roles: ["peerco_admin", "owner"],
+  },
+  {
+    href: "/admin/clients",
+    label: "Clients",
+    icon: Building2,
+    group: "SET UP",
+    roles: ["peerco_admin"],
   },
   { href: "/settings", label: "Settings", icon: Settings, group: "SET UP" },
 ];
