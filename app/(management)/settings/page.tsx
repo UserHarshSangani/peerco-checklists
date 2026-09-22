@@ -6,6 +6,7 @@ import { LanguageSwitcher } from "@/components/language/language-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LogoutButton } from "@/components/logout-button";
 import { Card } from "@/components/ui/card";
+import { ChangePasswordCard } from "./change-password-card";
 
 export default function SettingsPage() {
   return (
@@ -22,6 +23,8 @@ export default function SettingsPage() {
           <p className="mb-2 text-sm font-semibold text-text">Theme</p>
           <ThemeToggle />
         </Card>
+
+        <ChangePasswordCard />
 
         <Card className="flex items-center justify-between gap-4">
           <div>
