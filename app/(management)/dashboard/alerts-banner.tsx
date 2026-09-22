@@ -1,4 +1,5 @@
 import { AlertTriangle, Clock } from "lucide-react";
+import { formatDuration } from "@/lib/format";
 import type { OverviewAlert } from "./types";
 
 export function AlertsBanner({ alerts }: { alerts: OverviewAlert[] }) {
@@ -8,7 +9,7 @@ export function AlertsBanner({ alerts }: { alerts: OverviewAlert[] }) {
     <div className="flex flex-col gap-2">
       {alerts.map((alert, index) => {
         const overdue = alert.kind === "overdue";
-        const minutes = Math.abs(alert.minutes);
+        const duration = formatDuration(alert.minutes);
         return (
           <div
             key={`${alert.outlet_id}-${alert.template}-${index}`}
@@ -25,8 +26,8 @@ export function AlertsBanner({ alerts }: { alerts: OverviewAlert[] }) {
             )}
             <span>
               {overdue
-                ? `${alert.template} at ${alert.outlet} is ${minutes} min overdue`
-                : `${alert.template} at ${alert.outlet} is due in ${minutes} min`}
+                ? `${alert.template} at ${alert.outlet} is ${duration} overdue`
+                : `${alert.template} at ${alert.outlet} is due in ${duration}`}
             </span>
           </div>
         );
