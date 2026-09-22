@@ -44,11 +44,13 @@ async function main() {
   const config = loadConfig();
   const supabase = createServiceClient(config);
 
+  // Read-only and never writes, so an inactive source is still fine to
+  // discover against — unlike check.ts, this has no reason to filter by
+  // `active`.
   const { data, error } = await supabase
     .from("booking_sources")
-    .select("id, url, outlet_id, outlets(name)")
+    .select("id, url, outlet_id, active, outlets(name)")
     .eq("platform", platform)
-    .eq("active", true)
     .limit(1)
     .maybeSingle();
 
@@ -57,8 +59,11 @@ async function main() {
     process.exit(1);
   }
   if (!data) {
-    console.log(`No active "${platform}" source found in booking_sources.`);
+    console.log(`No "${platform}" source found in booking_sources.`);
     return;
+  }
+  if (!data.active) {
+    console.log(`Note: this "${platform}" source is currently inactive — discovering anyway (read-only).\n`);
   }
 
   console.log(`Discovering "${platform}" — ${data.url}\n`);
