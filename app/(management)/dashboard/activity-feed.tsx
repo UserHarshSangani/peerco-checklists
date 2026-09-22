@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardCheck, Package, Trash2, Truck, type LucideIcon } from "lucide-react";
+import { ChevronDown, ClipboardCheck, Package, Trash2, Truck, type LucideIcon } from "lucide-react";
 import { formatTime12Kolkata } from "@/lib/date";
 import { IconCircle, type IconTone } from "@/components/ui/icon-circle";
 import { StatusPill } from "@/components/ui/status-pill";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
 import type { OverviewActivity, OverviewActivityType } from "./types";
+
+// Roughly one screen's worth of rows before the card needs scrolling — the
+// rest of the up-to-20 items the RPC already returned are just hidden, not
+// re-fetched, when "See more" expands the list.
+const VISIBLE_COUNT = 6;
 
 const TYPE_ICON: Record<OverviewActivityType, LucideIcon> = {
   checklist: ClipboardCheck,
@@ -46,22 +51,29 @@ export function ActivityFeed({
   photoUrls: Record<string, string>;
 }) {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   if (activity.length === 0) {
     return <EmptyState title="No activity yet for this date." />;
   }
 
+  const visible = expanded ? activity : activity.slice(0, VISIBLE_COUNT);
+  const canExpand = activity.length > VISIBLE_COUNT;
+
   return (
     <>
       <ul className="flex flex-col gap-4">
-        {activity.map((entry) => {
+        {visible.map((entry) => {
           const Icon = TYPE_ICON[entry.type];
           const photos = entry.photos.map((path) => photoUrls[path]).filter(Boolean);
           const extraPhotos = entry.photos.length - photos.length;
           return (
-            <li key={`${entry.type}-${entry.id}`} className="flex gap-3">
+            <li
+              key={`${entry.type}-${entry.id}`}
+              className="grid grid-cols-[2rem_1fr] items-start gap-3"
+            >
               <IconCircle icon={<Icon className="h-full w-full" />} tone={TYPE_TONE[entry.type]} size="sm" />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-text">{activityText(entry)}</p>
                 <p className="text-xs text-muted">
                   {entry.outlet} · {formatTime12Kolkata(entry.ts)}
@@ -106,6 +118,23 @@ export function ActivityFeed({
           );
         })}
       </ul>
+
+      {canExpand && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          aria-expanded={expanded}
+          className="mt-4 flex min-h-[40px] w-full items-center justify-center gap-1 text-sm font-medium text-accent"
+        >
+          {expanded ? "Show less" : "See more"}
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 transition-transform motion-reduce:transition-none ${
+              expanded ? "rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </button>
+      )}
 
       {viewerUrl && (
         <Modal
