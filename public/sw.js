@@ -5,7 +5,7 @@
 // never caches any app page — every real page load always goes to the
 // network, so nobody's data goes stale or gets served without auth.
 
-const CACHE_NAME = "peerco-daybook-shell-v2";
+const CACHE_NAME = "peerco-daybook-shell-v3";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE_URLS = [
   OFFLINE_URL,

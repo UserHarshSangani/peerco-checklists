@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: APP_NAME,
     short_name: APP_SHORT_NAME,
     description: "Daily checklists, stock and variance for PeerCo outlets.",
-    start_url: "/tablet",
+    start_url: "/",
     display: "standalone",
     background_color: "#f6f2ea",
     theme_color: "#0f4a2e",
