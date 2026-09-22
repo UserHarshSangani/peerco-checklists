@@ -6,7 +6,7 @@ import { formatRupees } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useToast } from "@/components/ui/toast";
 import type { InventoryItemRow, Vendor } from "@/lib/types";
-import { isRecipeUnitMismatchError, RECIPE_UNIT_MISMATCH_MESSAGE } from "@/lib/units";
+import { isManualPackUnit, isRecipeUnitMismatchError, RECIPE_UNIT_MISMATCH_MESSAGE } from "@/lib/units";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -36,7 +36,7 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
       supabase
         .from("inventory_items")
         .select(
-          "id, name, category, count_unit, order_unit, order_unit_size, cost_per_unit, vendor_id, count_frequency, active, recipe_unit, recipe_factor",
+          "id, name, category, count_unit, order_unit, order_unit_size, cost_per_unit, vendor_id, count_frequency, active, recipe_unit, recipe_factor, pack_buffer_units",
         )
         .eq("organization_id", organizationId)
         .order("name"),
@@ -102,10 +102,12 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
     existing: InventoryItemRow | null,
     values: ItemFormValues,
   ): Promise<{ error: string | null }> {
+    const countUnit = values.count_unit.trim();
+    const manualPack = isManualPackUnit(values.recipe_unit, countUnit);
     const payload = {
       name: values.name.trim(),
       category: values.category.trim() || null,
-      count_unit: values.count_unit.trim(),
+      count_unit: countUnit,
       order_unit: values.order_unit.trim() || null,
       order_unit_size: values.order_unit_size.trim()
         ? Number(values.order_unit_size)
@@ -117,6 +119,15 @@ export function ItemsTab({ organizationId }: { organizationId: string }) {
       count_frequency: values.count_frequency,
       active: values.active,
       recipe_unit: values.recipe_unit || null,
+      // Every other pairing has the database derive recipe_factor on its
+      // own (and forces pack_buffer_units to 0), so only a manual pack
+      // sends its own recipe_factor; pack_buffer_units is always sent so
+      // switching an item away from a manual pack clears a stale buffer
+      // instead of leaving it to fail the database's own check.
+      ...(manualPack ? { recipe_factor: Number(values.recipe_factor) } : {}),
+      pack_buffer_units: manualPack
+        ? Number(values.pack_buffer_units.trim() || "0")
+        : 0,
     };
     const { error } = existing
       ? await supabase

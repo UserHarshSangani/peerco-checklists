@@ -72,6 +72,7 @@ export type InventoryItemRow = {
   active: boolean;
   recipe_unit: "g" | "ml" | "pcs" | null;
   recipe_factor: number;
+  pack_buffer_units: number;
 };
 
 export type OutletItemRow = {

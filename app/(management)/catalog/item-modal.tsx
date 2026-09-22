@@ -2,8 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { formatRupees } from "@/lib/format";
 import type { InventoryItemRow, Vendor } from "@/lib/types";
 import {
+  isManualPackUnit,
   isValidRecipeUnitPair,
   recipeUnitFactor,
   RECIPE_UNIT_MISMATCH_MESSAGE,
@@ -23,6 +25,12 @@ export type ItemFormValues = {
   count_frequency: "daily" | "weekly";
   active: boolean;
   recipe_unit: RecipeUnit | "";
+  // Only meaningful (and only shown) when recipe_unit is "pcs" paired with
+  // a non-"pcs" count_unit — a manual pack like "packet" or "tray". Every
+  // other combination has the database derive recipe_factor automatically
+  // and pack_buffer_units is forced to 0.
+  recipe_factor: string;
+  pack_buffer_units: string;
 };
 
 export function ItemModal({
@@ -48,6 +56,14 @@ export function ItemModal({
     count_frequency: item?.count_frequency ?? "daily",
     active: item?.active ?? true,
     recipe_unit: item?.recipe_unit ?? "",
+    recipe_factor:
+      item && isManualPackUnit(item.recipe_unit ?? "", item.count_unit)
+        ? String(item.recipe_factor)
+        : "",
+    pack_buffer_units:
+      item && isManualPackUnit(item.recipe_unit ?? "", item.count_unit)
+        ? String(item.pack_buffer_units)
+        : "0",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +71,20 @@ export function ItemModal({
   function set<K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
   }
+
+  const countUnitTrimmed = values.count_unit.trim();
+  const manualPack = isManualPackUnit(values.recipe_unit, countUnitTrimmed);
+  const piecesPerPack = Number(values.recipe_factor);
+  const bufferUnits = values.pack_buffer_units.trim() ? Number(values.pack_buffer_units) : 0;
+  const usablePieces =
+    manualPack && Number.isFinite(piecesPerPack) && piecesPerPack > 0 && Number.isFinite(bufferUnits)
+      ? piecesPerPack - bufferUnits
+      : null;
+  const costPerUnitNum = values.cost_per_unit.trim() ? Number(values.cost_per_unit) : null;
+  const costPerPiece =
+    usablePieces != null && usablePieces > 0 && costPerUnitNum != null
+      ? costPerUnitNum / usablePieces
+      : null;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -69,6 +99,20 @@ export function ItemModal({
     if (!isValidRecipeUnitPair(values.recipe_unit, values.count_unit.trim())) {
       setError(RECIPE_UNIT_MISMATCH_MESSAGE);
       return;
+    }
+    if (manualPack) {
+      if (!values.recipe_factor.trim() || !Number.isFinite(piecesPerPack) || piecesPerPack <= 0) {
+        setError(`Enter how many pieces are in one ${countUnitTrimmed}.`);
+        return;
+      }
+      if (!Number.isFinite(bufferUnits) || bufferUnits < 0) {
+        setError(`Enter a valid buffer for one ${countUnitTrimmed}.`);
+        return;
+      }
+      if (bufferUnits >= piecesPerPack) {
+        setError(`The buffer must be less than the pieces per ${countUnitTrimmed}.`);
+        return;
+      }
     }
     setSubmitting(true);
     setError(null);
@@ -188,25 +232,77 @@ export function ItemModal({
               <p className="mt-1 text-sm text-danger">{RECIPE_UNIT_MISMATCH_MESSAGE}</p>
             )}
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-muted">
-              Recipe units per stock unit
-            </label>
-            <p className="flex h-[50px] items-center rounded-lg bg-bg px-4 text-base text-muted">
-              {values.recipe_unit
-                ? (() => {
-                    const factor = recipeUnitFactor(
-                      values.recipe_unit,
-                      values.count_unit.trim(),
-                    );
-                    return factor != null
-                      ? `${factor} ${values.recipe_unit} per ${values.count_unit.trim()}`
-                      : "—";
-                  })()
-                : "—"}
-            </p>
-          </div>
+          {!manualPack && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-muted">
+                Recipe units per stock unit
+              </label>
+              <p className="flex h-[50px] items-center rounded-lg bg-bg px-4 text-base text-muted">
+                {values.recipe_unit
+                  ? (() => {
+                      const factor = recipeUnitFactor(
+                        values.recipe_unit,
+                        values.count_unit.trim(),
+                      );
+                      return factor != null
+                        ? `${factor} ${values.recipe_unit} per ${values.count_unit.trim()}`
+                        : "—";
+                    })()
+                  : "—"}
+              </p>
+            </div>
+          )}
         </div>
+
+        {manualPack && (
+          <div className="mb-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-muted">
+                  {`Pieces per ${countUnitTrimmed}`}
+                </label>
+                <input
+                  type="number"
+                  min="0.001"
+                  step="any"
+                  value={values.recipe_factor}
+                  onChange={(event) => set("recipe_factor", event.target.value)}
+                  className="w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-muted">
+                  How many individual pieces are in one {countUnitTrimmed}, e.g. 26 slices.
+                </p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-muted">
+                  {`Buffer / wastage per ${countUnitTrimmed}`}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={values.pack_buffer_units}
+                  onChange={(event) => set("pack_buffer_units", event.target.value)}
+                  className="w-full rounded-lg border border-border bg-bg px-4 py-3 text-base text-text focus:border-accent focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-muted">
+                  Pieces you expect to lose or not use from each {countUnitTrimmed}, e.g. 2 torn
+                  or stuck-together slices. This is only used to calculate an accurate cost per
+                  piece - it doesn&apos;t affect stock counts or ordering, since those already
+                  reflect real usage.
+                </p>
+              </div>
+            </div>
+            {usablePieces != null && (
+              <p className="mt-3 text-sm text-muted">
+                Usable pieces per {countUnitTrimmed}: {usablePieces}
+                {costPerPiece != null && (
+                  <> · Cost per piece: {formatRupees(costPerPiece)}</>
+                )}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="mb-4 grid grid-cols-2 gap-3">
           <div>
