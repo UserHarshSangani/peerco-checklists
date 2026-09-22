@@ -6,22 +6,28 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import type { Outlet, StaffMember } from "@/lib/types";
 import { Avatar } from "@/components/ui/avatar";
 import { SkeletonList } from "@/components/ui/skeleton";
+import { useTaskPermissions, type TaskKey } from "./task-permissions-context";
 
 // Full-screen "Select your name" step shown before any activity starts (if
 // nobody is picked yet) — a grid of Avatar buttons, one tap and done. The
-// PIN is still collected separately at submit time.
+// PIN is still collected separately at submit time. Filtered to staff
+// allowed to do `task` — a convenience only, the database still checks
+// this again at submit time.
 export function StaffPickerScreen({
   outlet,
+  task,
   onPick,
   onCancel,
 }: {
   outlet: Outlet;
+  task: TaskKey;
   onPick: (member: StaffMember) => void;
   onCancel: () => void;
 }) {
   const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
-  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const { isAllowed } = useTaskPermissions();
+  const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -40,12 +46,14 @@ export function StaffPickerScreen({
           setLoadError(error.message);
           return;
         }
-        setStaff((data ?? []).map(({ id, name }) => ({ id, name })));
+        setAllStaff((data ?? []).map(({ id, name }) => ({ id, name })));
       });
     return () => {
       cancelled = true;
     };
   }, [supabase, outlet.id]);
+
+  const staff = allStaff.filter((member) => isAllowed(member.id, task));
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
@@ -70,8 +78,11 @@ export function StaffPickerScreen({
             {t("common.loadStaffError", { error: loadError })}
           </p>
         )}
-        {!loading && !loadError && staff.length === 0 && (
+        {!loading && !loadError && staff.length === 0 && allStaff.length === 0 && (
           <p className="text-muted">{t("tablet.noActiveStaff")}</p>
+        )}
+        {!loading && !loadError && staff.length === 0 && allStaff.length > 0 && (
+          <p className="text-muted">{t("tablet.someStaffNoAccess")}</p>
         )}
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -87,6 +98,9 @@ export function StaffPickerScreen({
             </button>
           ))}
         </div>
+        {!loading && !loadError && staff.length > 0 && staff.length < allStaff.length && (
+          <p className="mt-4 text-sm text-muted">{t("tablet.someStaffNoAccess")}</p>
+        )}
       </main>
     </div>
   );

@@ -13,6 +13,11 @@ import { GoodsReceivedFlow } from "./stock/goods-received-flow";
 import { WastageFlow } from "./stock/wastage-flow";
 import { StaffPickerScreen } from "./staff-picker-screen";
 import { CurrentStaffProvider, useCurrentStaff } from "./current-staff-context";
+import {
+  TaskPermissionsProvider,
+  useTaskPermissions,
+  type TaskKey,
+} from "./task-permissions-context";
 import { StaffChip } from "./staff-chip";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -31,6 +36,13 @@ import {
 } from "lucide-react";
 
 type HomeTile = "checklists" | "stock-count" | "goods-received" | "wastage";
+
+const TILE_TASK: Record<HomeTile, TaskKey> = {
+  checklists: "checklists",
+  "stock-count": "stock_counts",
+  "goods-received": "goods_received",
+  wastage: "wastage",
+};
 
 export function TabletApp({ outlets }: { outlets: Outlet[] }) {
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(
@@ -53,13 +65,15 @@ export function TabletApp({ outlets }: { outlets: Outlet[] }) {
   }
 
   return (
-    <CurrentStaffProvider key={selectedOutlet.id}>
-      <OutletHome
-        outlet={selectedOutlet}
-        multiOutlet={outlets.length > 1}
-        onSwitchOutlet={() => chooseOutlet(null)}
-      />
-    </CurrentStaffProvider>
+    <TaskPermissionsProvider key={selectedOutlet.id} outletId={selectedOutlet.id}>
+      <CurrentStaffProvider key={selectedOutlet.id}>
+        <OutletHome
+          outlet={selectedOutlet}
+          multiOutlet={outlets.length > 1}
+          onSwitchOutlet={() => chooseOutlet(null)}
+        />
+      </CurrentStaffProvider>
+    </TaskPermissionsProvider>
   );
 }
 
@@ -126,6 +140,7 @@ function OutletHome({
 }) {
   const { t, locale } = useLanguage();
   const currentStaff = useCurrentStaff();
+  const taskPermissions = useTaskPermissions();
   const [activeTile, setActiveTile] = useState<HomeTile | null>(null);
   const [pendingTile, setPendingTile] = useState<HomeTile | null>(null);
   const [activeTemplate, setActiveTemplate] =
@@ -153,6 +168,7 @@ function OutletHome({
   function exitToHome() {
     setActiveTile(null);
     setActiveTemplate(null);
+    taskPermissions.refresh();
   }
 
   const header = (
@@ -183,6 +199,7 @@ function OutletHome({
     return (
       <StaffPickerScreen
         outlet={outlet}
+        task={TILE_TASK[pendingTile]}
         onPick={handleStaffPicked}
         onCancel={() => setPendingTile(null)}
       />
@@ -233,24 +250,32 @@ function OutletHome({
             icon={<ClipboardCheck className="h-full w-full" />}
             tone="accent"
             label={t("tablet.home.checklists")}
+            disabled={!taskPermissions.anyoneCan("checklists")}
+            hint={t("tablet.home.taskDisabledHint")}
             onClick={() => openTile("checklists")}
           />
           <HomeTileButton
             icon={<PackageSearch className="h-full w-full" />}
             tone="info"
             label={t("tablet.home.stockCount")}
+            disabled={!taskPermissions.anyoneCan("stock_counts")}
+            hint={t("tablet.home.taskDisabledHint")}
             onClick={() => openTile("stock-count")}
           />
           <HomeTileButton
             icon={<Truck className="h-full w-full" />}
             tone="success"
             label={t("tablet.home.goodsReceived")}
+            disabled={!taskPermissions.anyoneCan("goods_received")}
+            hint={t("tablet.home.taskDisabledHint")}
             onClick={() => openTile("goods-received")}
           />
           <HomeTileButton
             icon={<WastageIcon className="h-full w-full" />}
             tone="warning"
             label={t("tablet.home.wastage")}
+            disabled={!taskPermissions.anyoneCan("wastage")}
+            hint={t("tablet.home.taskDisabledHint")}
             onClick={() => openTile("wastage")}
           />
         </div>
@@ -265,20 +290,32 @@ function HomeTileButton({
   tone,
   label,
   onClick,
+  disabled = false,
+  hint,
 }: {
   icon: React.ReactNode;
   tone: "accent" | "success" | "warning" | "info";
   label: string;
   onClick: () => void;
+  disabled?: boolean;
+  hint?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-32 items-center gap-4 rounded-3xl bg-surface p-6 text-left shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
+      disabled={disabled}
+      className={`flex min-h-32 items-center gap-4 rounded-3xl p-6 text-left shadow-sm ring-1 ring-border transition active:scale-[0.98] disabled:active:scale-100 ${
+        disabled ? "bg-border/10 opacity-60" : "bg-surface hover:bg-border/20"
+      }`}
     >
-      <IconCircle icon={icon} tone={tone} size="lg" />
-      <span className="text-2xl font-semibold text-text">{label}</span>
+      <IconCircle icon={icon} tone={disabled ? "neutral" : tone} size="lg" />
+      <div className="min-w-0">
+        <span className={`block text-2xl font-semibold ${disabled ? "text-muted" : "text-text"}`}>
+          {label}
+        </span>
+        {disabled && hint && <span className="block text-sm text-muted">{hint}</span>}
+      </div>
     </button>
   );
 }

@@ -18,6 +18,7 @@ import {
   markLocationExplainerSeen,
 } from "@/lib/location-explainer";
 import { useCurrentStaff } from "./current-staff-context";
+import { useTaskPermissions } from "./task-permissions-context";
 import { Avatar } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -75,8 +76,9 @@ export function SubmitModal({
   const { t } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
   const currentStaff = useCurrentStaff();
+  const taskPermissions = useTaskPermissions();
   const [step, setStep] = useState<Step>(currentStaff.staff ? "pin" : "staff");
-  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [staffError, setStaffError] = useState<string | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(
@@ -108,12 +110,14 @@ export function SubmitModal({
           setStaffError(error.message);
           return;
         }
-        setStaff((data ?? []).map(({ id, name }) => ({ id, name })));
+        setAllStaff((data ?? []).map(({ id, name }) => ({ id, name })));
       });
     return () => {
       cancelled = true;
     };
   }, [supabase, outlet.id, step]);
+
+  const staff = allStaff.filter((member) => taskPermissions.isAllowed(member.id, "checklists"));
 
   // Auto-close and forget the PIN after a minute of inactivity — this runs
   // on a shared kiosk tablet, so someone can walk away mid-entry. Paused
@@ -220,6 +224,15 @@ export function SubmitModal({
           ? t("tablet.reason.locked", { name: selectedStaff.name, time: until })
           : t("tablet.reason.lockedNoTime", { name: selectedStaff.name }),
       );
+      return;
+    }
+
+    // Should be rare — the staff picker already filters to permitted staff
+    // — but a cached permission can go stale, so treat it as a fallback:
+    // show a friendly message and refresh the cache for next time.
+    if (result.reason === "task_not_allowed") {
+      setSubmitError(t("tablet.reason.task_not_allowed"));
+      taskPermissions.refresh();
       return;
     }
 
@@ -411,8 +424,11 @@ export function SubmitModal({
           {t("common.loadStaffError", { error: staffError })}
         </p>
       )}
-      {!loadingStaff && !staffError && staff.length === 0 && (
+      {!loadingStaff && !staffError && staff.length === 0 && allStaff.length === 0 && (
         <p className="text-muted">{t("tablet.noActiveStaff")}</p>
+      )}
+      {!loadingStaff && !staffError && staff.length === 0 && allStaff.length > 0 && (
+        <p className="text-muted">{t("tablet.someStaffNoAccess")}</p>
       )}
       <div className="grid grid-cols-2 gap-3">
         {staff.map((member) => (
@@ -429,6 +445,9 @@ export function SubmitModal({
           </button>
         ))}
       </div>
+      {!loadingStaff && !staffError && staff.length > 0 && staff.length < allStaff.length && (
+        <p className="mt-3 text-sm text-muted">{t("tablet.someStaffNoAccess")}</p>
+      )}
     </Modal>
   );
 }

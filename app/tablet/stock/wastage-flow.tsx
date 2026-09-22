@@ -336,6 +336,7 @@ export function WastageFlow({
       {showSubmitFlow && (
         <StockSubmitFlow
           outlet={outlet}
+          task="wastage"
           onClose={() => setShowSubmitFlow(false)}
           onSuccess={onExit}
           onSubmit={handleRpcSubmit}

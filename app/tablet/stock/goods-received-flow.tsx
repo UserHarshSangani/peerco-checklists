@@ -377,6 +377,7 @@ function ReceiptForm({
       {showSubmitFlow && (
         <StockSubmitFlow
           outlet={outlet}
+          task="goods_received"
           onClose={() => setShowSubmitFlow(false)}
           onSuccess={onExit}
           onSubmit={handleRpcSubmit}

@@ -459,6 +459,7 @@ function CountSheetForDate({
       {showSubmitFlow && (
         <StockSubmitFlow
           outlet={outlet}
+          task="stock_counts"
           onClose={() => setShowSubmitFlow(false)}
           onSuccess={handleSuccess}
           onSubmit={handleRpcSubmit}
