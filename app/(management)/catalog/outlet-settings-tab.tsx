@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useToast } from "@/components/ui/toast";
@@ -34,9 +34,11 @@ function draftFromOutletItem(row: OutletItemRow | undefined): RowDraft {
 export function OutletSettingsTab({
   outletId,
   organizationId,
+  highlightItemId,
 }: {
   outletId: string;
   organizationId: string;
+  highlightItemId?: string | null;
 }) {
   const { t } = useLanguage();
   const { showError, showSuccess } = useToast();
@@ -49,6 +51,8 @@ export function OutletSettingsTab({
   const [savingId, setSavingId] = useState<string | null>(null);
   const [addingAll, setAddingAll] = useState(false);
   const [search, setSearch] = useState("");
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
 
   async function fetchAll() {
     return Promise.all([
@@ -104,6 +108,16 @@ export function OutletSettingsTab({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outletId, organizationId]);
+
+  useEffect(() => {
+    if (loading || !highlightItemId) return;
+    const row = rowRefs.current[highlightItemId];
+    if (!row) return;
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(highlightItemId);
+    const timeout = window.setTimeout(() => setHighlightedId(null), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [loading, highlightItemId, items]);
 
   async function refresh() {
     const [itemsRes, outletItemsRes] = await fetchAll();
@@ -272,7 +286,15 @@ export function OutletSettingsTab({
                 const isStocked = !!stocked[item.id];
                 const draft = drafts[item.id] ?? draftFromOutletItem(undefined);
                 return (
-                  <tr key={item.id} className="border-b border-border last:border-0">
+                  <tr
+                    key={item.id}
+                    ref={(node) => {
+                      rowRefs.current[item.id] = node;
+                    }}
+                    className={`border-b border-border transition-colors last:border-0 ${
+                      highlightedId === item.id ? "bg-accent/15" : ""
+                    }`}
+                  >
                     <td className="px-4 py-3 whitespace-nowrap text-text">
                       <p className="font-medium">{item.name}</p>
                       <p className="text-xs text-muted">{item.count_unit}</p>

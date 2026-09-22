@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { ItemsTab } from "./items-tab";
@@ -9,10 +10,17 @@ import { OutletSettingsTab } from "./outlet-settings-tab";
 
 type Tab = "items" | "vendors" | "outlet-settings";
 
+function isTab(value: string | null): value is Tab {
+  return value === "items" || value === "vendors" || value === "outlet-settings";
+}
+
 export default function CatalogPage() {
   const { t } = useLanguage();
   const { selectedOutlet } = useOutletContext();
-  const [tab, setTab] = useState<Tab>("items");
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const highlightItemId = searchParams.get("item");
+  const [tab, setTab] = useState<Tab>(isTab(requestedTab) ? requestedTab : "items");
 
   if (!selectedOutlet) {
     return (
@@ -72,6 +80,7 @@ export default function CatalogPage() {
           key={`outlet-${selectedOutlet.id}`}
           outletId={selectedOutlet.id}
           organizationId={selectedOutlet.organizationId}
+          highlightItemId={highlightItemId}
         />
       )}
     </main>
