@@ -8,6 +8,7 @@ import { formatTimeOfDay12 } from "@/lib/date";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { useOutletContext } from "../outlet-context";
 import { NewChecklistModal, type ChecklistKind } from "./new-checklist-modal";
+import { ChecklistUploadModal } from "./checklist-upload-modal";
 import { Button } from "@/components/ui/button";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -48,6 +49,7 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const kindLabels: Record<ChecklistKind, string> = {
     opening: t("manager.kindOpening"),
@@ -60,6 +62,15 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
       .select("id, name, kind, active, due_time")
       .eq("outlet_id", outletId)
       .order("name");
+  }
+
+  async function refreshTemplates() {
+    const { data, error } = await fetchTemplates();
+    if (error) {
+      showError(error.message);
+      return;
+    }
+    setTemplates(data ?? []);
   }
 
   useEffect(() => {
@@ -142,9 +153,14 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
         <h2 className="font-serif text-xl font-bold text-text">
           {t("common.checklistsHeading")}
         </h2>
-        <Button type="button" onClick={() => setShowNewModal(true)}>
-          {t("manager.newChecklist")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="secondary" onClick={() => setShowUploadModal(true)}>
+            Upload checklist
+          </Button>
+          <Button type="button" onClick={() => setShowNewModal(true)}>
+            {t("manager.newChecklist")}
+          </Button>
+        </div>
       </div>
 
       {loading && <SkeletonList rows={3} rowClassName="h-16" />}
@@ -225,6 +241,14 @@ function ChecklistsForOutlet({ outletId }: { outletId: string }) {
         <NewChecklistModal
           onCreate={handleCreate}
           onClose={() => setShowNewModal(false)}
+        />
+      )}
+
+      {showUploadModal && (
+        <ChecklistUploadModal
+          outletId={outletId}
+          onClose={() => setShowUploadModal(false)}
+          onImported={refreshTemplates}
         />
       )}
     </main>
