@@ -114,6 +114,14 @@ export function UploadModal({
         <ImportSuccessView result={result} onClose={onClose} />
       ) : (
         <div className="flex flex-col gap-4">
+          <a
+            href="/templates/Recipe_Template_Blank.xlsx"
+            download
+            className="self-start text-sm font-medium text-accent underline"
+          >
+            Download template
+          </a>
+
           <div>
             <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full bg-bg px-4 text-sm font-medium text-text ring-1 ring-border">
               Choose workbook (.xlsx)
