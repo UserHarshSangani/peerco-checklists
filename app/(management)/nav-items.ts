@@ -5,6 +5,7 @@ import {
   ChefHat,
   ClipboardCheck,
   ClipboardList,
+  FileSpreadsheet,
   LayoutDashboard,
   Link2,
   Package,
@@ -43,6 +44,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["peerco_admin", "owner"],
   },
   { href: "/variance", label: "Variance", icon: Scale, group: "ANALYSE" },
+  { href: "/reports", label: "Reports", icon: FileSpreadsheet, group: "ANALYSE" },
   { href: "/catalog", label: "Catalog", icon: BookOpen, group: "SET UP" },
   { href: "/recipes", label: "Recipes", icon: ChefHat, group: "SET UP" },
   {
