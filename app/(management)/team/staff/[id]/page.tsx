@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { getTeamSettings } from "@/lib/team/settings/get-team-settings";
 import type { SalaryStructure } from "@/lib/team/salary";
+import { Avatar } from "@/components/ui/avatar";
 import { Tabs } from "@/components/ui/tabs";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { ProfileTab } from "./profile-tab";
@@ -32,7 +33,7 @@ export default function StaffRecordPage() {
       setError(t("team.record.notFound"));
       return;
     }
-    const [staff, profile, skills, salaries, bank, joining, colleagues, documents] = await Promise.all([
+    const [staff, profile, skills, salaries, bank, joining, colleagues, documents, bankRequest] = await Promise.all([
       supabase.from("staff").select("id, name, active, outlet_id").eq("id", id).single(),
       supabase.from("staff_profiles").select("*").eq("staff_id", id).maybeSingle(),
       supabase.from("staff_skills").select("skill").eq("staff_id", id),
@@ -49,12 +50,22 @@ export default function StaffRecordPage() {
       supabase.from("joining_checklists").select("*").eq("staff_id", id).maybeSingle(),
       supabase.from("staff").select("id, name").eq("outlet_id", access.outlet_id).eq("active", true).neq("id", id).order("name"),
       supabase.from("staff_documents").select("id, kind, storage_path, note, created_at").eq("staff_id", id).order("created_at", { ascending: false }),
+      access.can_see_pay
+        ? supabase
+            .from("staff_bank_change_requests")
+            .select("id, account_holder_name, account_last4, ifsc, requested_at")
+            .eq("staff_id", id)
+            .eq("status", "pending")
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
     ]);
     if (staff.error || !staff.data) {
       setError(staff.error?.message ?? t("team.record.notFound"));
       return;
     }
     const settings = await getTeamSettings(supabase, access.outlet_id);
+    const photoPath = profile.data?.photo_path as string | null | undefined;
+    const photo = photoPath ? await supabase.storage.from("staff-photos").createSignedUrl(photoPath, 3600) : null;
     setRecord({
       staff: staff.data,
       outletId: access.outlet_id,
@@ -64,6 +75,8 @@ export default function StaffRecordPage() {
       skillOptions: settings["team.skills"],
       salaries: (salaries.data ?? []) as SalaryStructure[],
       bank: bank.data ?? null,
+      bankRequest: bankRequest.data ?? null,
+      photoUrl: photo?.data?.signedUrl ?? null,
       joining: joining.data ?? null,
       colleagues: colleagues.data ?? [],
       documents: documents.data ?? [],
@@ -77,7 +90,9 @@ export default function StaffRecordPage() {
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "profile", label: t("team.record.tab.profile") },
-    ...(record?.canSeePay ? [{ id: "pay" as const, label: t("team.record.tab.pay") }] : []),
+    ...(record?.canSeePay
+      ? [{ id: "pay" as const, label: record.bankRequest ? t("team.record.tab.payWaiting") : t("team.record.tab.pay") }]
+      : []),
     { id: "joining", label: t("team.record.tab.joining") },
     { id: "access", label: t("team.record.tab.access") },
   ];
@@ -97,7 +112,10 @@ export default function StaffRecordPage() {
 
       {record && (
         <div className="flex max-w-3xl flex-col gap-4">
-          <h2 className="font-serif text-2xl font-bold text-text">{record.staff.name}</h2>
+          <div className="flex items-center gap-3">
+            <Avatar name={record.staff.name} size="lg" src={record.photoUrl} />
+            <h2 className="font-serif text-2xl font-bold text-text">{record.staff.name}</h2>
+          </div>
           <Tabs tabs={tabs} value={tab} onChange={setTab} />
           {tab === "profile" && <ProfileTab record={record} onSaved={load} />}
           {tab === "pay" && record.canSeePay && <PayTab record={record} onSaved={load} />}

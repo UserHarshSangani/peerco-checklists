@@ -19,6 +19,7 @@ import { PinPad } from "./pin-pad";
 type Person = {
   staff_id: string;
   name: string;
+  photo_path: string | null;
   roster_kind: "work" | "weekly_off" | null;
   segments: Segment[] | null;
   extended_until: string | null;
@@ -54,12 +55,21 @@ export function CheckInFlow({ outlet, onExit }: { outlet: Outlet; onExit: () => 
   const [step, setStep] = useState<Step>({ kind: "list" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     const { data, error: e } = await supabase.rpc("team_device_today", { p_outlet: outlet.id });
-    if (e) setLoadError(e.message);
-    else setPeople((data ?? []) as Person[]);
+    if (e) return setLoadError(e.message);
+    const list = (data ?? []) as Person[];
+    setPeople(list);
+    const paths = list.map((p) => p.photo_path).filter((p): p is string => Boolean(p));
+    if (!paths.length) return;
+    const { data: signed } = await supabase.storage.from("staff-photos").createSignedUrls(paths, 3600);
+    const urls: Record<string, string> = {};
+    for (const d of signed ?? []) if (d.path && d.signedUrl) urls[d.path] = d.signedUrl;
+    setPhotos(urls);
   }, [supabase, outlet.id]);
+  const photoOf = (p: Person) => (p.photo_path ? photos[p.photo_path] : null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the list on open
@@ -171,7 +181,7 @@ export function CheckInFlow({ outlet, onExit }: { outlet: Outlet; onExit: () => 
           </button>
         </header>
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-4 p-4 sm:p-6">
-          <Avatar name={step.person.name} size="lg" />
+          <Avatar name={step.person.name} size="lg" src={photoOf(step.person)} />
           <h2 className="text-center font-serif text-2xl font-bold text-text">{title}</h2>
           {error && <p className="text-center text-sm font-medium text-danger">{error}</p>}
 
@@ -257,7 +267,7 @@ export function CheckInFlow({ outlet, onExit }: { outlet: Outlet; onExit: () => 
               onClick={() => choose(p)}
               className="flex min-h-36 flex-col items-center justify-center gap-2 rounded-2xl bg-surface p-4 text-center shadow-sm ring-1 ring-border transition hover:bg-border/20 active:scale-[0.98]"
             >
-              <Avatar name={p.name} size="lg" />
+              <Avatar name={p.name} size="lg" src={photoOf(p)} />
               <span className="text-base font-medium text-text">{p.name}</span>
               <span className="text-xs text-muted">{shiftText(p)}</span>
               {p.state === "in" ? (

@@ -51,6 +51,7 @@ export function PayTab({ record, onSaved }: { record: StaffRecord; onSaved: () =
         )}
       </Card>
       <NewStructureForm record={record} base={current ?? record.salaries[0] ?? null} onSaved={onSaved} />
+      {record.bankRequest && <BankRequestCard record={record} onSaved={onSaved} />}
       <BankCard record={record} onSaved={onSaved} />
     </div>
   );
@@ -218,6 +219,69 @@ function NewStructureForm({
           {t("team.pay.save")}
         </Button>
       </form>
+    </Card>
+  );
+}
+
+// A bank change the staff member asked for from their phone. Nothing is
+// used for salary until someone allowed to see pay approves it.
+function BankRequestCard({ record, onSaved }: { record: StaffRecord; onSaved: () => Promise<void> }) {
+  const { t } = useLanguage();
+  const { showError, showSuccess } = useToast();
+  const supabase = useMemo(() => createClient(), []);
+  const [rejecting, setRejecting] = useState(false);
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const req = record.bankRequest!;
+
+  async function decide(approve: boolean) {
+    setBusy(true);
+    const { data, error } = await supabase.rpc("team_decide_bank_change", { p_request: req.id, p_approve: approve, p_note: note });
+    setBusy(false);
+    const reply = data as { ok: boolean; reason?: string } | null;
+    if (error || !reply?.ok) {
+      return showError(reply?.reason === "note_required" ? t("team.bankRequest.noteRequired") : t("team.bank.failed"));
+    }
+    showSuccess(approve ? t("team.bankRequest.approved") : t("team.bankRequest.rejected"));
+    await onSaved();
+  }
+
+  return (
+    <Card className="ring-2 ring-warning-icon">
+      <p className="mb-1 flex flex-wrap items-center gap-2 text-sm font-semibold text-text">
+        <StatusPill tone="warning">{t("team.bankRequest.pill")}</StatusPill>
+        {t("team.bankRequest.heading")}
+      </p>
+      <p className="mb-1 text-sm text-text">
+        {req.account_holder_name} · ••••{req.account_last4} · {req.ifsc}
+      </p>
+      <p className="mb-3 text-xs text-muted">
+        {t("team.bankRequest.hint", { current: record.bank ? `••••${record.bank.account_last4}` : t("team.bankRequest.noCurrent") })}
+      </p>
+      {rejecting ? (
+        <div className="flex flex-col gap-3">
+          <Field label={t("team.bankRequest.reason")} htmlFor="br-note">
+            <TextInput id="br-note" value={note} onChange={(e) => setNote(e.target.value)} />
+          </Field>
+          <div className="flex gap-2">
+            <Button variant="danger" loading={busy} disabled={!note.trim()} onClick={() => decide(false)}>
+              {t("team.bankRequest.reject")}
+            </Button>
+            <Button variant="ghost" onClick={() => setRejecting(false)}>
+              {t("common.cancel")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <Button loading={busy} onClick={() => decide(true)}>
+            {t("team.bankRequest.approve")}
+          </Button>
+          <Button variant="secondary" onClick={() => setRejecting(true)}>
+            {t("team.bankRequest.reject")}
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }

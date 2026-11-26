@@ -98,3 +98,20 @@ export async function uploadAttendancePhoto(
   });
   return { error: error?.message ?? null };
 }
+
+// Profile photo: {outlet}/{staff}/{uuid}.jpg in the private staff-photos bucket.
+export function staffPhotoPath(outletId: string, staffId: string): string {
+  return `${outletId}/${staffId}/${crypto.randomUUID()}.jpg`;
+}
+
+export async function uploadStaffPhoto(
+  supabase: Supabase,
+  path: string,
+  blob: Blob,
+): Promise<{ error: string | null }> {
+  const { error } = await supabase.storage.from("staff-photos").upload(path, blob, {
+    contentType: "image/jpeg",
+    upsert: false,
+  });
+  return { error: error?.message ?? null };
+}

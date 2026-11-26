@@ -10,12 +10,13 @@ import { useOutletContext } from "../../outlet-context";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusPill } from "@/components/ui/status-pill";
+import { Avatar } from "@/components/ui/avatar";
 
 type Row = {
   id: string;
   name: string;
   active: boolean;
-  staff_profiles: { mobile: string | null; employment_status: string; login_enabled: boolean } | null;
+  staff_profiles: { mobile: string | null; employment_status: string; login_enabled: boolean; photo_path: string | null } | null;
   staff_skills: { skill: string }[];
 };
 
@@ -38,21 +39,39 @@ function StaffList({ outletId }: { outletId: string }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<Record<string, string>>({});
+  // Bank changes waiting for approval (only visible to people who can see pay).
+  const [waiting, setWaiting] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("staff")
-      .select("id, name, active, staff_profiles(mobile, employment_status, login_enabled), staff_skills(skill)")
-      .eq("outlet_id", outletId)
-      .order("active", { ascending: false })
-      .order("name")
-      .then(({ data, error: loadError }) => {
-        if (cancelled) return;
-        setLoading(false);
-        if (loadError) setError(loadError.message);
-        else setRows((data ?? []) as unknown as Row[]);
-      });
+    (async () => {
+      const [{ data, error: loadError }, { data: requests }] = await Promise.all([
+        supabase
+          .from("staff")
+          .select("id, name, active, staff_profiles(mobile, employment_status, login_enabled, photo_path), staff_skills(skill)")
+          .eq("outlet_id", outletId)
+          .order("active", { ascending: false })
+          .order("name"),
+        supabase.from("staff_bank_change_requests").select("staff_id").eq("outlet_id", outletId).eq("status", "pending"),
+      ]);
+      if (cancelled) return;
+      setLoading(false);
+      if (loadError) return setError(loadError.message);
+      const list = (data ?? []) as unknown as Row[];
+      setRows(list);
+      setWaiting(new Set((requests ?? []).map((r) => r.staff_id as string)));
+
+      const paths = list
+        .map((r) => (Array.isArray(r.staff_profiles) ? r.staff_profiles[0] : r.staff_profiles)?.photo_path)
+        .filter((p): p is string => Boolean(p));
+      if (!paths.length) return;
+      const { data: signed } = await supabase.storage.from("staff-photos").createSignedUrls(paths, 3600);
+      if (cancelled) return;
+      const urls: Record<string, string> = {};
+      for (const d of signed ?? []) if (d.path && d.signedUrl) urls[d.path] = d.signedUrl;
+      setPhotos(urls);
+    })();
     return () => {
       cancelled = true;
     };
@@ -76,7 +95,8 @@ function StaffList({ outletId }: { outletId: string }) {
                 href={`/team/staff/${row.id}`}
                 className="flex min-h-[64px] items-center justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border hover:ring-accent"
               >
-                <div className="min-w-0">
+                <Avatar name={row.name} src={profile?.photo_path ? photos[profile.photo_path] : null} />
+                <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-2 font-medium text-text">
                     {row.name}
                     {profile?.login_enabled && (
@@ -90,6 +110,7 @@ function StaffList({ outletId }: { outletId: string }) {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
+                  {waiting.has(row.id) && <StatusPill tone="warning">{t("team.bankRequest.pill")}</StatusPill>}
                   {!row.active ? (
                     <StatusPill>{t("manager.inactive")}</StatusPill>
                   ) : profile && profile.employment_status !== "active" ? (

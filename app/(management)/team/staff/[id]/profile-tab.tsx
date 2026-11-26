@@ -26,6 +26,7 @@ type Form = {
   emergency_contact_phone: string;
   late_shift_consent: boolean;
   transport_note: string;
+  address: string;
 };
 
 function toForm(p: StaffProfileRow | null): Form {
@@ -44,6 +45,7 @@ function toForm(p: StaffProfileRow | null): Form {
     emergency_contact_phone: p?.emergency_contact_phone ?? "",
     late_shift_consent: p?.late_shift_consent ?? false,
     transport_note: p?.transport_note ?? "",
+    address: p?.address ?? "",
   };
 }
 
@@ -93,6 +95,7 @@ export function ProfileTab({ record, onSaved }: { record: StaffRecord; onSaved: 
           : null
         : (record.profile?.late_shift_consent_at ?? null),
       transport_note: form.transport_note.trim() || null,
+      address: form.address.trim() || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -213,6 +216,18 @@ export function ProfileTab({ record, onSaved }: { record: StaffRecord; onSaved: 
       </Card>
 
       <Card className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <Field label={t("team.myDetails.address")} htmlFor="p-address">
+            <textarea
+              id="p-address"
+              rows={2}
+              maxLength={500}
+              value={form.address}
+              onChange={(e) => set("address", e.target.value)}
+              className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-base text-text"
+            />
+          </Field>
+        </div>
         <Field label={t("team.profile.emergencyName")} htmlFor="p-ename">
           <TextInput id="p-ename" value={form.emergency_contact_name} onChange={(e) => set("emergency_contact_name", e.target.value)} />
         </Field>

@@ -17,6 +17,8 @@ export type StaffProfileRow = {
   late_shift_consent: boolean;
   late_shift_consent_at: string | null;
   transport_note: string | null;
+  address: string | null;
+  photo_path: string | null;
   login_enabled: boolean;
   auth_user_id: string | null;
 };
@@ -48,6 +50,8 @@ export type StaffRecord = {
   skillOptions: string[];
   salaries: SalaryStructure[];
   bank: { account_holder_name: string; account_last4: string; ifsc: string; updated_at: string } | null;
+  bankRequest: { id: string; account_holder_name: string; account_last4: string; ifsc: string; requested_at: string } | null;
+  photoUrl: string | null;
   joining: JoiningRow | null;
   colleagues: { id: string; name: string }[];
   documents: { id: string; kind: string; storage_path: string; note: string | null; created_at: string }[];

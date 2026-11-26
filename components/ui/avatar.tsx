@@ -27,15 +27,29 @@ function toneForName(name: string): (typeof RING_TONES)[number] {
 
 // Initials avatar with a deterministic (name-derived) coloured ring, so the
 // same person always gets the same colour without any stored preference.
+// With `src` (a signed photo URL) it shows the photo inside the same ring.
 export function Avatar({
   name,
   size = "md",
   className = "",
+  src,
 }: {
   name: string;
   size?: keyof typeof SIZE_CLASSES;
   className?: string;
+  src?: string | null;
 }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        className={`shrink-0 rounded-full object-cover ring-2 ${toneForName(name)} ${SIZE_CLASSES[size]} ${className}`}
+      />
+    );
+  }
   return (
     <span
       aria-hidden="true"

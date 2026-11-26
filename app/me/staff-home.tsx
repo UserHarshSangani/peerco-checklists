@@ -8,6 +8,7 @@ import { clockIST } from "@/lib/team/engines/attendance";
 import { formatSegments, type Segment } from "@/lib/team/engines/time";
 import { LogoutButton } from "@/components/logout-button";
 import { Card } from "@/components/ui/card";
+import { MyBankCard, MyDetailsCard, type MyBank, type MyDetails } from "./my-details";
 
 export type StaffShift = {
   business_date: string;
@@ -26,6 +27,8 @@ type Props = {
   today: string;
   checkedInAt: string | null;
   shifts: StaffShift[];
+  details: MyDetails | null;
+  bank: MyBank;
 };
 
 function formatDate(iso: string): string {
@@ -37,7 +40,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts }: Props) {
+export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank }: Props) {
   const { t } = useLanguage();
 
   return (
@@ -98,6 +101,9 @@ export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, 
               </ul>
             )}
           </Card>
+
+          {details && <MyDetailsCard details={details} />}
+          {details && <MyBankCard bank={bank} name={details.name} />}
 
           <Card>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{t("team.me.comingSoon")}</h2>
