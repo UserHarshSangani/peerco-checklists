@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { login, type LoginErrorCode, type LoginState } from "./actions";
 import { useLanguage } from "@/lib/i18n/language-context";
@@ -84,6 +85,13 @@ export default function LoginPage() {
           <Button type="submit" loading={pending} className="w-full">
             {pending ? t("auth.signingIn") : t("auth.signIn")}
           </Button>
+
+          <Link
+            href="/forgot-password"
+            className="mt-4 block min-h-[44px] py-3 text-center text-sm font-medium text-accent hover:underline"
+          >
+            {t("auth.forgotLink")}
+          </Link>
         </form>
       </div>
     </main>

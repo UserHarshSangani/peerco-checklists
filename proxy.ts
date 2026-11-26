@@ -3,11 +3,16 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { homeForRole } from "@/lib/roles";
 
 const PUBLIC_PATH = "/login";
+// Reachable without a session. Signed-in people are sent home from these.
+const LOGGED_OUT_PATHS = new Set([PUBLIC_PATH, "/forgot-password"]);
+// Reachable either way: turns an emailed link into a session.
+const AUTH_CALLBACK_PATH = "/auth/confirm";
 
 export async function proxy(request: NextRequest) {
   const { response, user, supabase } = await updateSession(request);
   const { pathname } = request.nextUrl;
-  const isLoginPath = pathname === PUBLIC_PATH;
+  if (pathname === AUTH_CALLBACK_PATH) return response;
+  const isLoginPath = LOGGED_OUT_PATHS.has(pathname);
 
   if (!user && !isLoginPath) {
     const url = request.nextUrl.clone();
