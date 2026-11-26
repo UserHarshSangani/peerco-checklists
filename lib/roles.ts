@@ -3,6 +3,7 @@ const ROLE_HOME: Record<string, string> = {
   peerco_admin: "/dashboard",
   manager: "/dashboard",
   owner: "/dashboard",
+  staff: "/me",
 };
 
 export function homeForRole(role: string | null | undefined): string {
@@ -24,6 +25,7 @@ const ROLE_LABEL: Record<string, string> = {
   owner: "Owner",
   manager: "Manager",
   device: "Tablet",
+  staff: "Staff",
 };
 
 export function roleLabel(role: string | null | undefined): string {

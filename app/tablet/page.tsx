@@ -12,6 +12,11 @@ export default async function TabletPage() {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role === "staff") {
+    redirect("/me");
+  }
+
   const { data: outlets, error } = await supabase
     .from("outlets")
     .select("id, name")

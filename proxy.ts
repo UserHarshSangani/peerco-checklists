@@ -4,7 +4,7 @@ import { homeForRole } from "@/lib/roles";
 
 const PUBLIC_PATH = "/login";
 // Reachable without a session. Signed-in people are sent home from these.
-const LOGGED_OUT_PATHS = new Set([PUBLIC_PATH, "/forgot-password"]);
+const LOGGED_OUT_PATHS = new Set([PUBLIC_PATH, "/forgot-password", "/staff-login"]);
 // Reachable either way: turns an emailed link into a session.
 const AUTH_CALLBACK_PATH = "/auth/confirm";
 

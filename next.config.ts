@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Rendered on the server for appointment letters; keep it out of the bundle.
+  serverExternalPackages: ["@react-pdf/renderer"],
   async headers() {
     return [
       {

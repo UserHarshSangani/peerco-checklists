@@ -27,6 +27,9 @@ export default async function ManagementLayout({
   if (!profile || profile.role === "device") {
     redirect("/tablet");
   }
+  if (profile.role === "staff") {
+    redirect("/me");
+  }
 
   const userName = profile.full_name || user.email || "Account";
 

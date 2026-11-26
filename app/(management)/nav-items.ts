@@ -5,6 +5,8 @@ import {
   ChefHat,
   ClipboardCheck,
   ClipboardList,
+  Contact,
+  FileSignature,
   FileSpreadsheet,
   LayoutDashboard,
   Link2,
@@ -18,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type NavGroup = "OPERATE" | "ANALYSE" | "SET UP";
+export type NavGroup = "OPERATE" | "ANALYSE" | "TEAM" | "SET UP";
 
 export type NavItem = {
   href: string;
@@ -46,6 +48,15 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { href: "/variance", label: "Variance", icon: Scale, group: "ANALYSE" },
   { href: "/reports", label: "Reports", icon: FileSpreadsheet, group: "ANALYSE" },
+  { href: "/team/staff", label: "People", icon: Contact, group: "TEAM" },
+  {
+    href: "/team/letter",
+    label: "Appointment letter",
+    icon: FileSignature,
+    group: "TEAM",
+    roles: ["peerco_admin", "owner"],
+  },
+  { href: "/team/settings", label: "Team settings", icon: SlidersHorizontal, group: "TEAM" },
   { href: "/catalog", label: "Catalog", icon: BookOpen, group: "SET UP" },
   { href: "/recipes", label: "Recipes", icon: ChefHat, group: "SET UP" },
   {
@@ -56,7 +67,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["peerco_admin", "owner"],
   },
   { href: "/staff", label: "Staff", icon: Users, group: "SET UP" },
-  { href: "/team/settings", label: "Team settings", icon: SlidersHorizontal, group: "SET UP" },
   {
     href: "/outlets",
     label: "Outlets",
@@ -74,7 +84,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/settings", label: "Settings", icon: Settings, group: "SET UP" },
 ];
 
-export const NAV_GROUPS: NavGroup[] = ["OPERATE", "ANALYSE", "SET UP"];
+export const NAV_GROUPS: NavGroup[] = ["OPERATE", "ANALYSE", "TEAM", "SET UP"];
 
 export function navItemsForRole(role: string | null): NavItem[] {
   return NAV_ITEMS.filter(

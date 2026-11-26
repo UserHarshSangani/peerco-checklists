@@ -92,6 +92,12 @@ export default function LoginPage() {
           >
             {t("auth.forgotLink")}
           </Link>
+          <Link
+            href="/staff-login"
+            className="block min-h-[44px] rounded-lg py-3 text-center text-sm font-medium text-muted ring-1 ring-border hover:text-text"
+          >
+            {t("team.staffLogin.fromLogin")}
+          </Link>
         </form>
       </div>
     </main>
