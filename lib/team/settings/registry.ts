@@ -79,6 +79,7 @@ export const SETTINGS = {
     group: "hours", type: "int", unit: "minutes", default: 660, min: 480, max: 960, verify: true,
   },
   "hours.women_late_cutoff": { group: "hours", type: "time", default: "19:00", verify: true },
+  "hours.week_start": { group: "hours", type: "enum", default: "monday", options: ["monday", "sunday"] },
   "hours.working_days_basis": {
     group: "hours", type: "enum", default: "fixed_26", options: ["fixed_26", "calendar_days", "rostered_days"],
     verify: true,

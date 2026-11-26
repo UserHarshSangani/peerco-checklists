@@ -1,10 +1,19 @@
 "use client";
 
-import { CalendarDays, PiggyBank, Clock } from "lucide-react";
+import { CalendarDays, PiggyBank } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { formatINR } from "@/lib/team/money";
+import { formatDateLabel } from "@/lib/date";
+import { formatSegments, type Segment } from "@/lib/team/engines/time";
 import { LogoutButton } from "@/components/logout-button";
 import { Card } from "@/components/ui/card";
+
+export type StaffShift = {
+  business_date: string;
+  kind: "work" | "weekly_off";
+  segments: Segment[];
+  extended_until: string | null;
+};
 
 type Props = {
   linked: boolean;
@@ -13,6 +22,8 @@ type Props = {
   joiningDate: string | null;
   mobile: string | null;
   pay: { kind: "monthly" | "daily"; paise: number } | null;
+  today: string;
+  shifts: StaffShift[];
 };
 
 function formatDate(iso: string): string {
@@ -24,7 +35,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay }: Props) {
+export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, shifts }: Props) {
   const { t } = useLanguage();
 
   return (
@@ -58,12 +69,36 @@ export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay }
           </Card>
 
           <Card>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{t("team.me.shifts")}</h2>
+            {shifts.length === 0 ? (
+              <p className="text-sm text-muted">{t("team.me.noShifts")}</p>
+            ) : (
+              <ul className="flex flex-col divide-y divide-border text-sm">
+                {shifts.map((shift) => (
+                  <li key={shift.business_date} className="flex min-h-[44px] items-center justify-between gap-3 py-2">
+                    <span className={shift.business_date === today ? "font-semibold text-text" : "text-text"}>
+                      {shift.business_date === today ? t("team.me.today") : formatDateLabel(shift.business_date)}
+                    </span>
+                    <span className="text-right text-text">
+                      {shift.kind === "weekly_off"
+                        ? t("team.roster.weeklyOff")
+                        : formatSegments(
+                            shift.extended_until
+                              ? shift.segments.map((s, i) =>
+                                  i === shift.segments.length - 1 ? { ...s, end: shift.extended_until!.slice(0, 5) } : s,
+                                )
+                              : shift.segments,
+                          )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{t("team.me.comingSoon")}</h2>
             <ul className="flex flex-col gap-3 text-sm text-text">
-              <li className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-accent" aria-hidden="true" />
-                {t("team.me.soonShifts")}
-              </li>
               <li className="flex items-center gap-3">
                 <CalendarDays className="h-5 w-5 text-accent" aria-hidden="true" />
                 {t("team.me.soonLeave")}

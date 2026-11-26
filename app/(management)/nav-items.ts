@@ -1,7 +1,9 @@
 import {
+  AlarmClock,
   BookOpen,
   Building2,
   CalendarClock,
+  CalendarRange,
   ChefHat,
   ClipboardCheck,
   ClipboardList,
@@ -49,6 +51,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/variance", label: "Variance", icon: Scale, group: "ANALYSE" },
   { href: "/reports", label: "Reports", icon: FileSpreadsheet, group: "ANALYSE" },
   { href: "/team/staff", label: "People", icon: Contact, group: "TEAM" },
+  { href: "/team/roster", label: "Roster", icon: CalendarRange, group: "TEAM" },
+  { href: "/team/shifts", label: "Shifts and minimums", icon: AlarmClock, group: "TEAM" },
   {
     href: "/team/letter",
     label: "Appointment letter",

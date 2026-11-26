@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { homeForRole } from "@/lib/roles";
-import { todayInKolkata } from "@/lib/date";
+import { addDaysToDateString, todayInKolkata } from "@/lib/date";
 import { monthlyGrossPaise, structureOn, type SalaryStructure } from "@/lib/team/salary";
-import { StaffHome } from "./staff-home";
+import { StaffHome, type StaffShift } from "./staff-home";
 
-// Home screen for a staff member signed in on their own phone. Milestone 2
-// shows who they are; shifts, attendance, leave and Gullak arrive later.
+// Home screen for a staff member signed in on their own phone: who they
+// are and their shifts for the next 7 days. Attendance, leave and Gullak
+// arrive in later milestones.
 export default async function MePage() {
   const supabase = await createClient();
   const {
@@ -30,7 +31,18 @@ export default async function MePage() {
         .eq("staff_id", me.staff_id)
     : { data: [] };
 
-  const current = structureOn((salaries ?? []) as SalaryStructure[], todayInKolkata());
+  const today = todayInKolkata();
+  const { data: shifts } = me
+    ? await supabase
+        .from("roster_entries")
+        .select("business_date, kind, segments, extended_until")
+        .eq("staff_id", me.staff_id)
+        .gte("business_date", today)
+        .lte("business_date", addDaysToDateString(today, 6))
+        .order("business_date")
+    : { data: [] };
+
+  const current = structureOn((salaries ?? []) as SalaryStructure[], today);
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
   return (
@@ -40,6 +52,8 @@ export default async function MePage() {
       outletName={one(me?.outlets ?? null)?.name ?? null}
       joiningDate={me?.joining_date ?? null}
       mobile={me?.mobile ?? null}
+      today={today}
+      shifts={(shifts ?? []) as StaffShift[]}
       pay={
         current
           ? current.wage_type === "daily"
