@@ -185,3 +185,23 @@ describe("audit log and payroll lock", () => {
     ).rejects.toThrow(/locked/);
   });
 });
+
+describe("staff task switches", () => {
+  it("a manager can read the task switches but not pin_hash", async () => {
+    const read = (cols: string) =>
+      db.transaction(async (tx) => {
+        await tx.query(`select set_config('request.jwt.claim.sub', $1, true)`, [ID.managerA1]);
+        await tx.exec("set local role authenticated");
+        try {
+          await tx.query(`select ${cols} from public.staff limit 1`);
+          return "ok";
+        } catch (e) {
+          return (e as Error).message;
+        } finally {
+          await tx.rollback().catch(() => {});
+        }
+      });
+    expect(await read("id, name, active, locked_until, can_checklists, can_stock_counts, can_goods_received, can_wastage")).toBe("ok");
+    expect(await read("pin_hash")).toMatch(/permission denied/);
+  });
+});
