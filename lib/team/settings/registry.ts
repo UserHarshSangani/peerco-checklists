@@ -108,6 +108,7 @@ export const SETTINGS = {
   "gullak.monthly_cap_paise": { group: "gullak", type: "paise", default: 150000, min: 0, max: 1000000 },
   "gullak.payable_share_bps": { group: "gullak", type: "bps", default: 5000, min: 0, max: 10000 },
   "gullak.unlock_months": { group: "gullak", type: "int_list", unit: "months", default: [3, 6, 12], min: 1, max: 60 },
+  "gullak.absence_wait_days": { group: "gullak", type: "int", unit: "days", default: 1, min: 0, max: 7 },
   "gullak.forfeit_locked_on_absconding": { group: "gullak", type: "boolean", default: false, verify: true },
 
   // ---- Leave ----

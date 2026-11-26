@@ -17,6 +17,7 @@ const URLS: Record<string, string> = {
   cover_awarded: "/me",
   cover_cancelled: "/me",
   leave_decided: "/me",
+  gullak_unlocked: "/me",
   cover_filled: "/team/cover",
   cover_unfilled: "/team/cover",
   cover_accepted: "/team/cover",

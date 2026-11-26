@@ -1,6 +1,5 @@
 "use client";
 
-import { PiggyBank } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { formatINR } from "@/lib/team/money";
 import { formatDateLabel } from "@/lib/date";
@@ -11,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { MyBankCard, MyDetailsCard, type MyBank, type MyDetails } from "./my-details";
 import { MyLeaveCard, type MyLeave } from "./my-leave";
 import { MyCoverCard, type MyCover } from "./my-cover";
+import { MyGullakCard, type MyGullak } from "./my-gullak";
 
 export type StaffShift = {
   business_date: string;
@@ -33,6 +33,7 @@ type Props = {
   bank: MyBank;
   leave: MyLeave | null;
   cover: MyCover | null;
+  gullak: MyGullak | null;
 };
 
 function formatDate(iso: string): string {
@@ -44,7 +45,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank, leave, cover }: Props) {
+export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank, leave, cover, gullak }: Props) {
   const { t } = useLanguage();
 
   return (
@@ -106,20 +107,11 @@ export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, 
             )}
           </Card>
 
+          {gullak?.enabled && <MyGullakCard gullak={gullak} checkedIn={Boolean(checkedInAt)} />}
           {cover && <MyCoverCard cover={cover} />}
           {leave && <MyLeaveCard leave={leave} />}
           {details && <MyDetailsCard details={details} />}
           {details && <MyBankCard bank={bank} name={details.name} />}
-
-          <Card>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{t("team.me.comingSoon")}</h2>
-            <ul className="flex flex-col gap-3 text-sm text-text">
-              <li className="flex items-center gap-3">
-                <PiggyBank className="h-5 w-5 text-accent" aria-hidden="true" />
-                {t("team.me.soonGullak")}
-              </li>
-            </ul>
-          </Card>
         </>
       )}
     </main>

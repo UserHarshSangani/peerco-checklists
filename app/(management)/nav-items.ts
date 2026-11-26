@@ -6,6 +6,7 @@ import {
   CalendarRange,
   CalendarCheck,
   HandHelping,
+  PiggyBank,
   Plane,
   ChefHat,
   ClipboardCheck,
@@ -58,6 +59,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/team/attendance", label: "Attendance", icon: CalendarCheck, group: "TEAM" },
   { href: "/team/leave", label: "Leave", icon: Plane, group: "TEAM" },
   { href: "/team/cover", label: "Cover", icon: HandHelping, group: "TEAM" },
+  { href: "/team/gullak", label: "Gullak", icon: PiggyBank, group: "TEAM" },
   { href: "/team/shifts", label: "Shifts and minimums", icon: AlarmClock, group: "TEAM" },
   {
     href: "/team/letter",

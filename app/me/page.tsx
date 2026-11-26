@@ -7,10 +7,11 @@ import { StaffHome, type StaffShift } from "./staff-home";
 import type { MyBank, MyDetails } from "./my-details";
 import type { MyLeave, MyLeaveRequest } from "./my-leave";
 import type { MyCover } from "./my-cover";
+import type { MyGullak } from "./my-gullak";
 import { parseRules, type LeaveType } from "@/lib/team/engines/leave";
 
 // Home screen for a staff member signed in on their own phone: who they
-// are, their shifts for the next 7 days, their details, their leave and cover offers.
+// are, their shifts for the next 7 days, their Gullak, their details, their leave and cover offers.
 export default async function MePage() {
   const supabase = await createClient();
   const {
@@ -75,7 +76,9 @@ export default async function MePage() {
       ])
     : [{ data: null }, { data: null }, null];
 
-  const { data: coverData } = me ? await supabase.rpc("team_my_cover_offers") : { data: null };
+  const [{ data: coverData }, { data: gullakData }] = me
+    ? await Promise.all([supabase.rpc("team_my_cover_offers"), supabase.rpc("team_my_gullak")])
+    : [{ data: null }, { data: null }];
 
   const [{ data: leaveTypes }, { data: ledger }, { data: leaveRequests }, { data: offs }, { data: leaveSettings }] = me
     ? await Promise.all([
@@ -157,6 +160,7 @@ export default async function MePage() {
     <StaffHome
       leave={leave}
       cover={(coverData ?? null) as MyCover | null}
+      gullak={(gullakData ?? null) as MyGullak | null}
       linked={Boolean(me)}
       name={staffName}
       outletName={one(me?.outlets ?? null)?.name ?? null}
