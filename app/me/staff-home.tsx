@@ -4,6 +4,7 @@ import { CalendarDays, PiggyBank } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { formatINR } from "@/lib/team/money";
 import { formatDateLabel } from "@/lib/date";
+import { clockIST } from "@/lib/team/engines/attendance";
 import { formatSegments, type Segment } from "@/lib/team/engines/time";
 import { LogoutButton } from "@/components/logout-button";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,7 @@ type Props = {
   mobile: string | null;
   pay: { kind: "monthly" | "daily"; paise: number } | null;
   today: string;
+  checkedInAt: string | null;
   shifts: StaffShift[];
 };
 
@@ -35,7 +37,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, shifts }: Props) {
+export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts }: Props) {
   const { t } = useLanguage();
 
   return (
@@ -70,6 +72,7 @@ export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, 
 
           <Card>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{t("team.me.shifts")}</h2>
+            {checkedInAt && <p className="mb-2 text-sm font-medium text-success-fg">{t("team.me.checkedInAt", { time: clockIST(checkedInAt) })}</p>}
             {shifts.length === 0 ? (
               <p className="text-sm text-muted">{t("team.me.noShifts")}</p>
             ) : (

@@ -4,6 +4,7 @@ import {
   Building2,
   CalendarClock,
   CalendarRange,
+  CalendarCheck,
   ChefHat,
   ClipboardCheck,
   ClipboardList,
@@ -52,6 +53,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/reports", label: "Reports", icon: FileSpreadsheet, group: "ANALYSE" },
   { href: "/team/staff", label: "People", icon: Contact, group: "TEAM" },
   { href: "/team/roster", label: "Roster", icon: CalendarRange, group: "TEAM" },
+  { href: "/team/attendance", label: "Attendance", icon: CalendarCheck, group: "TEAM" },
   { href: "/team/shifts", label: "Shifts and minimums", icon: AlarmClock, group: "TEAM" },
   {
     href: "/team/letter",

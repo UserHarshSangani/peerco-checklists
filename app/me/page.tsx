@@ -42,6 +42,19 @@ export default async function MePage() {
         .order("business_date")
     : { data: [] };
 
+  const { data: checkIn } = me
+    ? await supabase
+        .from("attendance_events")
+        .select("at")
+        .eq("staff_id", me.staff_id)
+        .eq("business_date", today)
+        .eq("kind", "in")
+        .neq("status", "void")
+        .order("at")
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+
   const current = structureOn((salaries ?? []) as SalaryStructure[], today);
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
@@ -53,6 +66,7 @@ export default async function MePage() {
       joiningDate={me?.joining_date ?? null}
       mobile={me?.mobile ?? null}
       today={today}
+      checkedInAt={checkIn?.at ?? null}
       shifts={(shifts ?? []) as StaffShift[]}
       pay={
         current

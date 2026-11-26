@@ -60,6 +60,11 @@ export const SETTINGS = {
   "attendance.photo_retention_days": {
     group: "attendance", type: "int", unit: "days", default: 90, min: 7, max: 730,
   },
+  "attendance.photo_required": { group: "attendance", type: "boolean", default: true },
+  "attendance.late_alerts": { group: "attendance", type: "boolean", default: true },
+  "attendance.auto_close_after_minutes": {
+    group: "attendance", type: "int", unit: "minutes", default: 120, min: 30, max: 720,
+  },
   "attendance.rounding_minutes": { group: "attendance", type: "int", unit: "minutes", default: 15, min: 1, max: 60 },
   "attendance.rounding_mode": {
     group: "attendance", type: "enum", default: "nearest", options: ["down", "nearest", "up"],

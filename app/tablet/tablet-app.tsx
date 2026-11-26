@@ -12,6 +12,7 @@ import { StockCountFlow } from "./stock/stock-count-flow";
 import { GoodsReceivedFlow } from "./stock/goods-received-flow";
 import { WastageFlow } from "./stock/wastage-flow";
 import { StaffPickerScreen } from "./staff-picker-screen";
+import { CheckInFlow } from "./attendance/check-in-flow";
 import { CurrentStaffProvider, useCurrentStaff } from "./current-staff-context";
 import {
   TaskPermissionsProvider,
@@ -30,6 +31,7 @@ import { InstallHint } from "@/components/pwa/install-hint";
 import {
   ClipboardCheck,
   Clock,
+  Fingerprint,
   ChefHat as WastageIcon,
   PackageSearch,
   Truck,
@@ -142,6 +144,8 @@ function OutletHome({
   const currentStaff = useCurrentStaff();
   const taskPermissions = useTaskPermissions();
   const [activeTile, setActiveTile] = useState<HomeTile | null>(null);
+  // Check-in picks the person itself, so it skips the "who are you" step.
+  const [checkingIn, setCheckingIn] = useState(false);
   const [pendingTile, setPendingTile] = useState<HomeTile | null>(null);
   const [activeTemplate, setActiveTemplate] =
     useState<ChecklistTemplate | null>(null);
@@ -195,6 +199,10 @@ function OutletHome({
     </header>
   );
 
+  if (checkingIn) {
+    return <CheckInFlow key={outlet.id} outlet={outlet} onExit={() => setCheckingIn(false)} />;
+  }
+
   if (pendingTile) {
     return (
       <StaffPickerScreen
@@ -246,6 +254,12 @@ function OutletHome({
           {t("tablet.home.heading")}
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <HomeTileButton
+            icon={<Fingerprint className="h-full w-full" />}
+            tone="accent"
+            label={t("team.checkin.tile")}
+            onClick={() => setCheckingIn(true)}
+          />
           <HomeTileButton
             icon={<ClipboardCheck className="h-full w-full" />}
             tone="accent"

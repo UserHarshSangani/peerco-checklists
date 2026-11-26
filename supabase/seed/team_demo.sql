@@ -103,9 +103,7 @@ begin
       if extract(dow from v_day)::int = v_staff.idx % 7 then
         insert into public.roster_entries (outlet_id, staff_id, business_date, kind, segments, source, created_by)
         values (v_outlet, v_staff.id, v_day, 'weekly_off', '[]', 'seed', null);
-        insert into public.attendance_days (staff_id, outlet_id, business_date, status)
-        values (v_staff.id, v_outlet, v_day, 'weekly_off');
-        continue;
+        continue;  -- the roster trigger records the weekly off
       end if;
 
       insert into public.roster_entries (outlet_id, staff_id, business_date, shift_template_id, segments,
@@ -117,9 +115,8 @@ begin
       end if;
 
       -- Rishabh never misses; others miss one day in roughly eleven.
+      -- (No events: the roster trigger records the day as absent.)
       if v_staff.idx <> 1 and (v_staff.idx * 3 + v_d) % 11 = 0 then
-        insert into public.attendance_days (staff_id, outlet_id, business_date, status)
-        values (v_staff.id, v_outlet, v_day, 'absent_unapproved');
         continue;
       end if;
 
@@ -133,10 +130,7 @@ begin
       values (v_outlet, v_staff.id, v_day, 'in', v_in, 'device', null),
              (v_outlet, v_staff.id, v_day, 'out', v_out, 'device', null);
 
-      insert into public.attendance_days (staff_id, outlet_id, business_date, status, first_in, last_out,
-                                          late_minutes, payable_minutes)
-      values (v_staff.id, v_outlet, v_day, 'present', v_in, v_out, greatest(v_jitter - 10, 0),
-              (extract(epoch from (v_out - v_in)) / 60)::int);
+      perform private.team_recompute_day(v_staff.id, v_day);
     end loop;
   end loop;
 

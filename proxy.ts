@@ -7,8 +7,11 @@ const PUBLIC_PATH = "/login";
 const LOGGED_OUT_PATHS = new Set([PUBLIC_PATH, "/forgot-password", "/staff-login"]);
 // Reachable either way: turns an emailed link into a session.
 const AUTH_CALLBACK_PATH = "/auth/confirm";
+// Scheduled jobs carry no session; each route checks CRON_SECRET itself.
+const CRON_PREFIX = "/api/cron/";
 
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith(CRON_PREFIX)) return NextResponse.next();
   const { response, user, supabase } = await updateSession(request);
   const { pathname } = request.nextUrl;
   if (pathname === AUTH_CALLBACK_PATH) return response;
