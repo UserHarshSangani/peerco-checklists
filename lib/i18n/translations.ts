@@ -124,6 +124,113 @@ const coreDictionary = {
     hi: "इस खाते के लिए कोई प्रोफ़ाइल सेट नहीं है।",
     mr: "या खात्यासाठी कोणतीही प्रोफाइल सेट केलेली नाही.",
   },
+  "auth.forgotLink": {
+    en: "Forgot password?",
+    hi: "पासवर्ड भूल गए?",
+    mr: "पासवर्ड विसरलात?",
+  },
+
+  // /forgot-password and /reset-password
+  "auth.forgot.heading": {
+    en: "Reset your password",
+    hi: "अपना पासवर्ड रीसेट करें",
+    mr: "तुमचा पासवर्ड रीसेट करा",
+  },
+  "auth.forgot.intro": {
+    en: "Enter the email you sign in with. We'll send you a link to choose a new password.",
+    hi: "जिस ईमेल से आप साइन इन करते हैं, वह डालें। हम नया पासवर्ड चुनने के लिए एक लिंक भेजेंगे।",
+    mr: "ज्या ईमेलने तुम्ही साइन इन करता तो टाका. नवीन पासवर्ड निवडण्यासाठी आम्ही एक लिंक पाठवू.",
+  },
+  "auth.forgot.send": {
+    en: "Send reset link",
+    hi: "रीसेट लिंक भेजें",
+    mr: "रीसेट लिंक पाठवा",
+  },
+  "auth.forgot.sending": {
+    en: "Sending…",
+    hi: "भेज रहे हैं…",
+    mr: "पाठवत आहे…",
+  },
+  "auth.forgot.sent": {
+    en: "If an account uses that email, a reset link is on its way. Open it on this same device and browser. It works once, for 1 hour.",
+    hi: "अगर इस ईमेल से कोई खाता है, तो रीसेट लिंक भेज दिया गया है। इसे इसी डिवाइस और ब्राउज़र में खोलें। यह एक बार, 1 घंटे तक काम करेगा।",
+    mr: "या ईमेलचे खाते असल्यास रीसेट लिंक पाठवली आहे. ती याच डिव्हाइस आणि ब्राउझरमध्ये उघडा. ती एकदाच, 1 तासासाठी चालेल.",
+  },
+  "auth.forgot.enterEmail": {
+    en: "Enter your email.",
+    hi: "अपना ईमेल डालें।",
+    mr: "तुमचा ईमेल टाका.",
+  },
+  "auth.forgot.tooMany": {
+    en: "Too many reset emails were sent. Wait a while and try again.",
+    hi: "बहुत सारे रीसेट ईमेल भेजे जा चुके हैं। थोड़ी देर बाद फिर कोशिश करें।",
+    mr: "खूप रीसेट ईमेल पाठवले गेले आहेत. थोडा वेळ थांबून पुन्हा प्रयत्न करा.",
+  },
+  "auth.forgot.failed": {
+    en: "Couldn't send the email. Try again in a minute.",
+    hi: "ईमेल नहीं भेजा जा सका। एक मिनट बाद फिर कोशिश करें।",
+    mr: "ईमेल पाठवता आला नाही. एका मिनिटाने पुन्हा प्रयत्न करा.",
+  },
+  "auth.forgot.linkInvalid": {
+    en: "That reset link has expired or was already used. Ask for a new one below.",
+    hi: "यह रीसेट लिंक समाप्त हो गया है या पहले ही इस्तेमाल हो चुका है। नीचे से नया लिंक मंगाएँ।",
+    mr: "ही रीसेट लिंक कालबाह्य झाली आहे किंवा आधीच वापरली आहे. खाली नवीन लिंक मागवा.",
+  },
+  "auth.forgot.backToLogin": {
+    en: "Back to sign in",
+    hi: "साइन इन पर वापस जाएँ",
+    mr: "साइन इनकडे परत जा",
+  },
+  "auth.reset.heading": {
+    en: "Choose a new password",
+    hi: "नया पासवर्ड चुनें",
+    mr: "नवीन पासवर्ड निवडा",
+  },
+  "auth.reset.newPassword": {
+    en: "New password",
+    hi: "नया पासवर्ड",
+    mr: "नवीन पासवर्ड",
+  },
+  "auth.reset.confirmPassword": {
+    en: "Confirm new password",
+    hi: "नए पासवर्ड की पुष्टि करें",
+    mr: "नवीन पासवर्डची पुष्टी करा",
+  },
+  "auth.reset.save": {
+    en: "Save new password",
+    hi: "नया पासवर्ड सेव करें",
+    mr: "नवीन पासवर्ड सेव्ह करा",
+  },
+  "auth.reset.saving": {
+    en: "Saving…",
+    hi: "सेव हो रहा है…",
+    mr: "सेव्ह होत आहे…",
+  },
+  "auth.reset.tooShort": {
+    en: "Use at least 8 characters.",
+    hi: "कम से कम 8 अक्षर रखें।",
+    mr: "किमान 8 अक्षरे वापरा.",
+  },
+  "auth.reset.mismatch": {
+    en: "The two passwords don't match.",
+    hi: "दोनों पासवर्ड मेल नहीं खाते।",
+    mr: "दोन्ही पासवर्ड जुळत नाहीत.",
+  },
+  "auth.reset.samePassword": {
+    en: "Choose a password different from your old one.",
+    hi: "पुराने पासवर्ड से अलग पासवर्ड चुनें।",
+    mr: "जुन्या पासवर्डपेक्षा वेगळा पासवर्ड निवडा.",
+  },
+  "auth.reset.failed": {
+    en: "Couldn't save the password: {error}",
+    hi: "पासवर्ड सेव नहीं हो सका: {error}",
+    mr: "पासवर्ड सेव्ह झाला नाही: {error}",
+  },
+  "auth.reset.done": {
+    en: "Password changed. Taking you in…",
+    hi: "पासवर्ड बदल गया। आपको अंदर ले जा रहे हैं…",
+    mr: "पासवर्ड बदलला. तुम्हाला आत घेऊन जात आहोत…",
+  },
 
   // Nav bar (manager roles)
   "nav.dashboard": { en: "Dashboard", hi: "डैशबोर्ड", mr: "डॅशबोर्ड" },
