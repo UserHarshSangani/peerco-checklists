@@ -51,3 +51,39 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
 });
+
+// Phone alerts. The server sends {title, body, url, tag}; tapping the alert
+// opens (or focuses) that page of the app.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "PeerCo Daybook", body: event.data ? event.data.text() : "" };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "PeerCo Daybook", {
+      body: data.body || "",
+      tag: data.tag,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: typeof data.url === "string" && data.url.startsWith("/") ? data.url : "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      for (const w of windows) {
+        if (w.url === target && "focus" in w) return w.focus();
+      }
+      for (const w of windows) {
+        if ("navigate" in w && "focus" in w) return w.navigate(target).then((c) => (c ? c.focus() : undefined));
+      }
+      return self.clients.openWindow(target);
+    }),
+  );
+});

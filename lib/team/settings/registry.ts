@@ -96,6 +96,9 @@ export const SETTINGS = {
   "cover.award_mode": { group: "cover", type: "enum", default: "first_accept", options: ["first_accept", "manager_pick"] },
   "cover.ot_multiplier_bps": { group: "cover", type: "bps", default: 20000, min: 10000, max: 30000, verify: true },
   "cover.comp_off_instead_of_pay": { group: "cover", type: "boolean", default: false, verify: true },
+  "cover.staff_may_choose_comp_off": { group: "cover", type: "boolean", default: true, verify: true },
+  "cover.ot_rate_basis": { group: "cover", type: "enum", default: "basic_da", options: ["basic_da", "gross"], verify: true },
+  "cover.points_per_cover": { group: "cover", type: "int", unit: "count", default: 20, min: 0, max: 1000 },
 
   // ---- Gullak ----
   "gullak.enabled": { group: "gullak", type: "boolean", default: true },

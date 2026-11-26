@@ -6,10 +6,11 @@ import { monthlyGrossPaise, structureOn, type SalaryStructure } from "@/lib/team
 import { StaffHome, type StaffShift } from "./staff-home";
 import type { MyBank, MyDetails } from "./my-details";
 import type { MyLeave, MyLeaveRequest } from "./my-leave";
+import type { MyCover } from "./my-cover";
 import { parseRules, type LeaveType } from "@/lib/team/engines/leave";
 
 // Home screen for a staff member signed in on their own phone: who they
-// are, their shifts for the next 7 days, their details and their leave.
+// are, their shifts for the next 7 days, their details, their leave and cover offers.
 export default async function MePage() {
   const supabase = await createClient();
   const {
@@ -73,6 +74,8 @@ export default async function MePage() {
         me.photo_path ? supabase.storage.from("staff-photos").createSignedUrl(me.photo_path, 3600) : Promise.resolve(null),
       ])
     : [{ data: null }, { data: null }, null];
+
+  const { data: coverData } = me ? await supabase.rpc("team_my_cover_offers") : { data: null };
 
   const [{ data: leaveTypes }, { data: ledger }, { data: leaveRequests }, { data: offs }, { data: leaveSettings }] = me
     ? await Promise.all([
@@ -153,6 +156,7 @@ export default async function MePage() {
   return (
     <StaffHome
       leave={leave}
+      cover={(coverData ?? null) as MyCover | null}
       linked={Boolean(me)}
       name={staffName}
       outletName={one(me?.outlets ?? null)?.name ?? null}

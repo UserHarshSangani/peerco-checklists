@@ -333,6 +333,17 @@ export function RosterWeek({ outletId }: { outletId: string }) {
                         have: gap.have,
                         needed: gap.needed,
                       })}
+                      {day >= todayInKolkata() && gap.endMinute <= 1440 && (
+                        <>
+                          {" "}
+                          <Link
+                            href={`/team/cover?date=${day}&skill=${gap.skill}&start=${gap.start}&end=${gap.end}`}
+                            className="font-medium text-accent underline"
+                          >
+                            {t("team.roster.askCover")}
+                          </Link>
+                        </>
+                      )}
                     </span>
                   </li>
                 ))}

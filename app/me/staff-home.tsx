@@ -10,6 +10,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { Card } from "@/components/ui/card";
 import { MyBankCard, MyDetailsCard, type MyBank, type MyDetails } from "./my-details";
 import { MyLeaveCard, type MyLeave } from "./my-leave";
+import { MyCoverCard, type MyCover } from "./my-cover";
 
 export type StaffShift = {
   business_date: string;
@@ -31,6 +32,7 @@ type Props = {
   details: MyDetails | null;
   bank: MyBank;
   leave: MyLeave | null;
+  cover: MyCover | null;
 };
 
 function formatDate(iso: string): string {
@@ -42,7 +44,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank, leave }: Props) {
+export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank, leave, cover }: Props) {
   const { t } = useLanguage();
 
   return (
@@ -104,6 +106,7 @@ export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, 
             )}
           </Card>
 
+          {cover && <MyCoverCard cover={cover} />}
           {leave && <MyLeaveCard leave={leave} />}
           {details && <MyDetailsCard details={details} />}
           {details && <MyBankCard bank={bank} name={details.name} />}
