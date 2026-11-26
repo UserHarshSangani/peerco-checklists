@@ -109,6 +109,9 @@ export const SETTINGS = {
 
   // ---- Leave ----
   "leave.encashment_on_exit": { group: "leave", type: "boolean", default: false, verify: true },
+  "leave.probation_months": { group: "leave", type: "int", unit: "months", default: 3, min: 0, max: 12, verify: true },
+  "leave.notice_days": { group: "leave", type: "int", unit: "days", default: 2, min: 0, max: 30 },
+  "leave.year_start": { group: "leave", type: "enum", default: "april", options: ["april", "january"] },
 
   // ---- Advances ----
   "advances.cap_bps_of_earned": { group: "advances", type: "bps", default: 5000, min: 0, max: 10000 },

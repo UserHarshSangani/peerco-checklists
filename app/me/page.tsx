@@ -5,10 +5,11 @@ import { addDaysToDateString, todayInKolkata } from "@/lib/date";
 import { monthlyGrossPaise, structureOn, type SalaryStructure } from "@/lib/team/salary";
 import { StaffHome, type StaffShift } from "./staff-home";
 import type { MyBank, MyDetails } from "./my-details";
+import type { MyLeave, MyLeaveRequest } from "./my-leave";
+import { parseRules, type LeaveType } from "@/lib/team/engines/leave";
 
 // Home screen for a staff member signed in on their own phone: who they
-// are and their shifts for the next 7 days. Attendance, leave and Gullak
-// arrive in later milestones.
+// are, their shifts for the next 7 days, their details and their leave.
 export default async function MePage() {
   const supabase = await createClient();
   const {
@@ -73,6 +74,28 @@ export default async function MePage() {
       ])
     : [{ data: null }, { data: null }, null];
 
+  const [{ data: leaveTypes }, { data: ledger }, { data: leaveRequests }, { data: offs }, { data: leaveSettings }] = me
+    ? await Promise.all([
+        supabase.from("leave_types").select("id, code, name, paid, needs_proof, active, accrual").eq("outlet_id", me.outlet_id).order("name"),
+        supabase.from("leave_ledger").select("leave_type_id, delta_minutes").eq("staff_id", me.staff_id),
+        supabase
+          .from("leave_requests")
+          .select("id, leave_type_id, from_date, to_date, leaving_at, status, paid_minutes, unpaid_minutes, decision_note")
+          .eq("staff_id", me.staff_id)
+          .or(`status.eq.pending,to_date.gte.${addDaysToDateString(today, -60)}`)
+          .order("from_date", { ascending: false })
+          .limit(20),
+        supabase
+          .from("roster_entries")
+          .select("business_date")
+          .eq("staff_id", me.staff_id)
+          .eq("kind", "weekly_off")
+          .gte("business_date", today)
+          .lte("business_date", addDaysToDateString(today, 90)),
+        supabase.rpc("team_my_leave_settings"),
+      ])
+    : [{ data: null }, { data: null }, { data: null }, { data: null }, { data: null }];
+
   const current = structureOn((salaries ?? []) as SalaryStructure[], today);
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
   const staffName = one(me?.staff ?? null)?.name ?? null;
@@ -99,8 +122,37 @@ export default async function MePage() {
       : null,
   };
 
+  const settings = (leaveSettings ?? null) as { notice_days: number; day_minutes: number } | null;
+  const balances: Record<string, number> = {};
+  for (const row of ledger ?? []) balances[row.leave_type_id] = (balances[row.leave_type_id] ?? 0) + row.delta_minutes;
+  const leave: MyLeave | null =
+    me && settings
+      ? {
+          staffId: me.staff_id,
+          outletId: me.outlet_id,
+          today,
+          noticeDays: settings.notice_days,
+          dayMinutes: settings.day_minutes,
+          types: (leaveTypes ?? []).map(
+            (row): LeaveType => ({
+              id: row.id,
+              code: row.code,
+              name: row.name,
+              paid: row.paid,
+              needsProof: row.needs_proof,
+              active: row.active,
+              rules: parseRules(row.accrual),
+            }),
+          ),
+          balances,
+          requests: (leaveRequests ?? []) as MyLeaveRequest[],
+          weeklyOffs: (offs ?? []).map((o) => o.business_date),
+        }
+      : null;
+
   return (
     <StaffHome
+      leave={leave}
       linked={Boolean(me)}
       name={staffName}
       outletName={one(me?.outlets ?? null)?.name ?? null}

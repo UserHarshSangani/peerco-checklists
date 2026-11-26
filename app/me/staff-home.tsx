@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, PiggyBank } from "lucide-react";
+import { PiggyBank } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { formatINR } from "@/lib/team/money";
 import { formatDateLabel } from "@/lib/date";
@@ -9,6 +9,7 @@ import { formatSegments, type Segment } from "@/lib/team/engines/time";
 import { LogoutButton } from "@/components/logout-button";
 import { Card } from "@/components/ui/card";
 import { MyBankCard, MyDetailsCard, type MyBank, type MyDetails } from "./my-details";
+import { MyLeaveCard, type MyLeave } from "./my-leave";
 
 export type StaffShift = {
   business_date: string;
@@ -29,6 +30,7 @@ type Props = {
   shifts: StaffShift[];
   details: MyDetails | null;
   bank: MyBank;
+  leave: MyLeave | null;
 };
 
 function formatDate(iso: string): string {
@@ -40,7 +42,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank }: Props) {
+export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, today, checkedInAt, shifts, details, bank, leave }: Props) {
   const { t } = useLanguage();
 
   return (
@@ -102,16 +104,13 @@ export function StaffHome({ linked, name, outletName, joiningDate, mobile, pay, 
             )}
           </Card>
 
+          {leave && <MyLeaveCard leave={leave} />}
           {details && <MyDetailsCard details={details} />}
           {details && <MyBankCard bank={bank} name={details.name} />}
 
           <Card>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{t("team.me.comingSoon")}</h2>
             <ul className="flex flex-col gap-3 text-sm text-text">
-              <li className="flex items-center gap-3">
-                <CalendarDays className="h-5 w-5 text-accent" aria-hidden="true" />
-                {t("team.me.soonLeave")}
-              </li>
               <li className="flex items-center gap-3">
                 <PiggyBank className="h-5 w-5 text-accent" aria-hidden="true" />
                 {t("team.me.soonGullak")}

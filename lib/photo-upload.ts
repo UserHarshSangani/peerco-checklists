@@ -115,3 +115,21 @@ export async function uploadStaffPhoto(
   });
   return { error: error?.message ?? null };
 }
+
+// Leave proof (doctor's note): {outlet}/{staff}/leave-{uuid}.jpg in the
+// private staff-documents bucket. The person can upload their own.
+export function leaveProofPath(outletId: string, staffId: string): string {
+  return `${outletId}/${staffId}/leave-${crypto.randomUUID()}.jpg`;
+}
+
+export async function uploadLeaveProof(
+  supabase: Supabase,
+  path: string,
+  blob: Blob,
+): Promise<{ error: string | null }> {
+  const { error } = await supabase.storage.from("staff-documents").upload(path, blob, {
+    contentType: "image/jpeg",
+    upsert: false,
+  });
+  return { error: error?.message ?? null };
+}

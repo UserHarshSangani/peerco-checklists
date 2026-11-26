@@ -62,11 +62,7 @@ begin
     (v_outlet, 'chef',    '10:00', '19:00', 1),
     (v_outlet, 'cashier', '12:00', '21:00', 1);
 
-  insert into public.leave_types (outlet_id, code, name, paid, needs_proof, accrual) values
-    (v_outlet, 'paid',     'Paid leave',  true,  false, '{"per_year_days":12,"accrual":"monthly"}'),
-    (v_outlet, 'sick',     'Sick leave',  true,  true,  '{"per_year_days":7,"accrual":"yearly"}'),
-    (v_outlet, 'unpaid',   'Unpaid leave', false, false, '{}'),
-    (v_outlet, 'comp_off', 'Comp-off',    true,  false, '{}');
+  -- Leave types (CL, SL, EL, comp-off, unpaid) come from the outlet trigger.
 
   insert into public.outlet_settings (outlet_id, key, value, updated_by) values
     (v_outlet, 'payroll.pt_state', '"MH"', null);
