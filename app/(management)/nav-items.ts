@@ -12,6 +12,7 @@ import {
   Receipt,
   Scale,
   Settings,
+  SlidersHorizontal,
   Store,
   Users,
   type LucideIcon,
@@ -55,6 +56,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["peerco_admin", "owner"],
   },
   { href: "/staff", label: "Staff", icon: Users, group: "SET UP" },
+  { href: "/team/settings", label: "Team settings", icon: SlidersHorizontal, group: "SET UP" },
   {
     href: "/outlets",
     label: "Outlets",

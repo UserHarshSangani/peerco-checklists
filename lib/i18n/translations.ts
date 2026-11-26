@@ -7,6 +7,8 @@
 // `satisfies` below makes TypeScript fail the build if any row is missing a
 // language or has a typo'd locale key.
 
+import { teamDictionary, type TeamTranslationKey } from "./team-translations";
+
 export type Locale = "en" | "hi" | "mr";
 
 export const LOCALE_NAMES: Record<Locale, string> = {
@@ -17,7 +19,7 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 
 type Entry = Record<Locale, string>;
 
-const dictionary = {
+const coreDictionary = {
   // Shared
   "common.logOut": { en: "Log out", hi: "लॉग आउट करें", mr: "लॉग आउट करा" },
   "common.loggingOut": {
@@ -1328,8 +1330,15 @@ const dictionary = {
   "stock.valueColumn": { en: "Value", hi: "मूल्य", mr: "मूल्य" },
 } satisfies Record<string, Entry>;
 
-export type TranslationKey = keyof typeof dictionary;
+// Daybook Team strings live in their own file, where only English is
+// required (see team-translations.ts).
+export type TranslationKey = keyof typeof coreDictionary | TeamTranslationKey;
 
 export function translate(locale: Locale, key: TranslationKey): string {
-  return dictionary[key][locale] ?? dictionary[key].en;
+  if (key in coreDictionary) {
+    const entry = coreDictionary[key as keyof typeof coreDictionary];
+    return entry[locale] ?? entry.en;
+  }
+  const entry: { en: string; hi?: string; mr?: string } = teamDictionary[key as TeamTranslationKey];
+  return entry[locale] ?? entry.en;
 }

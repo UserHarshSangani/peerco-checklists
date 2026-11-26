@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts", "app/**/*.test.ts"],
+    include: ["lib/**/*.test.ts", "app/**/*.test.ts", "supabase/tests/**/*.test.ts"],
+    testTimeout: 30_000,
   },
 });
