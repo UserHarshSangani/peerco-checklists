@@ -5,6 +5,7 @@ import { useOutletContext } from "../outlet-context";
 import { Button } from "@/components/ui/button";
 import { ImportModal } from "./import-modal";
 import { ImportHistory } from "./import-history";
+import { PulsePanel } from "./pulse-panel";
 
 export default function SalesPage() {
   const { selectedOutlet } = useOutletContext();
@@ -27,6 +28,12 @@ export default function SalesPage() {
           Import sales
         </Button>
       </div>
+
+      <PulsePanel
+        key={selectedOutlet.id}
+        outletId={selectedOutlet.id}
+        onSynced={() => setReloadToken((n) => n + 1)}
+      />
 
       <h3 className="mb-3 text-base font-semibold text-text">Import history</h3>
       <ImportHistory

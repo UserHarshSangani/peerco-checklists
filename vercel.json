@@ -1,3 +1,12 @@
 {
-  "crons": [{ "path": "/api/cron/attendance-photos", "schedule": "30 21 * * *" }]
+  "crons": [
+    {
+      "path": "/api/cron/attendance-photos",
+      "schedule": "30 21 * * *"
+    },
+    {
+      "path": "/api/cron/pulse-sync",
+      "schedule": "17 2 * * *"
+    }
+  ]
 }
